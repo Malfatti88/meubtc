@@ -1,0 +1,2334 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BTC Halving Cycles</title>
+<link rel="manifest" href="data:application/json,{&quot;name&quot;:&quot;BTC Halving Cycles&quot;,&quot;short_name&quot;:&quot;BTC Cycles&quot;,&quot;theme_color&quot;:&quot;#07070c&quot;,&quot;background_color&quot;:&quot;#07070c&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;start_url&quot;:&quot;/&quot;}">
+<meta name="theme-color" content="#07070c">
+<!-- CSP: unsafe-inline required for inline scripts. Upgrade path: move JS to external file + use nonces -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https:; connect-src https://api.coingecko.com https://api.alternative.me https://alternative.me https://api.binance.com https://api.allorigins.win https://www.coindesk.com https://cointelegraph.com https://bitcoinmagazine.com https://decrypt.co https://rss2json.com; base-uri 'self'; form-action 'none';">
+<meta http-equiv="X-Frame-Options" content="DENY">
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+<meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+<!-- HSTS must be set as HTTP header server-side: Strict-Transport-Security: max-age=31536000; includeSubDomains -->
+<meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=()">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" integrity="sha384-bs/nf9FbdNouRbMiFcrcZfLXYPKiPaGVGplVbv7dLGECccEXDW+S3zjqSKR5ZEaD" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js" integrity="sha384-Cs3dgUx6+jDxxuqHvVH8Onpyj2LF1gKZurLDlhqzuJmUqVYMJ0THTWpxK5Z086Zm" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js" integrity="sha384-zPzbVRXfR492Sd5D+HydTYCxxgHAfgVO8KERbLlpeH5unsmbAEXrscGUUqLZG9BM" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial@0.1.1/dist/chartjs-chart-financial.min.js" integrity="sha384-elIw5jAwGpYjdlRvfI/lttdMkYz0NmTHFcCpQN62ztww5KWfnZby4PZwnKlVXywY" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js" integrity="sha384-cVMg8E3QFwTvGCDuK+ET4PD341jF3W8nO1auiXfuZNQkzbUUiBGLsIQUE+b1mxws" crossorigin="anonymous"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Inter:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07070c;--bg2:#0d0d14;--bg3:#13131c;
+  --border:rgba(255,255,255,0.06);--border2:rgba(255,255,255,0.12);
+  --text:#cdd0e0;--muted:#6b6e85;--hint:#2a2a3a;
+  /* Role-based colors */
+  --orange:#f7931a;--orange-dim:rgba(247,147,26,0.14);--orange-glow:rgba(247,147,26,0.3);
+  --green:#00d97e;--green-dim:rgba(0,217,126,0.12);
+  --red:#ff4d6d;--red-dim:rgba(255,77,109,0.12);
+  --blue:#5aabff;--blue-dim:rgba(90,171,255,0.12);
+  --yellow:#ffd166;--yellow-dim:rgba(255,209,102,0.12);
+  --purple:#b388ff;
+  /* Chart cycle colors — only for graph */
+  --c1:#7b7fff;--c2:#29d9c2;--c3:#3ddc84;--c4:#f7931a;
+  --mono:'JetBrains Mono',monospace;--display:'Inter',sans-serif;
+  /* Border radius tokens */
+  --r-sm:6px;--r-md:10px;--r-lg:14px;
+  /* Spacing tokens */
+  --sec-gap:80px;--group-gap:48px;--inner-gap:24px;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:13px;line-height:1.6;overflow-x:hidden}
+/* Subtle scanline — reduced opacity */
+body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.012) 3px,rgba(0,0,0,0.012) 4px);pointer-events:none;z-index:9999}
+
+/* ── NAV ── */
+nav{display:flex;align-items:center;justify-content:space-between;padding:12px 28px;background:rgba(7,7,12,0.96);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:200}
+.nav-left{display:flex;align-items:center;gap:20px}
+.nav-logo{font-family:var(--display);font-size:16px;font-weight:800;color:var(--orange);display:flex;align-items:center;gap:8px}
+.nav-logo small{color:var(--muted);font-size:10px;font-weight:400;font-family:var(--mono);letter-spacing:.1em}
+.nav-links{display:flex;gap:22px}
+.nav-links a{color:var(--muted);text-decoration:none;font-size:11px;letter-spacing:.1em;text-transform:uppercase;transition:color .2s}
+.nav-links a:hover{color:var(--orange)}
+.btn-update{display:flex;align-items:center;gap:6px;background:var(--orange-dim);border:1px solid var(--orange-glow);border-radius:var(--r-sm);color:var(--orange);font-family:var(--mono);font-size:11px;font-weight:500;padding:6px 14px;cursor:pointer;transition:all .2s;letter-spacing:.04em}
+.btn-update:hover{background:rgba(247,147,26,.25);border-color:var(--orange)}
+.btn-update.loading{opacity:.6;cursor:wait}
+.btn-update .spin{display:inline-block;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Hamburger */
+.nav-hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;background:none;border:none;padding:4px}
+.nav-hamburger span{display:block;width:22px;height:2px;background:var(--muted);border-radius:2px;transition:all .2s}
+.nav-hamburger.open span:nth-child(1){transform:translateY(7px) rotate(45deg);background:var(--orange)}
+.nav-hamburger.open span:nth-child(2){opacity:0}
+.nav-hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg);background:var(--orange)}
+.nav-drawer{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(7,7,12,0.98);z-index:190;flex-direction:column;align-items:center;justify-content:center;gap:32px;backdrop-filter:blur(20px)}
+.nav-drawer.open{display:flex}
+.nav-drawer a{color:var(--text);text-decoration:none;font-family:var(--display);font-size:28px;font-weight:700;letter-spacing:-.01em;transition:color .2s}
+.nav-drawer a:hover{color:var(--orange)}
+.nav-drawer-close{position:absolute;top:20px;right:24px;background:none;border:none;color:var(--muted);font-size:28px;cursor:pointer;line-height:1}
+
+#ath-banner{display:none;padding:9px 28px;text-align:center;font-size:12px;letter-spacing:.1em;color:var(--orange);background:rgba(247,147,26,.08);border-bottom:1px solid var(--orange-glow);animation:blink 2.5s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.55}}
+
+/* refresh bar */
+.refresh-bar{height:2px;background:var(--border);position:relative;overflow:hidden}
+.refresh-progress{height:100%;background:var(--orange-glow);width:100%;transform-origin:left;animation:shrink 300s linear forwards}
+@keyframes shrink{to{transform:scaleX(0)}}
+
+/* ── HERO ── */
+.hero{max-width:1240px;margin:0 auto;padding:48px 24px 0}
+.hero-top{display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:20px;margin-bottom:32px}
+.hero-left h1{font-family:var(--display);font-size:42px;font-weight:800;color:var(--text);letter-spacing:-.03em;line-height:1;margin-bottom:8px}
+.hero-left h1 span{color:var(--orange)}
+.hero-tagline{font-size:13px;color:var(--muted);line-height:1.5;max-width:420px}
+.hero-price-block{text-align:right}
+.hero-price{font-family:var(--display);font-size:48px;font-weight:800;color:var(--orange);letter-spacing:-.03em;line-height:1}
+.hero-price-brl{font-size:16px;color:var(--muted);margin-top:4px}
+.hero-verdict{display:inline-flex;align-items:center;gap:10px;background:rgba(0,217,126,0.1);border:1px solid rgba(0,217,126,0.3);border-radius:var(--r-md);padding:10px 16px;margin-top:12px;cursor:pointer;transition:all .2s}
+.hero-verdict:hover{background:rgba(0,217,126,0.16)}
+.hero-verdict-signal{font-family:var(--display);font-size:16px;font-weight:700;color:var(--green)}
+.hero-verdict-score{font-size:11px;color:var(--muted)}
+.hm-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-top:16px}
+.hm-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-md);padding:14px 16px;position:relative;overflow:hidden}
+.hm-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--card-accent,var(--orange))}
+.hm-lbl{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+.hm-val{font-size:20px;font-weight:700;color:var(--text);letter-spacing:-.02em;line-height:1.1}
+.hm-sub{font-size:11px;color:var(--muted);margin-top:3px;line-height:1.4}
+
+/* ── MAIN ── */
+main{max-width:1240px;margin:0 auto;padding:36px 24px 80px}
+section{margin-bottom:var(--sec-gap)}
+.sec-label{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--orange);margin-bottom:6px;display:flex;align-items:center;gap:7px}
+.sec-label::before{content:'';display:inline-block;width:18px;height:1px;background:var(--orange)}
+.sec-title{font-family:var(--display);font-size:24px;font-weight:700;color:var(--text);letter-spacing:-.01em;margin-bottom:4px}
+.sec-title.large{font-size:34px;font-weight:800;letter-spacing:-.02em}
+.sec-sub{color:var(--muted);font-size:12px;margin-bottom:24px}
+
+.halving-bar{background:var(--bg2);border:1px solid var(--orange-glow);border-radius:var(--r-md);padding:16px 20px;margin-bottom:var(--inner-gap);display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.hb-num{font-family:var(--display);font-size:38px;font-weight:800;color:var(--orange);line-height:1;min-width:52px}
+.hb-body{flex:1;min-width:200px}
+.hb-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:2px;display:flex;align-items:center;gap:8px}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--orange);animation:pdot 1.5s ease-in-out infinite;flex-shrink:0}
+@keyframes pdot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.6)}}
+.hb-date{font-size:12px;color:var(--muted)}
+.prog-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin:8px 0 4px}
+.prog-track{background:var(--bg3);border-radius:3px;height:5px;overflow:hidden}
+.prog-fill{height:100%;border-radius:3px;background:var(--orange)}
+
+
+.compare-box{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-md);padding:18px 20px;margin-bottom:var(--inner-gap)}
+.cmp-title{font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:14px}
+.cmp-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.cmp-lbl{font-size:11px;min-width:88px}
+.cmp-track{flex:1;background:var(--bg3);border-radius:3px;height:18px;overflow:hidden;position:relative}
+.cmp-fill{height:100%;display:flex;align-items:center;padding-left:8px;font-size:11px;font-weight:500;border-radius:3px}
+.cmp-days{font-size:11px;color:var(--muted);min-width:65px;text-align:right}
+.cmp-divider{border:none;border-top:1px dashed var(--orange-glow);margin:10px 0}
+.cmp-note{font-size:11px;color:var(--orange);margin-top:8px}
+
+/* ── TABLE — desktop/mobile ── */
+.table-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-md);overflow:auto;margin-bottom:var(--inner-gap)}
+table{width:100%;border-collapse:collapse;min-width:560px}
+thead tr{background:var(--bg3);border-bottom:1px solid var(--border2)}
+th{padding:11px 13px;text-align:left;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:500;white-space:nowrap}
+td{padding:11px 13px;font-size:12px;border-bottom:1px solid var(--border);color:var(--text);white-space:nowrap}
+tr:last-child td{border-bottom:none}
+tr.hl td{background:rgba(247,147,26,.04)}
+.badge{display:inline-block;padding:2px 9px;border-radius:var(--r-sm);font-size:10px;font-weight:500}
+.b-blue{background:rgba(90,171,255,.15);color:var(--blue)}.b-green{background:var(--green-dim);color:var(--green)}
+.b-yellow{background:var(--yellow-dim);color:var(--yellow)}.b-now{background:var(--orange-glow);color:var(--orange);animation:blink 2s ease-in-out infinite}
+.up{color:var(--green)}.dn{color:var(--red)}
+
+/* Mobile table cards */
+.table-cards{display:none;flex-direction:column;gap:10px;margin-bottom:var(--inner-gap)}
+.tc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-md);padding:14px 16px}
+.tc.hl{border-color:var(--orange-glow);background:rgba(247,147,26,.03)}
+.tc-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.tc-cycle{font-family:var(--display);font-size:16px;font-weight:700;color:var(--text)}
+.tc-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tc-item{}
+.tc-label{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
+.tc-val{font-size:13px;font-weight:500;color:var(--text)}
+
+/* ── CHART ── */
+.chart-section{margin-bottom:var(--sec-gap)}
+.chart-header{max-width:1240px;margin:0 auto;padding:0 24px 16px}
+.chart-full{width:100%;background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:16px 0 14px}
+.chart-controls{display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap;padding:0 16px}
+.ctrl-sep{width:1px;height:22px;background:var(--border2);margin:0 4px;flex-shrink:0}
+.btn-ctrl{background:transparent;border:1px solid var(--border2);border-radius:var(--r-sm);color:var(--muted);font-family:var(--mono);font-size:11px;padding:5px 12px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:5px}
+.btn-ctrl:hover{color:var(--text);border-color:rgba(255,255,255,.25)}
+.btn-ctrl.c1.active{background:rgba(123,127,255,.15);border-color:#7b7fff;color:#7b7fff}
+.btn-ctrl.c2.active{background:rgba(41,217,194,.12);border-color:#29d9c2;color:#29d9c2}
+.btn-ctrl.c3.active{background:rgba(61,220,132,.12);border-color:#3ddc84;color:#3ddc84}
+.btn-ctrl.c4.active{background:rgba(247,147,26,.15);border-color:#f7931a;color:#f7931a}
+/* Indicadores de Mercado — toggles */
+.btn-ctrl.im.im-price.active{background:rgba(247,147,26,.15);border-color:#f7931a;color:#f7931a}
+.btn-ctrl.im.im-ma.active{background:rgba(90,171,255,.15);border-color:#5aabff;color:#5aabff}
+.btn-ctrl.im.im-mvrv.active{background:rgba(179,136,255,.15);border-color:#b388ff;color:#b388ff}
+.btn-ctrl.im.im-mayer.active{background:rgba(41,217,194,.15);border-color:#29d9c2;color:#29d9c2}
+.btn-ctrl.im.im-fg.active{background:rgba(255,209,102,.15);border-color:#ffd166;color:#ffd166}
+.btn-ctrl.imp.active{background:var(--orange-dim);border-color:var(--orange-glow);color:var(--orange)}
+.btn-reset{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r-sm);color:var(--muted);font-family:var(--mono);font-size:11px;padding:5px 12px;cursor:pointer;transition:all .15s}
+.btn-reset:hover{color:var(--orange);border-color:var(--orange)}
+.dot-sw{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0}
+.chart-inner{width:100%;padding:0}
+.chart-legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:12px;font-size:11px;color:var(--muted);padding:0 16px}
+.leg{display:flex;align-items:center;gap:5px}
+.leg-line{width:18px;height:2px;border-radius:2px;display:inline-block}
+.leg-dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+/* chart zoom hint for mobile */
+.chart-touch-hint{display:none;font-size:11px;color:var(--hint);text-align:center;padding:6px 0 2px}
+.chart-zoom-btns{display:none;justify-content:center;gap:8px;padding:8px 0 0}
+.chart-zoom-btns button{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r-sm);color:var(--muted);font-family:var(--mono);font-size:12px;padding:6px 16px;cursor:pointer}
+
+/* ── VEREDITO ── */
+.verd-banner{border-radius:var(--r-lg);padding:24px 28px;margin-bottom:var(--inner-gap);display:flex;align-items:center;gap:24px;border:2px solid;flex-wrap:wrap}
+.verd-banner-icon{font-size:44px;line-height:1;flex-shrink:0}
+.verd-banner-signal{font-family:var(--display);font-size:30px;font-weight:800;letter-spacing:-.02em;line-height:1.1;margin-bottom:6px}
+.verd-banner-desc{font-size:13px;line-height:1.5;color:var(--muted)}
+.verd-banner.buy{background:rgba(0,217,126,.07);border-color:rgba(0,217,126,.4)}
+.verd-banner.neut{background:rgba(255,209,102,.06);border-color:rgba(255,209,102,.35)}
+.verd-banner.sell{background:rgba(255,77,109,.07);border-color:rgba(255,77,109,.4)}
+.veredito-box{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-lg);padding:24px}
+.verd-title{font-family:var(--display);font-size:17px;font-weight:700;color:var(--text);margin-bottom:4px}
+.verd-sub{font-size:12px;color:var(--muted);margin-bottom:18px}
+.verd-labels{display:flex;justify-content:space-between;font-size:11px;margin-bottom:6px}
+.verd-track{height:16px;border-radius:8px;background:linear-gradient(90deg,#ff4d6d 0%,#ffd166 42%,#00d97e 100%);position:relative;box-shadow:0 0 0 1px rgba(255,255,255,.06)}
+.verd-needle{position:absolute;top:-6px;width:4px;height:28px;border-radius:2px;background:#fff;transform:translateX(-50%);box-shadow:0 0 8px rgba(255,255,255,.5);transition:left .5s}
+.verd-signal{font-size:18px;font-weight:700;margin:10px 0 8px}
+.verd-factors{display:grid;grid-template-columns:repeat(auto-fit,minmax(195px,1fr));gap:8px;margin-top:14px}
+.vf{background:var(--bg3);border-radius:var(--r-sm);padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.vf-name{font-size:11px;color:var(--muted)}.vf-val{font-size:11px;font-weight:500;text-align:right}
+.verd-reason{font-size:12px;color:var(--muted);line-height:1.75;border-top:1px solid var(--border);padding-top:14px;margin-top:14px}
+.verd-disclaimer{background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:var(--r-sm);padding:13px 16px;margin-top:14px;font-size:11px;color:var(--muted);line-height:1.6}
+.verd-disclaimer strong{color:var(--text);display:block;margin-bottom:3px}
+
+/* ── TOP WARNING (Veredito page) ── */
+.top-warning{max-width:1240px;margin:22px auto 0;padding:14px 18px;background:rgba(255,209,102,.06);border:1px solid rgba(255,209,102,.4);border-radius:var(--r-md);font-size:12px;line-height:1.6;display:flex;gap:12px;align-items:flex-start}
+.top-warning .tw-icon{font-size:20px;line-height:1.1;flex-shrink:0}
+.top-warning strong{display:block;color:var(--yellow);font-size:13px;margin-bottom:3px;font-weight:700;font-family:var(--display)}
+.top-warning .tw-body{color:var(--muted)}
+@media(max-width:700px){.top-warning{margin:14px 16px 0;font-size:11.5px}}
+
+/* ── BITCOINOLOGIA ── */
+.bit-article{max-width:880px;margin:0 auto}
+.bit-section{margin-bottom:var(--group-gap)}
+.bit-h{font-family:var(--display);font-size:24px;font-weight:700;color:var(--text);letter-spacing:-.01em;margin-bottom:14px;display:flex;align-items:center;gap:11px}
+.bit-h .bit-num{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--orange);background:var(--orange-dim);border:1px solid var(--orange-glow);border-radius:var(--r-sm);padding:3px 9px;flex-shrink:0}
+.bit-p{font-size:14px;line-height:1.8;color:var(--text);margin-bottom:14px}
+.bit-p strong{color:var(--text);font-weight:700}
+.bit-callout{background:rgba(247,147,26,.06);border:1px solid var(--orange-glow);border-left:3px solid var(--orange);border-radius:var(--r-md);padding:16px 18px;margin:18px 0;font-size:14px;line-height:1.8;color:var(--text)}
+.bit-callout strong{color:var(--orange)}
+.bit-list{list-style:none;margin:14px 0;padding:0;display:flex;flex-direction:column;gap:8px}
+.bit-list li{font-size:14px;line-height:1.6;color:var(--text);padding-left:20px;position:relative}
+.bit-list li::before{content:'▸';position:absolute;left:0;color:var(--orange)}
+.bit-list li b{color:var(--orange);font-weight:700}
+.bit-steps{display:flex;flex-direction:column;gap:10px;margin:16px 0}
+.bit-step{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r-md);padding:14px 16px;font-size:14px;line-height:1.7;color:var(--text);display:flex;gap:13px;align-items:flex-start}
+.bit-step .bit-step-n{font-family:var(--display);font-weight:800;font-size:17px;color:var(--orange);flex-shrink:0;width:22px;text-align:center}
+.bit-fig{margin:22px 0;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-lg);padding:18px 18px 14px}
+.bit-fig svg{display:block;width:100%;height:auto}
+.bit-fig figcaption{font-size:11px;color:var(--muted);text-align:center;margin-top:12px;letter-spacing:.02em;line-height:1.5}
+.bit-curiosity{font-size:12.5px;color:var(--muted);font-style:italic;line-height:1.7;border-top:1px dashed var(--border2);padding-top:14px;margin-top:4px}
+.bit-tease{font-size:13px;color:var(--blue);line-height:1.7;background:var(--blue-dim);border:1px solid rgba(90,171,255,.25);border-radius:var(--r-md);padding:12px 15px;margin-top:8px}
+@media(max-width:700px){.bit-h{font-size:20px}.bit-p,.bit-callout,.bit-step,.bit-list li,.bit-article .bit-tease{font-size:13px}.bit-fig{padding:12px}}
+
+/* share button */
+.share-btn{display:inline-flex;align-items:center;gap:6px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r-sm);color:var(--muted);font-family:var(--mono);font-size:11px;padding:6px 14px;cursor:pointer;transition:all .2s;margin-top:12px}
+.share-btn:hover{color:var(--orange);border-color:var(--orange-glow)}
+.share-btn.copied{color:var(--green);border-color:rgba(0,217,126,.3)}
+
+/* ── INDICATORS ── */
+.ind-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:var(--inner-gap)}
+.ind-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-md);padding:16px 18px}
+.ind-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.ind-name{font-size:12px;font-weight:500;color:var(--text)}
+.sig{font-size:10px;padding:3px 9px;border-radius:20px;font-weight:600;letter-spacing:.06em}
+.sig-buy{background:var(--green-dim);color:var(--green)}.sig-sell{background:var(--red-dim);color:var(--red)}
+.sig-neut{background:var(--yellow-dim);color:var(--yellow)}.sig-watch{background:var(--blue-dim);color:var(--blue)}
+.ind-val{font-size:20px;font-weight:700;color:var(--text);margin-bottom:8px}
+.ind-track{background:var(--bg3);border-radius:3px;height:7px;position:relative;margin-bottom:5px}
+.ind-fill{height:100%;border-radius:3px}
+.ind-pin{position:absolute;top:-4px;width:3px;height:15px;border-radius:2px;background:#fff;transform:translateX(-50%);box-shadow:0 0 5px rgba(255,255,255,.35)}
+.ind-range{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-bottom:7px}
+.ind-desc{font-size:11px;color:var(--muted);line-height:1.5}
+.mvrv-alert{display:none;background:rgba(255,77,109,.1);border:1px solid var(--red);border-radius:var(--r-sm);padding:12px 16px;margin-top:10px;font-size:12px;color:var(--red)}
+.mvrv-alert strong{font-size:14px;display:block;margin-bottom:3px}
+#ath-signal{display:none;background:rgba(247,147,26,.07);border:1px solid var(--orange-glow);border-radius:var(--r-md);padding:15px 18px;margin-top:12px}
+
+/* ── NEWS ── */
+.news-header-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px}
+.news-tabs{display:flex;gap:2px;background:var(--bg3);border-radius:var(--r-sm);padding:3px;width:fit-content}
+.news-tab{padding:7px 18px;border-radius:var(--r-sm);font-size:12px;cursor:pointer;color:var(--muted);transition:all .2s;border:none;background:transparent;font-family:var(--mono)}
+.news-tab.active.bull{background:var(--bg2);color:var(--green);border:1px solid rgba(0,217,126,.25)}
+.news-tab.active.bear{background:var(--bg2);color:var(--red);border:1px solid rgba(255,77,109,.25)}
+.news-tab.active.neut{background:var(--bg2);color:var(--muted);border:1px solid var(--border2)}
+.news-status{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted)}
+.news-status-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pdot 2s ease-in-out infinite;flex-shrink:0}
+.news-status-dot.loading{background:var(--orange);animation:spin .8s linear infinite}
+.news-status-dot.error{background:var(--red);animation:none}
+.news-panel{display:none;flex-direction:column;gap:10px}.news-panel.active{display:flex}
+.news-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-md);padding:15px 17px;display:flex;gap:14px;align-items:flex-start;transition:border-color .2s;text-decoration:none;color:inherit}
+.news-card:hover{border-color:var(--border2)}
+.news-card.bull-card{border-left:2px solid rgba(0,217,126,.35)}
+.news-card.bear-card{border-left:2px solid rgba(255,77,109,.35)}
+.news-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.news-dot.bull{background:var(--green)}.news-dot.bear{background:var(--red)}.news-dot.neut{background:var(--yellow)}
+.news-body{flex:1;min-width:0}
+.news-headline{font-size:13px;font-weight:500;color:var(--text);margin-bottom:5px;line-height:1.4}
+.news-summary{font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:8px}
+.news-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.news-tag{font-size:10px;padding:2px 8px;border-radius:3px;font-weight:500}
+.tag-bull{background:var(--green-dim);color:var(--green)}.tag-bear{background:var(--red-dim);color:var(--red)}.tag-neut{background:var(--yellow-dim);color:var(--yellow)}
+.news-votes{font-size:10px;color:var(--muted);display:flex;align-items:center;gap:3px}
+.news-source{font-size:10px;color:var(--muted)}.news-date{font-size:10px;color:var(--hint)}
+.news-link{font-size:11px;color:var(--blue);text-decoration:none;margin-left:auto;white-space:nowrap}
+.news-empty{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-md);padding:28px;text-align:center;color:var(--muted);font-size:12px}
+.news-skeleton{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-md);padding:15px 17px;display:flex;gap:14px}
+.news-skel-dot{width:8px;height:8px;border-radius:50%;background:var(--hint);flex-shrink:0;margin-top:5px;animation:pulse 1.5s ease-in-out infinite}
+.news-skel-body{flex:1;display:flex;flex-direction:column;gap:8px}
+.news-skel-line{height:12px;border-radius:3px;background:var(--hint);animation:pulse 1.5s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.4}50%{opacity:.8}}
+.news-sentiment-bar{display:flex;align-items:center;gap:10px;margin-bottom:16px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-md);padding:10px 14px}
+.nsb-label{font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+.nsb-track{flex:1;height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;display:flex}
+.nsb-bull{height:100%;background:var(--green);border-radius:3px 0 0 3px;transition:width .5s}
+.nsb-bear{height:100%;background:var(--red);border-radius:0 3px 3px 0;transition:width .5s}
+.nsb-stats{font-size:11px;white-space:nowrap}
+.nsb-bull-txt{color:var(--green)}.nsb-bear-txt{color:var(--red)}
+
+
+/* ── SIDEBAR LAYOUT ── */
+.app-shell{display:flex;min-height:100vh}
+.sidebar{width:200px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);position:fixed;top:0;left:0;bottom:0;z-index:100;display:flex;flex-direction:column;padding-top:60px}
+.sidebar-logo{padding:20px 20px 0;font-family:var(--display);font-size:15px;font-weight:800;color:var(--orange);line-height:1.2;letter-spacing:-.01em}
+.sidebar-logo small{display:block;color:var(--muted);font-size:9px;font-weight:400;font-family:var(--mono);letter-spacing:.1em;margin-top:3px}
+.sidebar-nav{padding:28px 12px 12px;display:flex;flex-direction:column;gap:4px}
+.sidebar-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--r-md);cursor:pointer;color:var(--muted);font-size:12px;font-weight:500;letter-spacing:.04em;transition:all .15s;border:none;background:transparent;font-family:var(--mono);width:100%;text-align:left}
+.sidebar-item:hover{background:var(--bg3);color:var(--text)}
+.sidebar-item.active{background:var(--orange-dim);color:var(--orange);border:1px solid var(--orange-glow)}
+.sidebar-item i{font-size:16px;flex-shrink:0}
+.sidebar-divider{height:1px;background:var(--border);margin:8px 12px}
+.sidebar-section-label{padding:8px 14px 4px;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--hint)}
+.sidebar-update{margin-top:auto;padding:16px 12px;border-top:1px solid var(--border)}
+.sidebar-ts{font-size:9px;color:var(--hint);letter-spacing:.04em;margin-top:6px;line-height:1.4}
+
+.page-content{margin-left:200px;flex:1;min-width:0}
+
+/* nav stays full width but is offset */
+nav{left:200px;right:0;width:auto}
+
+/* Views */
+.view{display:none}
+.view.active{display:block}
+
+/* Hide old nav links — sidebar replaces them */
+.nav-links{display:none!important}
+
+/* Mobile: sidebar becomes drawer */
+@media(max-width:700px){
+  .sidebar{transform:translateX(-100%);transition:transform .25s;padding-top:0}
+  .sidebar.open{transform:translateX(0)}
+  .sidebar-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:99}
+  .sidebar-backdrop.open{display:block}
+  .page-content{margin-left:0}
+  nav{left:0;width:100%}
+  .nav-hamburger{display:flex!important}
+}
+
+footer{border-top:1px solid var(--border);padding:18px 28px;text-align:center;color:var(--muted);font-size:11px}
+footer a{color:var(--orange);text-decoration:none}
+
+/* ═══════════════════════════════════════════════
+   MOBILE RESPONSIVE — max-width: 700px
+═══════════════════════════════════════════════ */
+@media(max-width:700px){
+  /* Nav */
+  nav{padding:10px 16px}
+  .nav-links,.btn-update{display:none}
+  .nav-hamburger{display:flex}
+
+  /* Hero */
+  .hero{padding:28px 16px 0}
+  .hero-top{flex-direction:column;align-items:flex-start;gap:12px}
+  .hero-left h1{font-size:30px}
+  .hero-price-block{text-align:left}
+  .hero-price{font-size:36px}
+  .hm-row{grid-template-columns:1fr 1fr}
+
+  /* Main */
+  main{padding:20px 16px 60px}
+  section{margin-bottom:48px}
+  .sec-title{font-size:20px}
+  .sec-title.large{font-size:26px}
+
+  /* Halving bar */
+  .hb-num{font-size:30px}
+
+  /* Cards row */
+
+  /* Compare */
+  .cmp-lbl{min-width:70px;font-size:10px}
+  .cmp-fill{font-size:10px}
+  .cmp-days{font-size:10px;min-width:50px}
+
+  /* Table → cards on mobile */
+  .table-wrap{display:none}
+  .table-cards{display:flex}
+
+  /* Chart */
+  .chart-header{padding:0 16px 12px}
+  .chart-touch-hint{display:block}
+  .chart-zoom-btns{display:flex}
+  #chart-wrap{height:300px!important}
+  #cycle4Chart-wrap{height:220px!important}
+  .chart-controls{gap:6px}
+  .btn-ctrl{font-size:10px;padding:4px 9px}
+
+  /* Veredito */
+  .verd-banner{flex-direction:column;gap:12px;padding:18px 16px}
+  .verd-banner-signal{font-size:22px}
+  .verd-banner-icon{font-size:34px}
+  .veredito-box{padding:16px}
+  .verd-factors{grid-template-columns:1fr}
+
+  /* Indicators */
+  .ind-grid{grid-template-columns:1fr}
+
+  /* News */
+  .news-card{flex-direction:column;gap:8px}
+  .news-dot{display:none}
+
+  footer{padding:16px;font-size:10px}
+}
+</style>
+</head>
+<body>
+
+<div id="ath-banner">⚡ NOVO ATH NO CICLO ATUAL — Bitcoin rompeu o topo histórico do ciclo 4! ⚡</div>
+
+<div class="app-shell">
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">₿TC Halving<br>Cycles<small>// análise de ciclos</small></div>
+  <nav class="sidebar-nav">
+    <button class="sidebar-item active" id="nav-resumo" onclick="switchView('resumo')">
+      <i class="ti ti-gavel" aria-hidden="true"></i> Veredito
+    </button>
+    <button class="sidebar-item" id="nav-graficos" onclick="switchView('graficos')">
+      <i class="ti ti-chart-line" aria-hidden="true"></i> Gráficos
+    </button>
+    <button class="sidebar-item" id="nav-noticias" onclick="switchView('noticias')">
+      <i class="ti ti-news" aria-hidden="true"></i> Notícias
+    </button>
+    <button class="sidebar-item" id="nav-bitcoinologia" onclick="switchView('bitcoinologia')">
+      <i class="ti ti-book-2" aria-hidden="true"></i> Bitcoinologia
+    </button>
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-section-label">Atalhos</div>
+    <button class="sidebar-item" id="snav-veredito" onclick="switchView('resumo');scrollTo('veredito')">
+      <i class="ti ti-gavel" aria-hidden="true"></i> Veredito
+    </button>
+    <button class="sidebar-item" id="snav-ciclo" onclick="switchView('resumo');scrollTo('status')">
+      <i class="ti ti-clock" aria-hidden="true"></i> Ciclo atual
+    </button>
+    <button class="sidebar-item" id="snav-halvings" onclick="switchView('graficos');scrollTo('halvings')">
+      <i class="ti ti-table" aria-hidden="true"></i> Halvings
+    </button>
+  </nav>
+  <div class="sidebar-update">
+    <button class="btn-update" id="btn-update" onclick="fetchLiveData()" style="width:100%;justify-content:center">
+      <span id="update-icon">↻</span> Atualizar
+    </button>
+    <div class="sidebar-ts" id="mb-ts"></div>
+  </div>
+</aside>
+
+<!-- SIDEBAR BACKDROP (mobile) -->
+<div class="sidebar-backdrop" id="sidebar-backdrop" onclick="closeSidebar()"></div>
+
+<!-- PAGE CONTENT -->
+<div class="page-content">
+
+<!-- NAV (top bar) -->
+<nav>
+  <div class="nav-left">
+    <button class="nav-hamburger" id="hamburger" onclick="toggleSidebar()" aria-label="Menu" style="display:flex">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="nav-logo" style="font-size:14px">₿TC Halving Cycles</div>
+  </div>
+  <div class="nav-links"></div>
+  <div id="nav-view-label" style="font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase">Veredito</div>
+</nav>
+
+<div class="refresh-bar"><div class="refresh-progress" id="refresh-prog"></div></div>
+
+
+<div class="view active" id="view-resumo">
+<!-- TOP WARNING -->
+<div class="top-warning">
+  <span class="tw-icon" aria-hidden="true">⚠️</span>
+  <div><strong>Aviso importante</strong><span class="tw-body">Análise gerada automaticamente a partir de indicadores técnicos e padrões históricos de ciclos. Não constitui aconselhamento financeiro. Bitcoin é altamente volátil e ciclos passados não garantem resultados futuros. Faça sua própria pesquisa (DYOR).</span></div>
+</div>
+<!-- HERO -->
+<div class="hero" style="padding-bottom:0">
+  <div class="hero-top">
+    <div class="hero-left">
+      <h1>Ciclos do <span>Bitcoin</span></h1>
+      <p class="hero-tagline">Rastreie o halving, os indicadores on-chain e o melhor momento de acumulação com base em padrões históricos.</p>
+    </div>
+    <div class="hero-price-block">
+      <div class="hero-price" id="hero-price">—</div>
+      <div class="hero-price-brl" id="hero-price-brl">—</div>
+      <div class="hero-verdict" id="hero-verdict-btn" onclick="switchView('resumo');scrollTo('veredito')">
+        <span class="hero-verdict-signal" id="hero-verd-signal">Calculando…</span>
+        <span class="hero-verdict-score" id="hero-verd-score">score —/100 ↓</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<main>
+
+
+<!-- CICLO ATUAL -->
+<section id="status">
+  <div class="sec-label">Ciclo em progresso</div>
+  <div class="sec-title">4º Halving — Ciclo Atual</div>
+  <div class="sec-sub">19 de abril de 2024 · 3,125 BTC por bloco · fase pós-ATH</div>
+  <div class="halving-bar">
+    <div class="hb-num">4º</div>
+    <div class="hb-body">
+      <div class="hb-title">Pós-ATH — fase de correção <span class="live-dot"></span></div>
+      <div class="hb-date" id="hb-date">19 abr 2024 · ATH: $126.198 em 06 out 2025 (dia 535) · Fundo proj.: —</div>
+      <div class="prog-labels"><span id="prog-lbl">—</span><span>~1460 dias total</span></div>
+      <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <div class="hm-row">
+    <div class="hm-card" style="--card-accent:var(--orange)">
+      <div class="hm-lbl">Preço no Halving</div>
+      <div class="hm-val">$63.800</div>
+      <div class="hm-sub">19 abr 2024</div>
+    </div>
+    <div class="hm-card" style="--card-accent:var(--red)">
+      <div class="hm-lbl">ATH do ciclo 4</div>
+      <div class="hm-val">$126.198</div>
+      <div class="hm-sub">06 out 2025 · dia 535</div>
+    </div>
+    <div class="hm-card" style="--card-accent:var(--green)">
+      <div class="hm-lbl">Fundo proj. ciclo 4</div>
+      <div class="hm-val" id="hero-bot-days">—</div>
+      <div class="hm-sub" id="hero-bot-date">dias restantes</div>
+    </div>
+    <div class="hm-card" style="--card-accent:var(--red)">
+      <div class="hm-lbl">Drawdown do ATH</div>
+      <div class="hm-val dn" id="hero-dd">—</div>
+      <div class="hm-sub">vs $126.198</div>
+    </div>
+    <div class="hm-card" style="--card-accent:var(--blue)">
+      <div class="hm-lbl">Próx. ATH estimado</div>
+      <div class="hm-val" id="hero-next-ath" style="color:var(--blue)">—</div>
+      <div class="hm-sub" id="hero-next-ath-date">dias restantes</div>
+    </div>
+    <div class="hm-card" style="--card-accent:var(--purple)">
+      <div class="hm-lbl">Dia do ciclo 4</div>
+      <div class="hm-val" id="hero-cycle-day" style="color:var(--purple)">—</div>
+      <div class="hm-sub">de ~1460 dias total</div>
+    </div>
+  </div>
+
+</section>
+
+<!-- VEREDITO -->
+<section id="veredito">
+  <div class="sec-label">Análise consolidada</div>
+  <div class="sec-title large">Veredito</div>
+  <div class="sec-sub">Score composto de todos os indicadores e momento do ciclo</div>
+
+  <div id="verd-banner" class="verd-banner neut">
+    <div class="verd-banner-icon" id="verd-banner-icon">⏳</div>
+    <div>
+      <div class="verd-banner-signal" id="verd-banner-signal">Calculando…</div>
+      <div class="verd-banner-desc" id="verd-banner-desc">Processando indicadores…</div>
+    </div>
+  </div>
+  <div class="veredito-box">
+    <div class="verd-title" id="verd-title">—</div>
+    <div class="verd-sub" id="verd-sub"></div>
+    <div style="margin-bottom:18px">
+      <div class="verd-labels"><span style="color:var(--red);font-size:11px">● VENDA</span><span style="color:var(--muted);font-size:11px">NEUTRO</span><span style="color:var(--green);font-size:11px">COMPRA ●</span></div>
+      <div class="verd-track"><div class="verd-needle" id="verd-needle" style="left:50%"></div></div>
+    </div>
+    <div class="verd-signal" id="verd-signal"></div>
+    <div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:14px 0 8px">Indicadores utilizados</div>
+    <div class="verd-factors" id="verd-factors"></div>
+    <div class="verd-reason" id="verd-reason"></div>
+    <button class="share-btn" id="share-btn" onclick="shareVeredito()">↗ Compartilhar sinal</button>
+    <div class="verd-disclaimer"><strong>⚠️ Aviso importante</strong>Análise gerada automaticamente a partir de indicadores técnicos e padrões históricos de ciclos. Não constitui aconselhamento financeiro. Bitcoin é altamente volátil e ciclos passados não garantem resultados futuros. Faça sua própria pesquisa (DYOR).</div>
+  </div>
+</section>
+
+<section id="indicadores">
+  <div class="sec-label">Sinais de mercado</div>
+  <div class="sec-title">Indicadores de Decisão</div>
+  <div class="sec-sub">Baseados em dados históricos · não constituem conselho financeiro</div>
+  <div class="ind-grid">
+    <div class="ind-card"><div class="ind-head"><div class="ind-name">Posição no Ciclo</div><div class="sig" id="sig-cycle">—</div></div><div class="ind-val" id="iv-cycle">—</div><div class="ind-track"><div class="ind-fill" id="if-cycle" style="background:linear-gradient(90deg,var(--green),var(--yellow),var(--red));opacity:.65"></div><div class="ind-pin" id="ip-cycle"></div></div><div class="ind-range"><span>Halving</span><span>ATH médio d531</span><span>Fim ciclo</span></div><div class="ind-desc">Dia <span id="id-cyc-day">—</span> de ~1460. Fase pós-ATH, correção em andamento.</div></div>
+    <div class="ind-card"><div class="ind-head"><div class="ind-name">Drawdown do ATH</div><div class="sig sig-buy">ACUMULAR</div></div><div class="ind-val" id="iv-dd">—</div><div class="ind-track"><div class="ind-fill" id="if-dd" style="background:linear-gradient(90deg,var(--green),var(--yellow),var(--red));opacity:.65"></div><div class="ind-pin" id="ip-dd"></div></div><div class="ind-range"><span>0% ATH</span><span>−40%</span><span>−80% fundo</span></div><div class="ind-desc">Fundos históricos entre −77% e −87%. Abaixo de −50%: zona de acumulação forte.</div></div>
+    <div class="ind-card"><div class="ind-head"><div class="ind-name">Pi Cycle Top</div><div class="sig sig-buy">ACUMULAÇÃO</div></div><div class="ind-val">MMA111 / MMA350×2</div><div class="ind-track"><div class="ind-fill" style="width:15%;background:var(--green);opacity:.5"></div></div><div class="ind-range"><span>Longe do cruzamento</span><span>Cruzamento = topo</span></div><div class="ind-desc">Cruzamento já ocorreu no ATH de out/25. Atualmente sem sinal de novo topo.</div></div>
+    <div class="ind-card"><div class="ind-head"><div class="ind-name">NUPL</div><div class="sig sig-watch">OBSERVAR</div></div><div class="ind-val">~0,35</div><div class="ind-track"><div class="ind-fill" style="width:100%;background:linear-gradient(90deg,var(--blue),var(--green),var(--yellow),var(--red));opacity:.6"></div><div class="ind-pin" style="left:35%"></div></div><div class="ind-range"><span>0 Capitulação</span><span>0,5 Crença</span><span>0,75 Euforia</span></div><div class="ind-desc">Em queda após ATH. Zona de esperança/negação (~0,25–0,5). Capitulação abaixo de 0.</div></div>
+    <div class="ind-card"><div class="ind-head"><div class="ind-name">Mayer Multiple</div><div class="sig sig-buy">ACUMULAR</div></div><div class="ind-val" id="iv-mayer">—</div><div class="ind-track"><div class="ind-fill" style="width:100%;background:linear-gradient(90deg,var(--blue),var(--green),var(--yellow),var(--orange),var(--red));opacity:.6"></div><div class="ind-pin" id="ip-mayer" style="left:30%"></div></div><div class="ind-range"><span>0,5</span><span>1,0 MMA200</span><span>2,4+ risco</span></div><div class="ind-desc">Abaixo de 1,0 = zona de acumulação histórica. Abaixo de 0,8 = fundo de ciclo.</div></div>
+    <div class="ind-card"><div class="ind-head"><div class="ind-name">Fear & Greed</div><div class="sig" id="fg-sig">—</div></div><div class="ind-val" id="fg-val">Carregando…</div><div class="ind-track"><div class="ind-fill" style="width:100%;background:linear-gradient(90deg,var(--red),var(--orange),var(--yellow),var(--green));opacity:.65"></div><div class="ind-pin" id="fg-pin" style="left:50%"></div></div><div class="ind-range"><span>0 Medo extremo</span><span>50</span><span>100 Ganância</span></div><div class="ind-desc" id="fg-desc">Buscando via API…</div></div>
+    <div class="ind-card"><div class="ind-head"><div class="ind-name">MVRV (estimado)</div><div class="sig" id="mvrv-sig">—</div></div><div class="ind-val" id="mvrv-val">—</div><div class="ind-track"><div class="ind-fill" style="width:100%;background:linear-gradient(90deg,var(--blue),var(--green),var(--yellow),var(--orange),var(--red));opacity:.6"></div><div class="ind-pin" id="mvrv-pin"></div></div><div class="ind-range"><span>&lt;1 Fundo</span><span>1–2 Acumulação</span><span>5+ Topo</span></div><div class="ind-desc">Abaixo de 1 = capitulação histórica. 1–2 = acumulação. Acima de 3,5 = atenção. Estimado via Mayer Multiple.</div><div class="mvrv-alert" id="mvrv-alert"><strong>⚠️ MVRV abaixo de 1 — Zona de capitulação histórica</strong>Uma das melhores janelas de acumulação de longo prazo historicamente.</div></div>
+    <div class="ind-card"><div class="ind-head"><div class="ind-name">Fundo Projetado Ciclo 4</div><div class="sig sig-watch" id="sig-bot">OBSERVAR</div></div><div class="ind-val" id="iv-bot">—</div><div class="ind-track"><div class="ind-fill" id="if-bot" style="background:linear-gradient(90deg,var(--red),var(--yellow),var(--green));opacity:.6"></div><div class="ind-pin" id="ip-bot"></div></div><div class="ind-range"><span>ATH (d0)</span><span>d383 médio</span><span>d500+</span></div><div class="ind-desc">Média ATH→fundo (3 ciclos): 383d · Proj.: <span id="id-bot-est">—</span> · Restam: <span id="id-bot-days">—</span>d.</div></div>
+  </div>
+  <div id="ath-signal"><div style="font-size:14px;font-weight:500;color:var(--orange);margin-bottom:4px">⚡ Novo ATH detectado neste ciclo</div><div style="font-size:12px;color:var(--muted)">Monitorar Pi Cycle e NUPL com atenção redobrada.</div></div>
+</section>
+
+</main>
+
+</div><!-- end view-resumo -->
+
+<div class="view" id="view-graficos">
+
+<!-- INDICADORES DE MERCADO — multi-linha -->
+<div class="chart-section" id="indicadores-mercado">
+  <div class="chart-header">
+    <div class="sec-label">Visão combinada</div>
+    <div class="sec-title">Indicadores de Mercado</div>
+    <div class="sec-sub" style="margin-bottom:0">Preço do BTC sobreposto aos principais indicadores ao longo do tempo · ligue/desligue linhas e ajuste o período para ver as oscilações do preço em relação a cada indicador · Scroll para zoom</div>
+  </div>
+  <div class="chart-full">
+    <div class="chart-controls">
+      <span style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Linhas:</span>
+      <button class="btn-ctrl im im-price active" id="im-btn-price" onclick="toggleIm('price')"><span class="dot-sw" style="background:#f7931a"></span>Preço BTC</button>
+      <button class="btn-ctrl im im-ma active" id="im-btn-ma" onclick="toggleIm('ma')"><span class="dot-sw" style="background:#5aabff"></span>MA 200</button>
+      <button class="btn-ctrl im im-mvrv active" id="im-btn-mvrv" onclick="toggleIm('mvrv')"><span class="dot-sw" style="background:#b388ff"></span>MVRV</button>
+      <button class="btn-ctrl im im-mayer active" id="im-btn-mayer" onclick="toggleIm('mayer')"><span class="dot-sw" style="background:#29d9c2"></span>Múltiplo de Mayer</button>
+      <button class="btn-ctrl im im-fg active" id="im-btn-fg" onclick="toggleIm('fg')"><span class="dot-sw" style="background:#ffd166"></span>Medo &amp; Ganância</button>
+      <div class="ctrl-sep"></div>
+      <span style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Período:</span>
+      <button class="btn-ctrl imp" id="im-p-30" onclick="setImRange('30')">30 dias</button>
+      <button class="btn-ctrl imp active" id="im-p-90" onclick="setImRange('90')">90 dias</button>
+      <button class="btn-ctrl imp" id="im-p-365" onclick="setImRange('365')">1 ano</button>
+      <button class="btn-ctrl imp" id="im-p-max" onclick="setImRange('max')">Tudo</button>
+      <div class="ctrl-sep"></div>
+      <button class="btn-reset" onclick="resetImZoom()">↺ Reset zoom</button>
+      <span id="im-status" style="font-size:11px;color:var(--hint);font-style:italic;margin-left:4px">Carregando…</span>
+    </div>
+    <div class="chart-touch-hint">Pinça para zoom · dois dedos para navegar</div>
+    <div class="chart-inner" id="im-wrap" style="position:relative;width:100%;height:440px">
+      <canvas id="indMarketChart" style="position:absolute;top:0;left:0;width:100%;height:100%"></canvas>
+    </div>
+    <div class="chart-zoom-btns">
+      <button onclick="zoomImIn()">+ zoom</button>
+      <button onclick="resetImZoom()">↺ reset</button>
+      <button onclick="zoomImOut()">- zoom</button>
+    </div>
+    <div class="chart-legend">
+      <span class="leg"><span class="leg-line" style="background:#f7931a"></span>Preço BTC (eixo esq · log $)</span>
+      <span class="leg"><span class="leg-line" style="background:#5aabff"></span>MA 200 ($)</span>
+      <span class="leg"><span class="leg-line" style="background:#b388ff"></span>MVRV (estimado)</span>
+      <span class="leg"><span class="leg-line" style="background:#29d9c2"></span>Múltiplo de Mayer</span>
+      <span class="leg"><span class="leg-line" style="background:#ffd166"></span>Medo &amp; Ganância (eixo dir · 0–100)</span>
+    </div>
+  </div>
+</div>
+
+<!-- CYCLE 4 CHART — CANDLESTICK + PROJEÇÃO -->
+<div style="margin-bottom:var(--sec-gap)">
+  <div style="max-width:1240px;margin:0 auto;padding:0 24px 14px">
+    <div class="sec-label">Ciclo 4 em detalhe</div>
+    <div class="sec-title">Preço BTC — Projeção de Fundo</div>
+    <div style="color:var(--muted);font-size:12px">Candles diários via CoinGecko · Pontilhado = projeção · Escala linear</div>
+  </div>
+  <div style="width:100%;background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:14px 0">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;padding:0 16px;margin-bottom:12px">
+      <div style="display:flex;gap:14px;font-size:11px;color:var(--muted);flex-wrap:wrap;align-items:center">
+        <span style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:10px;height:14px;background:var(--green);border-radius:1px"></span>Alta</span>
+        <span style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:10px;height:14px;background:var(--red);border-radius:1px"></span>Baixa</span>
+        <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;background:rgba(255,77,109,.3);border-radius:2px;display:inline-block"></span>Pessimista ~$29k</span>
+        <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;background:rgba(255,209,102,.25);border-radius:2px;display:inline-block"></span>Moderado ~$48k</span>
+        <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;background:rgba(0,217,126,.2);border-radius:2px;display:inline-block"></span>Otimista ~$69k</span>
+        <span id="c4-status" style="color:var(--hint);font-style:italic">Carregando candles…</span>
+      </div>
+      <div style="display:flex;gap:6px">
+        <select id="c4-range" onchange="onC4RangeChange()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r-sm);color:var(--muted);font-family:var(--mono);font-size:11px;padding:5px 10px;cursor:pointer">
+          <option value="30" selected>30 dias</option>
+          <option value="90">90 dias</option>
+          <option value="180">180 dias</option>
+          <option value="365">1 ano</option>
+          <option value="max">Tudo</option>
+        </select>
+        <button class="btn-reset" onclick="resetC4Zoom()">↺ Reset zoom</button>
+      </div>
+    </div>
+    <div class="chart-touch-hint">Pinça para zoom · dois dedos para navegar</div>
+    <div style="position:relative;width:100%;height:340px" id="cycle4Chart-wrap">
+      <canvas id="cycle4Chart" style="position:absolute;top:0;left:0;width:100%;height:100%"></canvas>
+    </div>
+    <div class="chart-zoom-btns">
+      <button onclick="zoomC4In()">+ zoom</button>
+      <button onclick="resetC4Zoom()">↺ reset</button>
+      <button onclick="zoomC4Out()">- zoom</button>
+    </div>
+  </div>
+</div>
+
+<!-- CHART FULL WIDTH -->
+<div class="chart-section" id="grafico">
+  <div class="chart-header">
+    <div class="sec-label">Visualização histórica</div>
+    <div class="sec-title">Múltiplo do Preço no Halving</div>
+    <div class="sec-sub" style="margin-bottom:0">Eixo Y = múltiplo (1x = preço no halving) · Eixo X = dias desde o halving de cada ciclo · 0 = dia do halving · Scroll para zoom</div>
+  </div>
+  <div class="chart-full">
+    <div class="chart-controls">
+      <span style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Ciclos:</span>
+      <button class="btn-ctrl c1 active" id="btn-c1" onclick="toggleCycle(0)"><span class="dot-sw" style="background:#7b7fff"></span>1º 2012</button>
+      <button class="btn-ctrl c2 active" id="btn-c2" onclick="toggleCycle(1)"><span class="dot-sw" style="background:#29d9c2"></span>2º 2016</button>
+      <button class="btn-ctrl c3 active" id="btn-c3" onclick="toggleCycle(2)"><span class="dot-sw" style="background:#3ddc84"></span>3º 2020</button>
+      <button class="btn-ctrl c4 active" id="btn-c4" onclick="toggleCycle(3)"><span class="dot-sw" style="background:#f7931a"></span>4º 2024</button>
+      <div class="ctrl-sep"></div>
+      <button class="btn-reset" onclick="resetZoom()">↺ Reset zoom</button>
+    </div>
+    <div class="chart-touch-hint">Pinça para zoom · dois dedos para navegar</div>
+    <div class="chart-inner" id="chart-wrap" style="position:relative;width:100%;height:440px">
+      <canvas id="mainChart" style="position:absolute;top:0;left:0;width:100%;height:100%"></canvas>
+    </div>
+    <div class="chart-zoom-btns">
+      <button onclick="zoomIn()">+ zoom</button>
+      <button onclick="resetZoom()">↺ reset</button>
+      <button onclick="zoomOut()">- zoom</button>
+    </div>
+    <div class="chart-legend">
+      <span class="leg"><span class="leg-line" style="background:#7b7fff"></span>1º Halving 2012</span>
+      <span class="leg"><span class="leg-line" style="background:#29d9c2"></span>2º Halving 2016</span>
+      <span class="leg"><span class="leg-line" style="background:#3ddc84"></span>3º Halving 2020</span>
+      <span class="leg"><span class="leg-line" style="background:#f7931a"></span>4º Halving 2024</span>
+      <span class="leg"><span class="leg-dot" style="background:var(--red)"></span>ATH</span>
+      <span class="leg"><span class="leg-dot" style="background:#22d3ee"></span>Fundo</span>
+      <span class="leg"><span class="leg-dot" style="background:#07070c;border:2px solid #f7931a;box-sizing:border-box;width:10px;height:10px"></span>Hoje</span>
+      <span class="leg"><span style="display:inline-block;width:18px;height:0;border-top:1px solid rgba(247,147,26,.4);vertical-align:middle"></span>1x = halving</span>
+    </div>
+  </div>
+</div>
+
+<main>
+<section id="halvings">
+  <div class="sec-label">Dados históricos</div>
+  <div class="sec-title">Tabela de Halvings</div>
+  <div class="sec-sub">Comparativo completo de todos os ciclos</div>
+
+  <!-- Desktop table -->
+  <div class="table-wrap"><table>
+    <thead><tr><th>#</th><th>Data</th><th>Preço no Halving</th><th>ATH do Ciclo</th><th>Dias até ATH</th><th>Multiplicador</th><th>Fundo Pós-ATH</th><th>Queda do ATH</th><th>Dias ATH→Fundo</th></tr></thead>
+    <tbody>
+      <tr><td><span class="badge b-blue">1º</span></td><td>28 nov 2012</td><td>$12,35</td><td><strong>$1.242</strong> <small style="color:var(--muted)">nov/13</small></td><td>516 dias</td><td class="up">+100x</td><td>$152 <small style="color:var(--muted)">jan/15</small></td><td class="dn">−87%</td><td>411 dias</td></tr>
+      <tr><td><span class="badge b-green">2º</span></td><td>09 jul 2016</td><td>$650</td><td><strong>$19.783</strong> <small style="color:var(--muted)">dez/17</small></td><td>526 dias</td><td class="up">+30x</td><td>$3.122 <small style="color:var(--muted)">dez/18</small></td><td class="dn">−84%</td><td>363 dias</td></tr>
+      <tr><td><span class="badge b-yellow">3º</span></td><td>11 mai 2020</td><td>$8.787</td><td><strong>$68.789</strong> <small style="color:var(--muted)">nov/21</small></td><td>546 dias</td><td class="up">+7,8x</td><td>$15.760 <small style="color:var(--muted)">nov/22</small></td><td class="dn">−77%</td><td>376 dias</td></tr>
+      <tr class="hl"><td><span class="badge b-now">4º ●</span></td><td>19 abr 2024</td><td>$63.800</td><td><strong>$126.198</strong> <small style="color:var(--muted)">out/25</small></td><td>535 dias</td><td class="up">+1,98x</td><td style="color:var(--muted)" id="td-bot-proj">Proj. out/26</td><td style="color:var(--muted)" id="td-dd-proj">—</td><td style="color:var(--muted)">Proj. 383d</td></tr>
+    </tbody>
+  </table></div>
+
+  <!-- Mobile cards (shown on mobile, hidden on desktop) -->
+  <div class="table-cards">
+    <div class="tc">
+      <div class="tc-header">
+        <div class="tc-cycle">1º Halving · 2012</div>
+        <span class="badge b-blue">1º</span>
+      </div>
+      <div class="tc-grid">
+        <div class="tc-item"><div class="tc-label">Preço no halving</div><div class="tc-val">$12,35</div></div>
+        <div class="tc-item"><div class="tc-label">ATH do ciclo</div><div class="tc-val up">$1.242</div></div>
+        <div class="tc-item"><div class="tc-label">Multiplicador</div><div class="tc-val up">+100x</div></div>
+        <div class="tc-item"><div class="tc-label">Queda do ATH</div><div class="tc-val dn">−87%</div></div>
+        <div class="tc-item"><div class="tc-label">Dias até ATH</div><div class="tc-val">516 dias</div></div>
+        <div class="tc-item"><div class="tc-label">Fundo pós-ATH</div><div class="tc-val">$152</div></div>
+      </div>
+    </div>
+    <div class="tc">
+      <div class="tc-header">
+        <div class="tc-cycle">2º Halving · 2016</div>
+        <span class="badge b-green">2º</span>
+      </div>
+      <div class="tc-grid">
+        <div class="tc-item"><div class="tc-label">Preço no halving</div><div class="tc-val">$650</div></div>
+        <div class="tc-item"><div class="tc-label">ATH do ciclo</div><div class="tc-val up">$19.783</div></div>
+        <div class="tc-item"><div class="tc-label">Multiplicador</div><div class="tc-val up">+30x</div></div>
+        <div class="tc-item"><div class="tc-label">Queda do ATH</div><div class="tc-val dn">−84%</div></div>
+        <div class="tc-item"><div class="tc-label">Dias até ATH</div><div class="tc-val">526 dias</div></div>
+        <div class="tc-item"><div class="tc-label">Fundo pós-ATH</div><div class="tc-val">$3.122</div></div>
+      </div>
+    </div>
+    <div class="tc">
+      <div class="tc-header">
+        <div class="tc-cycle">3º Halving · 2020</div>
+        <span class="badge b-yellow">3º</span>
+      </div>
+      <div class="tc-grid">
+        <div class="tc-item"><div class="tc-label">Preço no halving</div><div class="tc-val">$8.787</div></div>
+        <div class="tc-item"><div class="tc-label">ATH do ciclo</div><div class="tc-val up">$68.789</div></div>
+        <div class="tc-item"><div class="tc-label">Multiplicador</div><div class="tc-val up">+7,8x</div></div>
+        <div class="tc-item"><div class="tc-label">Queda do ATH</div><div class="tc-val dn">−77%</div></div>
+        <div class="tc-item"><div class="tc-label">Dias até ATH</div><div class="tc-val">546 dias</div></div>
+        <div class="tc-item"><div class="tc-label">Fundo pós-ATH</div><div class="tc-val">$15.760</div></div>
+      </div>
+    </div>
+    <div class="tc hl">
+      <div class="tc-header">
+        <div class="tc-cycle">4º Halving · 2024 <span class="live-dot" style="display:inline-block;vertical-align:middle;margin-left:6px"></span></div>
+        <span class="badge b-now">4º ●</span>
+      </div>
+      <div class="tc-grid">
+        <div class="tc-item"><div class="tc-label">Preço no halving</div><div class="tc-val">$63.800</div></div>
+        <div class="tc-item"><div class="tc-label">ATH do ciclo</div><div class="tc-val up">$126.198</div></div>
+        <div class="tc-item"><div class="tc-label">Multiplicador</div><div class="tc-val up">+1,98x</div></div>
+        <div class="tc-item"><div class="tc-label">Drawdown atual</div><div class="tc-val dn" id="tc-dd">—</div></div>
+        <div class="tc-item"><div class="tc-label">Dias até ATH</div><div class="tc-val">535 dias</div></div>
+        <div class="tc-item"><div class="tc-label">Fundo proj.</div><div class="tc-val" style="color:var(--muted)" id="tc-bot">out/26</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+  <div class="compare-box">
+    <div class="cmp-title">Dias do halving até o ATH — comparação entre ciclos</div>
+    <div class="cmp-row"><div class="cmp-lbl" style="color:var(--c1)">1º · 2012</div><div class="cmp-track"><div class="cmp-fill" style="width:97%;background:rgba(123,127,255,.22);color:var(--c1)">516 dias</div></div><div class="cmp-days">516 d</div></div>
+    <div class="cmp-row"><div class="cmp-lbl" style="color:var(--c2)">2º · 2016</div><div class="cmp-track"><div class="cmp-fill" style="width:99%;background:rgba(41,217,194,.18);color:var(--c2)">526 dias</div></div><div class="cmp-days">526 d</div></div>
+    <div class="cmp-row"><div class="cmp-lbl" style="color:var(--c3)">3º · 2020</div><div class="cmp-track"><div class="cmp-fill" style="width:100%;background:rgba(61,220,132,.18);color:var(--c3)">546 dias</div></div><div class="cmp-days">546 d</div></div>
+    <div class="cmp-row"><div class="cmp-lbl" style="color:var(--orange)">4º · 2024</div><div class="cmp-track"><div class="cmp-fill" style="width:100%;background:rgba(247,147,26,.28);color:var(--orange)">535 dias</div></div><div class="cmp-days">535 d</div></div>
+    <hr class="cmp-divider">
+    <div class="cmp-row" id="cmp-c5-row">
+      <div class="cmp-lbl" style="color:var(--muted)">5º · 2028 <span style="font-size:10px">(proj.)</span></div>
+      <div class="cmp-track" style="position:relative">
+        <div id="cmp-c5-elapsed" style="height:100%;background:rgba(179,136,255,.15);color:var(--purple);display:flex;align-items:center;padding-left:8px;font-size:11px;font-weight:500;border-radius:3px 0 0 3px;position:absolute;left:0;top:0"></div>
+        <div id="cmp-c5-remain" style="height:100%;background:rgba(179,136,255,.07);border:1px dashed rgba(179,136,255,.3);color:rgba(179,136,255,.6);display:flex;align-items:center;padding-left:6px;font-size:11px;border-radius:0 3px 3px 0;position:absolute;top:0"></div>
+      </div>
+      <div class="cmp-days" id="cmp-c5-days" style="color:var(--purple)">—</div>
+    </div>
+    <div style="font-size:11px;color:var(--muted);margin-top:6px" id="cmp-c5-note">—</div>
+    <hr class="cmp-divider">
+    <div class="cmp-note">📊 Média 4 ciclos: 531 dias · Fundo proj. ciclo 4: 24 out 2026 (ATH + 383d) · Dias restantes: <span id="cmp-days-bot">—</span></div>
+  </div>
+
+  <div class="compare-box">
+    <div class="cmp-title">Dias do ATH até o fundo — comparação entre ciclos</div>
+    <div class="cmp-row">
+      <div class="cmp-lbl" style="color:var(--c1)">1º · 2012</div>
+      <div class="cmp-track"><div class="cmp-fill" style="width:100%;background:rgba(123,127,255,.22);color:var(--c1)">411 dias</div></div>
+      <div class="cmp-days">411 d</div>
+    </div>
+    <div class="cmp-row">
+      <div class="cmp-lbl" style="color:var(--c2)">2º · 2016</div>
+      <div class="cmp-track"><div class="cmp-fill" style="width:88%;background:rgba(41,217,194,.18);color:var(--c2)">363 dias</div></div>
+      <div class="cmp-days">363 d</div>
+    </div>
+    <div class="cmp-row">
+      <div class="cmp-lbl" style="color:var(--c3)">3º · 2020</div>
+      <div class="cmp-track"><div class="cmp-fill" style="width:91%;background:rgba(61,220,132,.18);color:var(--c3)">376 dias</div></div>
+      <div class="cmp-days">376 d</div>
+    </div>
+    <hr class="cmp-divider">
+    <div class="cmp-row">
+      <div class="cmp-lbl" style="color:var(--orange)">4º · 2024</div>
+      <div class="cmp-track" style="display:flex;overflow:hidden;background:transparent;gap:0">
+        <div id="bot-elapsed-bar" style="height:18px;background:rgba(247,147,26,.4);color:var(--orange);display:flex;align-items:center;padding:0 6px;font-size:11px;font-weight:500;border-radius:3px 0 0 3px;white-space:nowrap;min-width:0;transition:width .4s"></div>
+        <div id="bot-remaining-bar" style="height:18px;background:rgba(90,171,255,.18);color:var(--blue);display:flex;align-items:center;padding:0 6px;font-size:11px;font-weight:500;border-radius:0 3px 3px 0;white-space:nowrap;border-left:1px dashed rgba(90,171,255,.5);transition:width .4s;flex:1"></div>
+      </div>
+      <div class="cmp-days" id="bot-total-days" style="color:var(--orange)">—</div>
+    </div>
+    <div class="cmp-note" id="bot-cmp-note">📊 Média 3 ciclos: 383 dias · Fundo proj. ciclo 4: 24 out 2026</div>
+  </div>
+
+
+</main>
+
+</div><!-- end view-graficos -->
+
+<div class="view" id="view-noticias">
+<main>
+<section id="noticias">
+  <div class="sec-label">Contexto de mercado</div>
+  <div class="sec-title">Notícias de Bitcoin</div>
+  <div class="sec-sub">Classificadas por sentimento · atualizadas automaticamente via CryptoPanic</div>
+
+  <div id="news-sentiment-bar" class="news-sentiment-bar" style="display:none">
+    <span class="nsb-label">Sentimento</span>
+    <div class="nsb-track">
+      <div class="nsb-bull" id="nsb-bull" style="width:50%"></div>
+      <div class="nsb-bear" id="nsb-bear" style="width:50%"></div>
+    </div>
+    <span class="nsb-stats"><span class="nsb-bull-txt" id="nsb-bull-count">—</span> alta · <span class="nsb-bear-txt" id="nsb-bear-count">—</span> baixa</span>
+  </div>
+
+  <div class="news-header-row">
+    <div class="news-tabs">
+      <button class="news-tab active bull" id="tab-bull" onclick="switchNewsTab('bull')">🟢 Alta</button>
+      <button class="news-tab bear" id="tab-bear" onclick="switchNewsTab('bear')">🔴 Baixa</button>
+      <button class="news-tab neut" id="tab-neut" onclick="switchNewsTab('neut')">⚪ Neutro</button>
+    </div>
+    <div class="news-status">
+      <div class="news-status-dot" id="news-dot"></div>
+      <span id="news-status-txt">Carregando…</span>
+      <button class="btn-reset" onclick="fetchNews(true)" style="padding:4px 10px;font-size:10px">↻</button>
+    </div>
+  </div>
+
+  <div id="news-bull" class="news-panel active"></div>
+  <div id="news-bear" class="news-panel"></div>
+  <div id="news-neut" class="news-panel"></div>
+</section>
+</main>
+</div><!-- end view-noticias -->
+
+<div class="view" id="view-bitcoinologia">
+<main>
+<section id="bitcoinologia">
+  <div class="sec-label">Aprenda</div>
+  <div class="sec-title large">Bitcoinologia</div>
+  <div class="sec-sub">Os fundamentos do Bitcoin explicados de forma simples · conteúdo educativo, não constitui conselho financeiro</div>
+
+  <div class="bit-article">
+
+    <!-- ===== 1. O QUE É O BITCOIN ===== -->
+    <div class="bit-section" id="bit-bitcoin">
+      <div class="bit-h"><span class="bit-num">01</span> O que é o Bitcoin</div>
+
+      <p class="bit-p"><strong>Bitcoin é dinheiro digital sem dono.</strong> Ele foi descrito em outubro de 2008, num documento de nove páginas chamado <em>"Bitcoin: A Peer-to-Peer Electronic Cash System"</em>, assinado pelo pseudônimo Satoshi Nakamoto, o famoso <em>whitepaper</em>. A proposta era simples e radical: permitir que pessoas enviem valor diretamente umas às outras pela internet, sem precisar de um banco ou de qualquer intermediário no meio.</p>
+
+      <p class="bit-p">No sistema financeiro tradicional, é uma instituição (banco ou governo) que mantém o registro de quem tem quanto e que decide o que é válido. O whitepaper resolve isso de outro jeito: o registro de todas as transações fica numa rede pública distribuída em milhares de computadores pelo mundo, e a validade é garantida por <strong>prova de trabalho</strong> (a mineração) e por criptografia, não pela confiança em uma autoridade central.</p>
+
+      <div class="bit-callout"><strong>A diferença que mais importa:</strong> quem governa o Bitcoin não é um banco central nem um governo com a "máquina de imprimir dinheiro". Quem governa são as <strong style="color:var(--text)">regras de um algoritmo</strong>, definidas desde o início e aplicadas por toda a rede. Nenhum presidente, ministro ou diretor pode criar bitcoins do nada para cobrir um rombo. A política monetária do Bitcoin está escrita em código, é previsível e é igual para todo mundo.</div>
+
+      <p class="bit-p">E essa regra inclui um limite que muda tudo: <strong>só existirão 21 milhões de bitcoins, jamais.</strong> Moedas tradicionais podem ser emitidas sem teto, e, quando se imprime muito, cada unidade tende a valer menos (inflação). O Bitcoin faz o oposto: a emissão é finita e vai ficando cada vez mais lenta com o tempo (é aqui que entram os <em>halvings</em>, no próximo tópico). Por ser escasso por desenho, e cada vez mais raro à medida que a emissão diminui, muita gente passou a tratá-lo como uma espécie de "ouro digital".</p>
+
+      <figure class="bit-fig">
+        <svg viewBox="0 0 800 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Comparação entre a emissão do dinheiro tradicional e a do Bitcoin">
+          <rect x="20" y="42" width="370" height="268" rx="12" fill="#0d0d14" stroke="rgba(255,255,255,0.06)"/>
+          <rect x="410" y="42" width="370" height="268" rx="12" fill="#0d0d14" stroke="rgba(255,255,255,0.06)"/>
+          <text x="205" y="30" text-anchor="middle" fill="#ff4d6d" font-family="Inter,sans-serif" font-size="15" font-weight="700">Dinheiro tradicional</text>
+          <text x="595" y="30" text-anchor="middle" fill="#f7931a" font-family="Inter,sans-serif" font-size="15" font-weight="700">Bitcoin</text>
+          <!-- left: unbounded -->
+          <line x1="62" y1="72" x2="62" y2="278" stroke="rgba(255,255,255,0.12)"/>
+          <line x1="62" y1="278" x2="360" y2="278" stroke="rgba(255,255,255,0.12)"/>
+          <path d="M62 274 C 120 268, 168 250, 208 214 S 288 118, 328 72" fill="none" stroke="#ff4d6d" stroke-width="3" stroke-linecap="round"/>
+          <path d="M328 72 L 364 38" fill="none" stroke="#ff4d6d" stroke-width="2.5" stroke-dasharray="5 5" stroke-linecap="round"/>
+          <path d="M364 38 l -11 1 l 5 10 z" fill="#ff4d6d"/>
+          <text x="300" y="62" text-anchor="end" fill="#ff4d6d" font-family="JetBrains Mono,monospace" font-size="22" font-weight="700">&#8734;</text>
+          <text x="205" y="302" text-anchor="middle" fill="#6b6e85" font-family="JetBrains Mono,monospace" font-size="10.5">sem teto · decidido por uma autoridade</text>
+          <!-- right: bounded -->
+          <line x1="452" y1="72" x2="452" y2="278" stroke="rgba(255,255,255,0.12)"/>
+          <line x1="452" y1="278" x2="762" y2="278" stroke="rgba(255,255,255,0.12)"/>
+          <line x1="452" y1="82" x2="762" y2="82" stroke="#f7931a" stroke-width="1.4" stroke-dasharray="6 5" opacity="0.85"/>
+          <text x="758" y="75" text-anchor="end" fill="#f7931a" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700">21.000.000 BTC</text>
+          <path d="M452 274 C 522 256, 562 210, 612 152 S 702 96, 762 86" fill="none" stroke="#f7931a" stroke-width="3" stroke-linecap="round"/>
+          <text x="607" y="302" text-anchor="middle" fill="#6b6e85" font-family="JetBrains Mono,monospace" font-size="10.5">emissão fixa e previsível · definida em código</text>
+        </svg>
+        <figcaption>Dinheiro tradicional pode ser emitido sem limite por uma autoridade. O Bitcoin tem emissão fixa em código, desacelerando até o teto de 21 milhões.</figcaption>
+      </figure>
+
+      <p class="bit-curiosity">Curiosidade real: no primeiro bloco do Bitcoin, minerado em 3 de janeiro de 2009, Satoshi deixou gravada uma manchete de jornal sobre o resgate de bancos pelo governo, um recado claro sobre o problema que o Bitcoin queria resolver.</p>
+    </div>
+
+    <!-- ===== 2. O QUE É HALVING ===== -->
+    <div class="bit-section" id="bit-halving">
+      <div class="bit-h"><span class="bit-num">02</span> O que é o halving</div>
+
+      <p class="bit-p">O Bitcoin é criado aos poucos: a cada novo "bloco" de transações confirmado (mais ou menos a cada 10 minutos), quem ajuda a manter a rede recebe uma quantidade de bitcoins novos como recompensa. O detalhe genial está na regra que controla essa criação.</p>
+
+      <p class="bit-p"><strong>A cada 210 mil blocos, o que dá aproximadamente 4 anos, essa recompensa é cortada pela metade.</strong> Isso é o <em>halving</em> ("divisão ao meio").</p>
+
+      <ul class="bit-list">
+        <li>No começo (2009), cada bloco gerava <b>50 BTC</b>.</li>
+        <li>1º halving (2012): caiu para <b>25 BTC</b>.</li>
+        <li>2º halving (2016): <b>12,5 BTC</b>.</li>
+        <li>3º halving (2020): <b>6,25 BTC</b>.</li>
+        <li>4º halving (2024): <b>3,125 BTC</b> (onde estamos agora).</li>
+      </ul>
+
+      <p class="bit-p">Ou seja: a torneira que cria bitcoins novos vai fechando, de forma programada e previsível, até a emissão chegar a zero (estimado por volta de <strong>2140</strong>). É exatamente esse mecanismo que garante o teto de 21 milhões.</p>
+
+      <figure class="bit-fig">
+        <svg viewBox="0 0 820 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Linha do tempo dos halvings com a recompensa caindo pela metade">
+          <line x1="40" y1="270" x2="790" y2="270" stroke="rgba(255,255,255,0.12)"/>
+          <text x="40" y="28" fill="#6b6e85" font-family="JetBrains Mono,monospace" font-size="11">Recompensa por bloco (BTC)</text>
+          <rect x="55"  y="70"  width="70" height="200" rx="4" fill="#6b6e85" opacity="0.55"/>
+          <text x="90"  y="62"  text-anchor="middle" fill="#cdd0e0" font-family="JetBrains Mono,monospace" font-size="13" font-weight="700">50</text>
+          <text x="90"  y="288" text-anchor="middle" fill="#6b6e85" font-family="JetBrains Mono,monospace" font-size="11">2009</text>
+          <rect x="175" y="129" width="70" height="141" rx="4" fill="#7b7fff" opacity="0.85"/>
+          <text x="210" y="121" text-anchor="middle" fill="#cdd0e0" font-family="JetBrains Mono,monospace" font-size="13" font-weight="700">25</text>
+          <text x="210" y="288" text-anchor="middle" fill="#6b6e85" font-family="JetBrains Mono,monospace" font-size="11">2012 · 1º</text>
+          <rect x="295" y="170" width="70" height="100" rx="4" fill="#29d9c2" opacity="0.85"/>
+          <text x="330" y="162" text-anchor="middle" fill="#cdd0e0" font-family="JetBrains Mono,monospace" font-size="13" font-weight="700">12,5</text>
+          <text x="330" y="288" text-anchor="middle" fill="#6b6e85" font-family="JetBrains Mono,monospace" font-size="11">2016 · 2º</text>
+          <rect x="415" y="199" width="70" height="71"  rx="4" fill="#3ddc84" opacity="0.85"/>
+          <text x="450" y="191" text-anchor="middle" fill="#cdd0e0" font-family="JetBrains Mono,monospace" font-size="13" font-weight="700">6,25</text>
+          <text x="450" y="288" text-anchor="middle" fill="#6b6e85" font-family="JetBrains Mono,monospace" font-size="11">2020 · 3º</text>
+          <rect x="535" y="220" width="70" height="50"  rx="4" fill="#f7931a"/>
+          <text x="570" y="212" text-anchor="middle" fill="#f7931a" font-family="JetBrains Mono,monospace" font-size="13" font-weight="700">3,125</text>
+          <text x="570" y="288" text-anchor="middle" fill="#f7931a" font-family="JetBrains Mono,monospace" font-size="11" font-weight="700">2024 · 4º</text>
+          <rect x="655" y="248" width="70" height="22"  rx="4" fill="none" stroke="#6b6e85" stroke-width="1.4" stroke-dasharray="5 4"/>
+          <text x="690" y="240" text-anchor="middle" fill="#6b6e85" font-family="JetBrains Mono,monospace" font-size="13" font-weight="700">&#8230;&#8594;0</text>
+          <text x="690" y="288" text-anchor="middle" fill="#6b6e85" font-family="JetBrains Mono,monospace" font-size="11">2028+</text>
+          <g font-family="JetBrains Mono,monospace" font-size="11" fill="#f7931a" font-weight="700">
+            <text x="150" y="108" text-anchor="middle">&#247;2</text>
+            <text x="270" y="150" text-anchor="middle">&#247;2</text>
+            <text x="390" y="185" text-anchor="middle">&#247;2</text>
+            <text x="510" y="210" text-anchor="middle">&#247;2</text>
+            <text x="630" y="235" text-anchor="middle">&#247;2</text>
+          </g>
+        </svg>
+        <figcaption>A cada halving a recompensa por bloco é dividida ao meio (alturas ilustrativas). É esse corte programado que torna o Bitcoin cada vez mais escasso.</figcaption>
+      </figure>
+
+      <p class="bit-p">Historicamente, cada halving marcou o início de um novo <strong>ciclo de mercado</strong>: como a oferta nova de bitcoins despenca de uma vez, enquanto a demanda continua, os ciclos passados tenderam a mostrar fortes valorizações nos meses seguintes, seguidas de correções. É justamente esse padrão que as outras abas deste site acompanham. <strong>Importante:</strong> ciclos passados não garantem o futuro.</p>
+
+      <p class="bit-tease">E como, na prática, a recompensa é entregue e por que ela diminui? Isso tem a ver com a <strong>mineração</strong>, que é o próximo tópico. &#8595;</p>
+    </div>
+
+    <!-- ===== 3. O QUE É MINERAÇÃO ===== -->
+    <div class="bit-section" id="bit-mineracao">
+      <div class="bit-h"><span class="bit-num">03</span> O que é mineração</div>
+
+      <p class="bit-p">Esquece a imagem de picareta e capacete. <strong>Minerar Bitcoin é, na prática, competir para validar transações e organizar o registro da rede</strong>, e quem vence ganha os bitcoins novos do bloco como recompensa.</p>
+
+      <p class="bit-p">Explicando de forma simples, sem termos técnicos:</p>
+
+      <div class="bit-steps">
+        <div class="bit-step"><span class="bit-step-n">1</span><div><strong>Várias pessoas enviam transações</strong> ("fulano pagou 0,1 BTC para ciclano"). Essas transações ficam numa fila esperando confirmação.</div></div>
+        <div class="bit-step"><span class="bit-step-n">2</span><div><strong>Computadores espalhados pelo mundo (os mineradores)</strong> juntam essas transações num "pacote" (o bloco) e disputam quem resolve primeiro um <strong>quebra-cabeça matemático</strong> muito difícil. Não dá para "pensar" a resposta, só tentando milhões de combinações por segundo, gastando energia e poder de computação. É por isso que se chama <strong>prova de trabalho</strong>: para vencer, é preciso provar que gastou esforço de verdade.</div></div>
+        <div class="bit-step"><span class="bit-step-n">3</span><div><strong>Quem acha a resposta primeiro</strong> anuncia o bloco para a rede, todos conferem que está tudo certo e o bloco é adicionado ao registro permanente. Em troca, esse minerador recebe a recompensa em bitcoins novos mais as taxas das transações daquele bloco.</div></div>
+      </div>
+
+      <figure class="bit-fig">
+        <svg viewBox="0 0 820 270" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Os três passos da mineração de Bitcoin">
+          <path d="M232 102 L 298 102" stroke="#f7931a" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          <path d="M300 102 l -11 -5 l 1 10 z" fill="#f7931a"/>
+          <path d="M517 102 L 583 102" stroke="#f7931a" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          <path d="M585 102 l -11 -5 l 1 10 z" fill="#f7931a"/>
+          <!-- box 1 -->
+          <rect x="20" y="36" width="212" height="134" rx="12" fill="#13131c" stroke="rgba(255,255,255,0.08)"/>
+          <text x="126" y="60" text-anchor="middle" fill="#5aabff" font-family="Inter,sans-serif" font-size="13" font-weight="700">1 · Fila de transações</text>
+          <rect x="55" y="78"  width="142" height="13" rx="3" fill="#5aabff" opacity="0.38"/>
+          <rect x="55" y="98"  width="142" height="13" rx="3" fill="#5aabff" opacity="0.26"/>
+          <rect x="55" y="118" width="142" height="13" rx="3" fill="#5aabff" opacity="0.16"/>
+          <text x="126" y="154" text-anchor="middle" fill="#6b6e85" font-family="JetBrains Mono,monospace" font-size="10">pagamentos aguardando</text>
+          <!-- box 2 -->
+          <rect x="305" y="36" width="212" height="134" rx="12" fill="#13131c" stroke="rgba(255,255,255,0.08)"/>
+          <text x="411" y="60" text-anchor="middle" fill="#f7931a" font-family="Inter,sans-serif" font-size="13" font-weight="700">2 · Prova de trabalho</text>
+          <circle cx="375" cy="106" r="20" fill="none" stroke="#f7931a" stroke-width="3"/>
+          <circle cx="375" cy="106" r="5.5" fill="#f7931a"/>
+          <text x="445" y="100" text-anchor="middle" fill="#cdd0e0" font-family="JetBrains Mono,monospace" font-size="11">0x00a3f&#8230;</text>
+          <text x="445" y="117" text-anchor="middle" fill="#6b6e85" font-family="JetBrains Mono,monospace" font-size="9.5">milhões de</text>
+          <text x="445" y="129" text-anchor="middle" fill="#6b6e85" font-family="JetBrains Mono,monospace" font-size="9.5">tentativas/s</text>
+          <text x="411" y="154" text-anchor="middle" fill="#6b6e85" font-family="JetBrains Mono,monospace" font-size="10">quebra-cabeça matemático</text>
+          <!-- box 3 -->
+          <rect x="590" y="36" width="212" height="134" rx="12" fill="#13131c" stroke="rgba(255,255,255,0.08)"/>
+          <text x="696" y="60" text-anchor="middle" fill="#00d97e" font-family="Inter,sans-serif" font-size="13" font-weight="700">3 · Bloco + recompensa</text>
+          <rect x="638" y="82" width="48" height="48" rx="6" fill="none" stroke="#00d97e" stroke-width="2.5"/>
+          <line x1="638" y1="98"  x2="686" y2="98"  stroke="#00d97e" stroke-width="1.1" opacity="0.55"/>
+          <line x1="638" y1="114" x2="686" y2="114" stroke="#00d97e" stroke-width="1.1" opacity="0.55"/>
+          <line x1="654" y1="82"  x2="654" y2="130" stroke="#00d97e" stroke-width="1.1" opacity="0.55"/>
+          <line x1="670" y1="82"  x2="670" y2="130" stroke="#00d97e" stroke-width="1.1" opacity="0.55"/>
+          <circle cx="738" cy="106" r="22" fill="#f7931a"/>
+          <text x="738" y="114" text-anchor="middle" fill="#07070c" font-family="Inter,sans-serif" font-size="21" font-weight="800">&#8383;</text>
+          <text x="696" y="154" text-anchor="middle" fill="#6b6e85" font-family="JetBrains Mono,monospace" font-size="10">confirmado + bitcoins novos</text>
+          <!-- reward strip -->
+          <rect x="20" y="200" width="782" height="52" rx="10" fill="#0d0d14" stroke="rgba(247,147,26,0.3)"/>
+          <text x="38" y="223" fill="#f7931a" font-family="JetBrains Mono,monospace" font-size="11" font-weight="700">A recompensa cai pela metade a cada halving:</text>
+          <text x="38" y="242" fill="#cdd0e0" font-family="JetBrains Mono,monospace" font-size="12.5">50 &#8594; 25 &#8594; 12,5 &#8594; 6,25 &#8594; 3,125 BTC &#8594; &#8230; &#8594; 0</text>
+        </svg>
+        <figcaption>Os três passos da mineração. Com o tempo, a parcela criada "do nada" some e os mineradores passam a viver cada vez mais das taxas das transações.</figcaption>
+      </figure>
+
+      <p class="bit-p">Esse trabalho todo serve para uma coisa essencial: <strong>tornar praticamente impossível fraudar ou reescrever o histórico</strong>. Para "burlar" o registro, alguém precisaria de mais poder de computação do que a rede inteira somada, o que é inviável. É a segurança do Bitcoin "comprada" com energia e matemática, e não com a confiança num intermediário.</p>
+
+      <p class="bit-p">E é aqui que tudo se conecta com o halving: <strong>a recompensa que o minerador ganha vai diminuindo pela metade a cada halving</strong> (de 50 &#8594; 25 &#8594; 12,5 &#8594; 6,25 &#8594; 3,125 BTC&#8230;). Com o tempo, a parte criada "do nada" some, e os mineradores passam a ser remunerados cada vez mais pelas <strong>taxas das transações</strong>. É esse desenho que faz a emissão desacelerar e garante que jamais existirão mais de 21 milhões de bitcoins.</p>
+    </div>
+
+  </div><!-- end bit-article -->
+</section>
+</main>
+</div><!-- end view-bitcoinologia -->
+
+<footer>BTC Halving Cycles · Preço via <a href="https://api.coingecko.com" target="_blank" rel="noopener noreferrer">CoinGecko API</a> · Fear & Greed via <a href="https://alternative.me" target="_blank" rel="noopener noreferrer">Alternative.me</a> · Notícias via RSS (CoinDesk, Cointelegraph, Bitcoin Magazine, Decrypt)<br><span style="opacity:.35;margin-top:3px;display:block">Não constitui conselho financeiro · DYOR · Atualizado: <span id="footer-ts">—</span></span></footer>
+
+<script>
+// ── STATIC CYCLE DATA ─────────────────────────────────────────
+const HP={h1:12.35,h2:650,h3:8787,h4:63800};
+const HALVD={h1:new Date('2012-11-28'),h2:new Date('2016-07-09'),h3:new Date('2020-05-11'),h4:new Date('2024-04-19')};
+const ATH_C={c1:{d:new Date('2013-11-29'),p:1242},c2:{d:new Date('2017-12-17'),p:19783},c3:{d:new Date('2021-11-10'),p:68789},c4:{d:new Date('2025-10-06'),p:126198}};
+const BOTS_C={c1:{d:new Date('2015-01-14'),p:152},c2:{d:new Date('2018-12-15'),p:3122},c3:{d:new Date('2022-11-21'),p:15760}};
+const avgDATH=Math.round((516+526+546+535)/4);
+const avgATHtoBot=Math.round((411+363+376)/3);
+const botEst4=new Date(ATH_C.c4.d.getTime()+avgATHtoBot*86400000);
+const halving5=new Date('2028-04-01');
+const nextATH5=new Date(halving5.getTime()+avgDATH*86400000);
+
+function db(a,b){return Math.round((b-a)/86400000);}
+function fmtDate(d){return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'});}
+function fmtDateShort(d){return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'short',year:'2-digit'});}
+
+let liveData={
+  btcUSD:77400, btcBRL:388000, ma200:82000, mvrz:1.37, fgVal:45, fgClass:'Fear',
+  lastUpdate:new Date(), mayer:0.94
+};
+const ATH4=ATH_C.c4;
+
+// ── SIDEBAR ───────────────────────────────────────────────────
+let chartsLoaded=false;
+let newsLoaded=false;
+
+const VIEW_LABELS={resumo:'Veredito',graficos:'Gráficos',noticias:'Notícias',bitcoinologia:'Bitcoinologia'};
+
+function switchView(view){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+view).classList.add('active');
+  document.querySelectorAll('.sidebar-item[id^="nav-"]').forEach(b=>b.classList.remove('active'));
+  const navBtn=document.getElementById('nav-'+view);
+  if(navBtn) navBtn.classList.add('active');
+  document.getElementById('nav-view-label').textContent=VIEW_LABELS[view]||view;
+
+  // Lazy load charts on first open
+  if(view==='graficos'&&!chartsLoaded){
+    chartsLoaded=true;
+    buildChart(liveData.btcUSD);
+    buildCycle4Chart(liveData.btcUSD);
+    buildIndMarketChart();
+  }
+  // Resize charts when switching back
+  if(view==='graficos'){
+    setTimeout(()=>{
+      if(chartInst) chartInst.resize();
+      if(c4ChartInst) c4ChartInst.resize();
+      if(imChartInst) imChartInst.resize();
+    },50);
+  }
+  // Lazy load news on first open
+  if(view==='noticias'&&!newsLoaded){
+    newsLoaded=true;
+    fetchNews();
+  }
+  closeSidebar();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function scrollTo(id){
+  setTimeout(()=>{
+    const el=document.getElementById(id);
+    if(el) el.scrollIntoView({behavior:'smooth',block:'start'});
+  },50);
+}
+
+function toggleSidebar(){
+  const sb=document.getElementById('sidebar');
+  const bd=document.getElementById('sidebar-backdrop');
+  const hb=document.getElementById('hamburger');
+  sb.classList.toggle('open');
+  bd.classList.toggle('open');
+  hb.classList.toggle('open');
+  document.body.style.overflow=sb.classList.contains('open')?'hidden':'';
+}
+
+function closeSidebar(){
+  const sb=document.getElementById('sidebar');
+  const bd=document.getElementById('sidebar-backdrop');
+  const hb=document.getElementById('hamburger');
+  sb.classList.remove('open');
+  bd.classList.remove('open');
+  hb.classList.remove('open');
+  document.body.style.overflow='';
+}
+
+function toggleMenu(){ toggleSidebar(); }
+
+// ── SHARE VEREDITO ────────────────────────────────────────────
+function shareVeredito(){
+  const today=new Date();
+  const d4=db(HALVD.h4,today);
+  const p=liveData.btcUSD;
+  const signal=document.getElementById('hero-verd-signal').textContent||'—';
+  const score=document.getElementById('hero-verd-score').textContent||'—';
+  const text=`BTC Halving Cycles\n${signal} · ${score}\n$${p.toLocaleString('en-US')} · Dia ${d4} do Ciclo 4\nbased on btchalvingcycles.com`;
+  navigator.clipboard.writeText(text).then(()=>{
+    const btn=document.getElementById('share-btn');
+    btn.textContent='✓ Copiado!';
+    btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent='↗ Compartilhar sinal';btn.classList.remove('copied');},2500);
+  }).catch(()=>{alert(text);});
+}
+
+// ── REFRESH PROGRESS ──────────────────────────────────────────
+function resetRefreshBar(){
+  const bar=document.getElementById('refresh-prog');
+  if(!bar) return;
+  bar.style.animation='none';
+  bar.offsetHeight; // reflow
+  bar.style.animation='shrink 300s linear forwards';
+}
+
+// ── FETCH LIVE DATA ───────────────────────────────────────────
+async function fetchLiveData(){
+  const btn=document.getElementById('btn-update');
+  const icon=document.getElementById('update-icon');
+  btn.classList.add('loading');
+  icon.classList.add('spin');
+  icon.textContent='↻';
+  try{
+    const [priceRes, fgRes, ma200Res] = await Promise.all([
+      fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd,brl',{signal:AbortSignal.timeout(9000)}),
+      fetch('https://api.alternative.me/fng/?limit=1',{signal:AbortSignal.timeout(9000)}),
+      fetch('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=201',{signal:AbortSignal.timeout(9000)})
+    ]);
+    if(priceRes.ok){
+      const pd=await priceRes.json();
+      if(pd?.bitcoin?.usd && pd?.bitcoin?.brl &&
+         isFinite(pd.bitcoin.usd) && isFinite(pd.bitcoin.brl) &&
+         pd.bitcoin.usd > 0 && pd.bitcoin.usd < 10000000){
+        liveData.btcUSD=Math.round(pd.bitcoin.usd);
+        liveData.btcBRL=Math.round(pd.bitcoin.brl);
+      }
+    }
+    if(fgRes.ok){
+      const fd=await fgRes.json();
+      const val=parseInt(fd?.data?.[0]?.value);
+      if(!isNaN(val) && val >= 0 && val <= 100){
+        liveData.fgVal=val;
+        liveData.fgClass=String(fd.data[0].value_classification||'').slice(0,30);
+      }
+    }
+    if(ma200Res.ok){
+      const kraw=await ma200Res.json();
+      if(Array.isArray(kraw) && kraw.length>=200){
+        const closes=kraw.slice(0,200).map(k=>parseFloat(k[4])).filter(v=>!isNaN(v));
+        if(closes.length===200){
+          const ma200=closes.reduce((s,v)=>s+v,0)/200;
+          if(ma200>0){
+            liveData.ma200=+ma200.toFixed(0);
+          }
+        }
+      }
+    }
+  }catch(e){console.warn('Live fetch partial failure',e);}
+  liveData.lastUpdate=new Date();
+  const ma200=liveData.ma200||82000;
+  liveData.mayer=+(liveData.btcUSD/ma200).toFixed(2);
+  // MVRV simples estimado: proxy baseado no Mayer Multiple (mayer^1.5 × 1.5)
+  // Mapeamento histórico: bottom ~0.7-1.0, acumulação 1-2, neutro 2-3, topo 4-6+
+  liveData.mvrz=+(Math.pow(liveData.mayer,1.5)*1.5).toFixed(2);
+  refreshUI();
+  resetRefreshBar();
+  icon.classList.remove('spin');
+  btn.classList.remove('loading');
+  icon.textContent='✓';
+  setTimeout(()=>{ icon.textContent='↻'; },2000);
+}
+
+// ── REFRESH UI ────────────────────────────────────────────────
+// Safe DOM helper — used throughout refreshUI
+function setEl(id,fn){const el=document.getElementById(id);if(el)fn(el);}
+
+function refreshUI(){
+  const p=liveData.btcUSD;
+  const today=new Date();
+  const d4=db(HALVD.h4,today);
+  const dAth4=db(ATH4.d,today);
+  const cycPct=Math.min(d4/1460*100,100);
+  const dd=(p-ATH4.p)/ATH4.p*100;
+  const daysToBot=db(today,botEst4);
+  const daysToNextATH=db(today,nextATH5);
+  const isNewATH=p>=ATH4.p;
+  const mvrz=liveData.mvrz;
+
+  // Hero
+  document.getElementById('hero-price').textContent='$'+p.toLocaleString('en-US');
+  document.getElementById('hero-price-brl').textContent='R$ '+liveData.btcBRL.toLocaleString('pt-BR');
+  document.getElementById('hero-bot-days').textContent=daysToBot>0?daysToBot+' dias':'proj. atingido';
+  document.getElementById('hero-bot-date').textContent=fmtDate(botEst4)+' · ATH + 383d';
+  document.getElementById('hero-dd').textContent=dd.toFixed(1)+'%';
+  document.getElementById('hero-next-ath').textContent=daysToNextATH>0?daysToNextATH+' dias':'em breve';
+  document.getElementById('hero-next-ath-date').textContent=fmtDate(nextATH5)+' · ciclo 5';
+  document.getElementById('hero-cycle-day').textContent='Dia '+d4;
+
+  // Timestamp
+  const now=liveData.lastUpdate;
+  const ts=now.toLocaleString('pt-BR');
+  const mbTs=document.getElementById('mb-ts');
+  if(mbTs) mbTs.textContent='Atualizado: '+ts;
+  document.getElementById('footer-ts').textContent=ts;
+
+  // Halving bar
+  document.getElementById('prog-lbl').textContent=d4+' dias desde o halving';
+  document.getElementById('prog-fill').style.width=cycPct.toFixed(1)+'%';
+  document.getElementById('hb-date').textContent='19 abr 2024 · ATH: $126.198 em 06 out 2025 (dia 535) · Fundo proj.: '+fmtDateShort(botEst4);
+
+  // Cards
+  setEl('card-days-ath',el=>el.textContent=dAth4+' dias');
+  setEl('card-dd',el=>el.textContent=dd.toFixed(1)+'%');
+  setEl('cmp-days-bot',el=>el.textContent=daysToBot>0?daysToBot+'d':'atingido');
+  // Mobile table cards
+  const tcDd=document.getElementById('tc-dd');
+  if(tcDd) tcDd.textContent=dd.toFixed(1)+'%';
+  const tcBot=document.getElementById('tc-bot');
+  if(tcBot) tcBot.textContent=fmtDateShort(botEst4);
+
+  // C5 bar
+  const daysSinceH5Start = db(halving5, today);
+  const daysFromH5ToNow = daysSinceH5Start > 0 ? daysSinceH5Start : 0;
+  const c5ElapsedPct = Math.min(daysFromH5ToNow / avgDATH * 100, 100);
+  const c5EW = Math.round(c5ElapsedPct);
+  const c5RW = Math.max(0, 100 - c5EW);
+  const c5e = document.getElementById('cmp-c5-elapsed');
+  const c5r = document.getElementById('cmp-c5-remain');
+  if(c5e){c5e.style.width=c5EW+'%';c5e.textContent=daysFromH5ToNow>0?daysFromH5ToNow+'d decorridos':'';}
+  if(c5r){c5r.style.left=c5EW+'%';c5r.style.width=c5RW+'%';c5r.textContent=daysToNextATH>0?daysToNextATH+'d restantes':'ATH esperado';}
+  const c5days=document.getElementById('cmp-c5-days');
+  if(c5days) c5days.textContent=daysFromH5ToNow>0?daysFromH5ToNow+'/'+avgDATH+'d':'~'+daysToNextATH+'d restantes';
+  const c5note=document.getElementById('cmp-c5-note');
+  if(c5note){
+    const h5Str=halving5.toLocaleDateString('pt-BR',{day:'2-digit',month:'short',year:'numeric'});
+    c5note.textContent='📅 5º Halving proj.: '+h5Str+' · ATH proj.: '+fmtDate(nextATH5)+' · '+(daysToNextATH>0?'em '+daysToNextATH+' dias':'atingido')+' · com base na média de '+avgDATH+'d';
+  }
+
+  // ATH→bottom bars
+  const elapsedPct=Math.min(dAth4/avgATHtoBot*100,100);
+  const eBar=document.getElementById('bot-elapsed-bar');
+  const rBar=document.getElementById('bot-remaining-bar');
+  if(eBar){eBar.style.width=elapsedPct.toFixed(1)+'%';eBar.textContent=dAth4+'d';}
+  if(rBar){
+    const rp=Math.max(0,100-elapsedPct);
+    rBar.style.width=rp.toFixed(1)+'%';
+    rBar.style.flex=rp>0?'0 0 '+rp.toFixed(1)+'%':'0';
+    rBar.textContent=daysToBot>0?daysToBot+'d restantes':'';
+  }
+  const botTotalEl=document.getElementById('bot-total-days');
+  if(botTotalEl) botTotalEl.textContent=dAth4+'/'+avgATHtoBot+'d';
+  const botNoteEl=document.getElementById('bot-cmp-note');
+  if(botNoteEl) botNoteEl.textContent='📊 Média 3 ciclos: '+avgATHtoBot+'d · '+dAth4+'d desde ATH · Fundo proj.: '+fmtDate(botEst4)+(daysToBot>0?' (em '+daysToBot+'d)':' (atingido)');
+
+  // Table
+  setEl('td-bot-proj',el=>el.textContent='Proj. '+fmtDateShort(botEst4));
+  setEl('td-dd-proj',el=>el.textContent=dd.toFixed(1)+'% atual');
+
+  // Indicators
+  document.getElementById('iv-cycle').textContent=cycPct.toFixed(0)+'% do ciclo';
+  document.getElementById('if-cycle').style.width=cycPct+'%';
+  document.getElementById('ip-cycle').style.left=cycPct+'%';
+  document.getElementById('id-cyc-day').textContent=d4;
+  const sigEl=document.getElementById('sig-cycle');
+  if(sigEl){
+    if(cycPct<36){sigEl.textContent='ACUMULAR';sigEl.className='sig sig-buy';}
+    else if(cycPct<60){sigEl.textContent='NEUTRO';sigEl.className='sig sig-neut';}
+    else{sigEl.textContent='CAUTELA';sigEl.className='sig sig-watch';}
+  }
+  const ddA=Math.abs(dd),ddP=Math.min(ddA/90*100,100);
+  document.getElementById('iv-dd').textContent=dd.toFixed(1)+'%';
+  document.getElementById('if-dd').style.width=ddP+'%';
+  document.getElementById('ip-dd').style.left=ddP+'%';
+  document.getElementById('iv-mayer').textContent='~'+liveData.mayer;
+  const mayerP=Math.min(liveData.mayer/3*100,100);
+  document.getElementById('ip-mayer').style.left=mayerP+'%';
+  document.getElementById('mvrv-val').textContent='~'+mvrz;
+  document.getElementById('mvrv-pin').style.left=Math.min(mvrz/6*100,100)+'%';
+  const mvrvSig=document.getElementById('mvrv-sig');
+  if(mvrvSig){
+    if(mvrz<1){document.getElementById('mvrv-alert').style.display='block';mvrvSig.textContent='FUNDO HISTÓRICO';mvrvSig.className='sig sig-buy';}
+    else if(mvrz<2){mvrvSig.textContent='ACUMULAR';mvrvSig.className='sig sig-buy';}
+    else if(mvrz<3.5){mvrvSig.textContent='NEUTRO';mvrvSig.className='sig sig-neut';}
+    else{mvrvSig.textContent='CAUTELA';mvrvSig.className='sig sig-watch';}
+  }
+  const botElapsed=db(ATH4.d,today);
+  const botP=Math.min(botElapsed/avgATHtoBot*100,100);
+  document.getElementById('iv-bot').textContent=daysToBot>0?'Em '+daysToBot+' dias':'Fundo proj. atingido';
+  document.getElementById('if-bot').style.width=botP+'%';
+  document.getElementById('ip-bot').style.left=Math.min(botP,100)+'%';
+  document.getElementById('id-bot-est').textContent=fmtDate(botEst4);
+  document.getElementById('id-bot-days').textContent=daysToBot>0?daysToBot:'0';
+  if(isNewATH){document.getElementById('ath-banner').style.display='block';document.getElementById('ath-signal').style.display='block';}
+  if(liveData.fgVal!==null) updateFG(liveData.fgVal, liveData.fgClass);
+  // Only rebuild main chart if not already built or price moved >0.3%
+  if(chartsLoaded){
+    if(!chartInst||!chartInst._lastPrice||Math.abs(p-chartInst._lastPrice)/chartInst._lastPrice>0.003){
+      buildChart(p);
+    }
+    buildCycle4Chart(p);
+  }
+  buildVeredito(p,dd,cycPct,dAth4,daysToBot,mvrz);
+}
+
+function updateFG(val,cls){
+  document.getElementById('fg-val').textContent=val+' / 100'+(cls?' — '+cls:'');
+  document.getElementById('fg-pin').style.left=val+'%';
+  const sig=document.getElementById('fg-sig');
+  if(val<=25){sig.textContent='MEDO EXTREMO';sig.className='sig sig-buy';}
+  else if(val<=45){sig.textContent='MEDO';sig.className='sig sig-buy';}
+  else if(val<=55){sig.textContent='NEUTRO';sig.className='sig sig-neut';}
+  else if(val<=75){sig.textContent='GANÂNCIA';sig.className='sig sig-watch';}
+  else{sig.textContent='GANÂNCIA EXTREMA';sig.className='sig sig-sell';}
+  document.getElementById('fg-desc').textContent='Atualizado via Alternative.me. Ganância extrema (>80) historicamente precede correções.';
+}
+
+// ── CHART DATA ────────────────────────────────────────────────
+const RAW={
+  c1:[[-700,'2011-01-18',0.31],[-500,'2011-08-16',10.5],[-300,'2012-03-03',5.0],[-100,'2012-09-19',10.5],[-20,'2012-11-08',11.9],[0,'2012-11-28',12.35],[50,'2013-01-17',14],[150,'2013-04-27',55],[190,'2013-06-06',105],[300,'2013-09-24',130],[390,'2013-12-23',1242],[450,'2014-02-21',620],[600,'2014-07-21',220],[700,'2014-10-28',168],[750,'2014-12-17',152],[850,'2015-03-27',250],[1050,'2015-10-12',310],[1350,'2016-08-07',590]],
+  c2:[[-700,'2014-08-08',600],[-400,'2015-06-04',230],[-100,'2016-03-30',420],[-20,'2016-06-19',700],[0,'2016-07-09',650],[120,'2016-11-06',720],[240,'2017-03-06',1280],[360,'2017-07-04',2540],[480,'2017-11-01',6740],[526,'2017-12-17',19783],[600,'2018-03-01',10570],[700,'2018-06-29',6180],[880,'2018-12-06',3500],[900,'2018-12-26',3122],[1100,'2019-07-13',11250],[1350,'2020-04-08',7150]],
+  c3:[[-700,'2018-06-15',6400],[-400,'2019-04-11',5100],[-100,'2020-02-05',9700],[-20,'2020-04-21',7200],[0,'2020-05-11',8787],[120,'2020-09-08',10400],[240,'2021-01-06',35000],[360,'2021-05-06',57000],[400,'2021-06-15',35000],[546,'2021-11-08',68789],[640,'2022-02-10',44000],[700,'2022-04-11',40000],[760,'2022-06-10',29000],[880,'2022-10-08',19600],[955,'2022-12-22',15760],[1020,'2023-02-24',23500],[1300,'2023-12-08',44200],[1450,'2024-05-01',60000]],
+  c4:[[-700,'2022-06-14',20000],[-500,'2022-12-31',16500],[-300,'2023-07-19',29900],[-100,'2024-01-10',46000],[-20,'2024-03-30',70000],[0,'2024-04-19',63800],[80,'2024-07-08',57000],[160,'2024-09-26',63500],[200,'2024-11-05',75000],[240,'2024-12-15',104000],[276,'2025-01-20',109590],[330,'2025-03-15',85000],[390,'2025-05-14',105000],[447,'2025-07-10',118000],[482,'2025-08-14',124128],[535,'2025-10-06',126198],[560,'2025-11-01',110000],[620,'2026-01-01',92000],[680,'2026-03-02',83000],[740,'2026-05-01',78000]]
+};
+const RAW_C4_CONT=[[-680,'2026-05-22',77400],[-640,'2026-07-01',72000],[-578,'2026-09-01',60000],[-525,'2026-10-24',48000],[-487,'2026-12-01',52000],[-397,'2027-03-01',65000],[-213,'2027-09-01',75000],[-91,'2028-01-01',85000],[-17,'2028-03-15',90000]];
+const EVTS={
+  c1:[
+    {x:0,  p:12.35, type:'halving',label:'Halving\n2012',     c:'#f7931a'},
+    {x:390,p:1242,  type:'ath',   label:'ATH\nnov/13',        c:'#ff4d6d'},
+    {x:750,p:152,   type:'bot',   label:'Fundo\njan/15 −87%', c:'#22d3ee'},
+  ],
+  c2:[
+    {x:0,  p:650,   type:'halving',label:'Halving\n2016',     c:'#f7931a'},
+    {x:526,p:19783, type:'ath',   label:'ATH\ndez/17',        c:'#ff4d6d'},
+    {x:900,p:3122,  type:'bot',   label:'Fundo\ndez/18 −84%', c:'#22d3ee'},
+  ],
+  c3:[
+    {x:0,  p:8787,  type:'halving',label:'Halving\n2020',     c:'#f7931a'},
+    {x:546,p:68789, type:'ath',   label:'ATH\nnov/21',        c:'#ff4d6d'},
+    {x:955,p:15760, type:'bot',   label:'Fundo\nnov/22 −77%', c:'#22d3ee'},
+  ],
+  c4:[
+    {x:0,  p:63800, type:'halving',label:'Halving\n2024',     c:'#f7931a'},
+    {x:535,p:126198,type:'ath',   label:'ATH\nout/25',        c:'#ff4d6d'},
+    // c4 projected bottom added dynamically in buildChart
+  ]
+};
+function mkPts(raw){return raw.map(([d,dt,p])=>({x:d,y:p,_date:dt,_price:p}));}
+const DS={c1:mkPts(RAW.c1),c2:mkPts(RAW.c2),c3:mkPts(RAW.c3),c4:mkPts(RAW.c4)};
+const COLORS=['#7b7fff','#29d9c2','#3ddc84','#f7931a'];
+const FILLS=['rgba(123,127,255,0.04)','rgba(41,217,194,0.04)','rgba(61,220,132,0.04)','rgba(247,147,26,0.06)'];
+const CKEYS=['c1','c2','c3','c4'];
+const CLABELS=['1º Halving (2012)','2º Halving (2016)','3º Halving (2020)','4º Halving (2024)'];
+const visible=[true,true,true,true];
+
+const evtLabelsPlugin={
+  id:'evtLabels',
+  afterDatasetsDraw(chart){
+    const {ctx,scales:{x,y},chartArea:ca}=chart;
+    // Helper: draw outlined text (no shadowBlur — faster)
+    function outlinedText(text,tx,ty,fillColor,size){
+      ctx.font=(size||9)+'px JetBrains Mono';
+      ctx.textAlign='center';
+      ctx.lineWidth=3;
+      ctx.strokeStyle='rgba(7,7,12,0.9)';
+      ctx.strokeText(text,tx,ty);
+      ctx.fillStyle=fillColor;
+      ctx.fillText(text,tx,ty);
+    }
+    chart.data.datasets.forEach(ds=>{
+      if(!ds._evts||!ds._evts.length) return;
+      ds._evts.forEach(evt=>{
+        const xp=x.getPixelForValue(evt.x),yp=y.getPixelForValue(evt.y);
+        if(xp<ca.left||xp>ca.right||yp<ca.top||yp>ca.bottom) return;
+        ctx.save();
+        // Dot
+        ctx.beginPath();ctx.arc(xp,yp,6,0,Math.PI*2);
+        ctx.fillStyle=evt.c+'dd';ctx.fill();
+        ctx.strokeStyle='rgba(0,0,0,.6)';ctx.lineWidth=1.5;ctx.stroke();
+        // Labels above dot
+        const lines=evt.label.split('\n');
+        lines.forEach((ln,i)=>outlinedText(ln,xp,yp-14+(i*11),evt.c,9));
+        ctx.restore();
+      });
+    });
+  }
+};
+
+const vLinesPlugin={
+  id:'vLines',
+  afterDraw(chart){
+    const {ctx,chartArea:{top,bottom,left,right},scales:{x}}=chart;
+    const vline=(xv,color,lbl,dash)=>{
+      const xp=x.getPixelForValue(xv);
+      if(xp<left||xp>right) return;
+      ctx.save();ctx.beginPath();ctx.moveTo(xp,top);ctx.lineTo(xp,bottom);
+      ctx.setLineDash(dash||[4,4]);ctx.strokeStyle=color;ctx.lineWidth=1;ctx.stroke();
+      if(lbl){ctx.fillStyle=color;ctx.font='9px JetBrains Mono';ctx.textAlign='center';ctx.fillText(lbl,xp,top+10);}
+      ctx.restore();
+    };
+    // Day 0 = halving reference
+    vline(0,'rgba(247,147,26,.55)','Dia 0',[5,3]);
+    // Today on H4 axis
+    if(chart._todayD4!==undefined) vline(chart._todayD4,'rgba(247,147,26,.7)','HOJE',[3,3]);
+    // Projected bottom on H4 axis
+    if(chart._botD4!==undefined) vline(chart._botD4,'rgba(34,211,238,.55)','Fundo proj.',[6,3]);
+  }
+};
+Chart.register(evtLabelsPlugin,vLinesPlugin);
+
+let chartInst=null;
+function buildChart(btcPrice){
+  const wrap=document.getElementById('chart-wrap');
+  if(chartInst){chartInst.destroy();chartInst=null;}
+  wrap.innerHTML='<canvas id="mainChart" style="position:absolute;top:0;left:0;width:100%;height:100%"></canvas>';
+  const today=new Date();
+  const d4=db(HALVD.h4,today);
+  const botD4=db(HALVD.h4,botEst4);
+  const projBotMult=(ATH_C.c4.p*0.38)/HP.h4;
+  const halvingPrices={c1:HP.h1,c2:HP.h2,c3:HP.h3,c4:HP.h4};
+  function norm(raw,key){
+    const base=halvingPrices[key];
+    return raw.filter(([d])=>d>=0).map(([d,dt,p])=>({x:d,y:+(p/base).toFixed(4),_date:dt,_price:p,_mult:+(p/base).toFixed(2),_base:base}));
+  }
+  const c4History=norm(RAW.c4,'c4'); // norm() already filters day<0
+  const lastC4Day=RAW.c4.filter(([d])=>d>=0).slice(-1)[0][0];
+  if(d4>lastC4Day){
+    c4History.push({x:d4,y:+(btcPrice/HP.h4).toFixed(4),_date:'hoje',_price:btcPrice,_mult:+(btcPrice/HP.h4).toFixed(2),_base:HP.h4});
+  }
+  const todayMult=+(btcPrice/HP.h4).toFixed(4);
+  const c4Proj=[];
+  for(let i=0;i<=40;i++){
+    const t=i/40;
+    const dayX=Math.round(d4+(botD4-d4)*t);
+    const m=+(todayMult+(projBotMult-todayMult)*t).toFixed(4);
+    const dt2=new Date(HALVD.h4.getTime()+dayX*86400000).toISOString().slice(0,10);
+    c4Proj.push({x:dayX,y:m,_mult:+m.toFixed(2),_base:HP.h4,_price:Math.round(m*HP.h4),_date:dt2});
+  }
+  function normEvts(evts,key){
+    const base=halvingPrices[key]||HP.h4;
+    return evts.filter(e=>e.x>=0).map(e=>({x:e.x,y:+(e.p/base).toFixed(4),label:e.label,c:e.c}));
+  }
+  const c4BotEvt={x:botD4,p:Math.round(projBotMult*HP.h4),label:'Fundo proj.\n'+db(ATH_C.c4.d,today)+'d/383d',c:'#22d3ee'};
+  const evts4WithBot=[...EVTS.c4,c4BotEvt];
+  const sets=[];
+  ['c1','c2','c3'].forEach((key,i)=>{
+    if(!visible[i]) return;
+    sets.push({label:CLABELS[i],data:norm(RAW[key],key),borderColor:COLORS[i],backgroundColor:FILLS[i],borderWidth:1.8,pointRadius:0,tension:0.4,fill:false,order:4-i,_evts:normEvts(EVTS[key],key)});
+  });
+  if(visible[3]){
+    sets.push({label:CLABELS[3],data:c4History,borderColor:'#f7931a',backgroundColor:'rgba(247,147,26,0.05)',borderWidth:2.5,pointRadius:0,tension:0.4,fill:false,order:1,_evts:normEvts(evts4WithBot,'c4')});
+    sets.push({label:'4\u00ba 2024 (proj.)',data:c4Proj,borderColor:'#f7931a',backgroundColor:'transparent',borderWidth:1.8,borderDash:[6,4],pointRadius:0,tension:0,fill:false,order:1,_evts:[]});
+    sets.push({label:'Hoje',data:[{x:d4,y:todayMult,_date:'hoje',_price:btcPrice,_mult:+(btcPrice/HP.h4).toFixed(2),_base:HP.h4}],type:'scatter',backgroundColor:'#07070c',borderColor:'#f7931a',borderWidth:2.5,pointRadius:10,pointStyle:'circle',showLine:false,order:0});
+  }
+  const refLinesPlugin={
+    id:'refLines',
+    afterDraw(chart){
+      const {ctx,chartArea:{left,right,top,bottom},scales:{y}}=chart;
+      [0.5,1,2,5,10,20,50,100].forEach(mult=>{
+        const yp=y.getPixelForValue(mult);
+        if(yp<top||yp>bottom) return;
+        ctx.save();
+        ctx.beginPath();ctx.moveTo(left,yp);ctx.lineTo(right,yp);
+        ctx.setLineDash([2,6]);
+        ctx.strokeStyle=mult===1?'rgba(247,147,26,.4)':'rgba(255,255,255,0.06)';
+        ctx.lineWidth=mult===1?1.5:1;ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.font='9px JetBrains Mono';
+        ctx.fillStyle=mult===1?'rgba(247,147,26,.65)':'rgba(255,255,255,0.22)';
+        ctx.textAlign='left';
+        ctx.fillText(mult+'x',left+4,yp-3);
+        ctx.restore();
+      });
+    }
+  };
+  const chart=new Chart(document.getElementById('mainChart').getContext('2d'),{
+    type:'line',data:{datasets:sets},
+    options:{
+      responsive:true,maintainAspectRatio:false,animation:{duration:300},
+      // Hover/tooltip desativado de propósito: o cálculo a cada movimento do mouse
+      // sobre tantos pontos travava a página e tinha pouca utilidade. events:[] remove
+      // o processamento de mousemove (o zoom por scroll/pinça continua funcionando).
+      interaction:{mode:null},
+      events:[],
+      plugins:{
+        legend:{display:false},
+        tooltip:{enabled:false},
+        zoom:{zoom:{wheel:{enabled:true,speed:0.08},pinch:{enabled:true},mode:'x'},pan:{enabled:false},limits:{x:{min:0,max:1500}}}
+      },
+      scales:{
+        x:{type:'linear',min:0,max:1500,
+          title:{display:true,text:'Dias desde o halving (0 = dia do halving de cada ciclo)',color:'#55576e',font:{family:'JetBrains Mono',size:10}},
+          grid:{color:'rgba(255,255,255,0.03)'},
+          ticks:{color:'#55576e',font:{family:'JetBrains Mono',size:9},maxTicksLimit:16,callback:v=>v===0?'\u25cf 0':String(v)}
+        },
+        y:{type:'logarithmic',min:0.05,
+          title:{display:true,text:'M\u00faltiplo do pre\u00e7o no halving (1x = pre\u00e7o no halving)',color:'#55576e',font:{family:'JetBrains Mono',size:10}},
+          grid:{color:'rgba(255,255,255,0.03)'},
+          ticks:{color:'#55576e',font:{family:'JetBrains Mono',size:9},callback:v=>{const m=[0.1,0.5,1,2,5,10,20,50,100,200];return m.includes(v)?v+'x':null;}}
+        }
+      }
+    },
+    plugins:[refLinesPlugin],
+  });
+  chart._todayD4=d4;chart._botD4=botD4;chart._lastPrice=btcPrice;
+  chartInst=chart;
+}
+function resetZoom(){ if(chartInst) chartInst.resetZoom(); }
+function zoomIn(){ if(chartInst) chartInst.zoom(1.3); }
+function zoomOut(){ if(chartInst) chartInst.zoom(0.7); }
+function toggleCycle(idx){
+  visible[idx]=!visible[idx];
+  const ids=['btn-c1','btn-c2','btn-c3','btn-c4'];
+  const btn=document.getElementById(ids[idx]);
+  if(btn){visible[idx]?btn.classList.add('active'):btn.classList.remove('active');}
+  buildChart(liveData.btcUSD);
+}
+
+// ── CYCLE 4 CANDLESTICK CHART ─────────────────────────────────
+// Binance public API — sem chave, CORS liberado, retorna OHLC real
+// GET /api/v3/klines?symbol=BTCUSDT&interval=1d&limit=N
+// resposta: [[openTime, open, high, low, close, volume, ...], ...]
+
+let c4ChartInst = null;
+let c4OhlcCache = null;
+let c4OhlcLastFetch = 0;
+const C4_OHLC_TTL = 30 * 60 * 1000;
+
+const DAYS_TO_LIMIT = { '30': 30, '90': 90, '180': 180, '365': 365, 'max': 1000 };
+
+async function fetchC4Ohlc(days) {
+  const now = Date.now();
+  if (c4OhlcCache && (now - c4OhlcLastFetch) < C4_OHLC_TTL && c4OhlcCache._days === days) {
+    return c4OhlcCache.data;
+  }
+  const limit = DAYS_TO_LIMIT[days] || 365;
+  const url = `https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=${limit}`;
+  const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  const raw = await res.json();
+  if (!Array.isArray(raw)) throw new Error('Invalid Binance response');
+  // Binance: [openTime, open, high, low, close, volume, closeTime, ...]
+  const data = raw
+    .filter(k => Array.isArray(k) && k.length >= 5)
+    .map(k => ({
+      x: Number(k[0]),
+      o: parseFloat(k[1]),
+      h: parseFloat(k[2]),
+      l: parseFloat(k[3]),
+      c: parseFloat(k[4]),
+    }))
+    .filter(k => !isNaN(k.x) && !isNaN(k.o) && !isNaN(k.h) && !isNaN(k.l) && !isNaN(k.c));
+  c4OhlcCache = { data, _days: days };
+  c4OhlcLastFetch = now;
+  return data;
+}
+
+function buildCandlestickChart(ohlcData, btcPrice) {
+  const canvas = document.getElementById('cycle4Chart');
+  if (!canvas) return;
+  if (c4ChartInst) { c4ChartInst.destroy(); c4ChartInst = null; }
+
+  const today = new Date();
+  const d4 = db(HALVD.h4, today);
+  const daysToBot = db(today, botEst4);
+  const botDay = d4 + daysToBot;
+  const pessimist = Math.round(126198 * 0.23);
+  const moderate  = Math.round(126198 * 0.38);
+  const optimist  = Math.round(126198 * 0.55);
+
+  const botDateObj = new Date(HALVD.h4.getTime() + botDay * 86400000);
+  const botDateStr = botDateObj.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
+
+  // Projection lines from last candle close to each scenario
+  const lastClose = ohlcData.length ? ohlcData[ohlcData.length - 1].c : btcPrice;
+  const lastTs = ohlcData.length ? ohlcData[ohlcData.length - 1].x : Date.now();
+  const botTs = botDateObj.getTime();
+
+  function projLine(endPrice, steps = 40) {
+    const pts = [];
+    for (let i = 0; i <= steps; i++) {
+      const t = i / steps;
+      pts.push({
+        x: Math.round(lastTs + (botTs - lastTs) * t),
+        y: Math.round(lastClose + (endPrice - lastClose) * t),
+      });
+    }
+    return pts;
+  }
+
+  const annotPlugin = {
+    id: 'c4annot',
+    afterDraw(chart) {
+      const { ctx, scales: { x, y }, chartArea: ca } = chart;
+      function vline(ts, color, lbl, dash) {
+        const xp = x.getPixelForValue(ts);
+        if (xp < ca.left || xp > ca.right) return;
+        ctx.save();
+        ctx.beginPath(); ctx.moveTo(xp, ca.top); ctx.lineTo(xp, ca.bottom);
+        ctx.setLineDash(dash || [4, 4]); ctx.strokeStyle = color; ctx.lineWidth = 1.5; ctx.stroke();
+        if (lbl) {
+          ctx.setLineDash([]);
+          ctx.font = 'bold 9px JetBrains Mono'; ctx.fillStyle = color;
+          ctx.textAlign = 'center'; ctx.shadowColor = 'rgba(0,0,0,.8)'; ctx.shadowBlur = 4;
+          lbl.split('|').forEach((l, i) => ctx.fillText(l, xp, ca.top + 10 + i * 12));
+        }
+        ctx.restore();
+      }
+      function hline(price, color, lbl) {
+        const yp = y.getPixelForValue(price);
+        if (yp < ca.top || yp > ca.bottom) return;
+        ctx.save();
+        ctx.beginPath(); ctx.moveTo(ca.left, yp); ctx.lineTo(ca.right, yp);
+        ctx.setLineDash([5, 4]); ctx.strokeStyle = color; ctx.lineWidth = 1; ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.font = 'bold 9px JetBrains Mono'; ctx.fillStyle = color;
+        ctx.textAlign = 'right'; ctx.shadowColor = 'rgba(0,0,0,.8)'; ctx.shadowBlur = 4;
+        ctx.fillText(lbl, ca.right - 6, yp - 4);
+        ctx.restore();
+      }
+      hline(pessimist, 'rgba(255,77,109,0.75)',  'Pessimista ~$' + Math.round(pessimist / 1000) + 'k');
+      hline(moderate,  'rgba(255,209,102,0.75)', 'Moderado ~$'  + Math.round(moderate  / 1000) + 'k');
+      hline(optimist,  'rgba(0,217,126,0.75)',   'Otimista ~$'  + Math.round(optimist  / 1000) + 'k');
+      hline(126198,    'rgba(255,77,109,0.4)',    'ATH $126k');
+      vline(Date.now(), 'rgba(247,147,26,0.75)', 'HOJE', [3, 3]);
+      vline(botTs,      'rgba(90,171,255,0.65)', 'Fundo proj.|' + botDateStr, [5, 4]);
+    }
+  };
+
+  c4ChartInst = new Chart(canvas.getContext('2d'), {
+    type: 'candlestick',
+    plugins: [annotPlugin],
+    data: {
+      datasets: [
+        {
+          label: 'BTC OHLC',
+          data: ohlcData,
+          color: {
+            up:   '#00d97e',
+            down: '#ff4d6d',
+            unchanged: '#6b6e85',
+          },
+          borderColor: {
+            up:   '#00d97e',
+            down: '#ff4d6d',
+            unchanged: '#6b6e85',
+          },
+          order: 1,
+        },
+        {
+          label: 'Proj. otimista',
+          data: projLine(optimist),
+          type: 'line',
+          borderColor: 'rgba(0,217,126,0.6)',
+          backgroundColor: 'transparent',
+          borderWidth: 1.5,
+          borderDash: [6, 4],
+          pointRadius: 0,
+          tension: 0,
+          order: 2,
+        },
+        {
+          label: 'Proj. moderado',
+          data: projLine(moderate),
+          type: 'line',
+          borderColor: 'rgba(255,209,102,0.6)',
+          backgroundColor: 'transparent',
+          borderWidth: 1.5,
+          borderDash: [6, 4],
+          pointRadius: 0,
+          tension: 0,
+          order: 2,
+        },
+        {
+          label: 'Proj. pessimista',
+          data: projLine(pessimist),
+          type: 'line',
+          borderColor: 'rgba(255,77,109,0.6)',
+          backgroundColor: 'transparent',
+          borderWidth: 1.5,
+          borderDash: [6, 4],
+          pointRadius: 0,
+          tension: 0,
+          order: 2,
+        },
+        {
+          label: 'Cenários',
+          data: [
+            { x: botTs, y: optimist },
+            { x: botTs, y: moderate },
+            { x: botTs, y: pessimist },
+          ],
+          type: 'scatter',
+          backgroundColor: ['rgba(0,217,126,.85)', 'rgba(255,209,102,.85)', 'rgba(255,77,109,.85)'],
+          borderColor: 'transparent',
+          pointRadius: 6,
+          showLine: false,
+          order: 0,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 300 },
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        zoom: {
+          zoom: { wheel: { enabled: true, speed: 0.08 }, pinch: { enabled: true }, mode: 'x' },
+          pan: { enabled: false },
+        },
+        tooltip: {
+          backgroundColor: '#1a1a26',
+          titleColor: '#cdd0e0',
+          bodyColor: '#8890aa',
+          borderColor: 'rgba(255,255,255,0.1)',
+          borderWidth: 1,
+          padding: 10,
+          filter: item => !['Cenários'].includes(item.dataset.label),
+          callbacks: {
+            title: items => {
+              const ts = items[0].parsed.x;
+              return new Date(ts).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
+            },
+            label: item => {
+              if (item.dataset.label === 'BTC OHLC') {
+                const r = item.raw;
+                return [
+                  ' O: $' + r.o.toLocaleString('en-US'),
+                  ' H: $' + r.h.toLocaleString('en-US'),
+                  ' L: $' + r.l.toLocaleString('en-US'),
+                  ' C: $' + r.c.toLocaleString('en-US'),
+                ];
+              }
+              return ' $' + Math.round(item.parsed.y).toLocaleString('en-US') + ' · ' + item.dataset.label;
+            },
+          },
+        },
+      },
+      scales: {
+        x: {
+          type: 'timeseries',
+          time: { unit: 'month', displayFormats: { month: 'MMM yy' } },
+          adapters: { date: {} },
+          grid: { color: 'rgba(255,255,255,0.03)' },
+          ticks: { color: '#55576e', font: { family: 'JetBrains Mono', size: 9 }, maxTicksLimit: 12 },
+        },
+        y: {
+          type: 'linear',
+          position: 'right',
+          grid: { color: 'rgba(255,255,255,0.03)' },
+          ticks: {
+            color: '#55576e',
+            font: { family: 'JetBrains Mono', size: 9 },
+            callback: v => '$' + (v >= 1000 ? Math.round(v / 1000) + 'k' : v),
+          },
+        },
+      },
+    },
+  });
+}
+
+async function buildCycle4Chart(btcPrice) {
+  const status = document.getElementById('c4-status');
+  const days = document.getElementById('c4-range')?.value || '30';
+  if (status) { status.textContent = 'Carregando candles…'; status.style.color = 'var(--hint)'; }
+
+  try {
+    const ohlc = await fetchC4Ohlc(days);
+    buildCandlestickChart(ohlc, btcPrice);
+    if (status) {
+      const ts = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+      status.textContent = ohlc.length + ' candles · ' + ts;
+      status.style.color = 'var(--muted)';
+    }
+  } catch (e) {
+    console.warn('OHLC fetch failed:', e.message);
+    // Fallback: build with static line data
+    buildCandlestickChart([], btcPrice);
+    if (status) { status.textContent = 'API indisponível — sem candles'; status.style.color = 'var(--red)'; }
+  }
+}
+
+function onC4RangeChange() {
+  c4OhlcCache = null; // force re-fetch on range change
+  buildCycle4Chart(liveData.btcUSD);
+}
+
+function resetC4Zoom() { if (c4ChartInst) c4ChartInst.resetZoom(); }
+function zoomC4In()    { if (c4ChartInst) c4ChartInst.zoom(1.3); }
+function zoomC4Out()   { if (c4ChartInst) c4ChartInst.zoom(0.7); }
+
+// ── INDICADORES DE MERCADO (multi-linha) ─────────────────────
+// Preço BTC + MA200 + Mayer + MVRV(estimado) + Fear&Greed ao longo do tempo.
+// Fontes reais: Binance (preço diário → MA200 e Mayer) e Alternative.me (F&G histórico).
+// MVRV não tem fonte pública gratuita; é estimado a partir do Múltiplo de Mayer e
+// rotulado como "estimado". Preço, MA200, Mayer e F&G são dados reais.
+let imChartInst = null;
+let imDataCache = null;
+let imRange = '90';
+const imVisible = { price:true, ma:true, mvrv:true, mayer:true, fg:true };
+
+async function fetchImData(){
+  if(imDataCache) return imDataCache;
+  // 1) Fechamentos diários do BTC (Binance, máx 1000 candles)
+  const kRes = await fetch('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=1000',{signal:AbortSignal.timeout(9000)});
+  if(!kRes.ok) throw new Error('Binance HTTP '+kRes.status);
+  const kraw = await kRes.json();
+  if(!Array.isArray(kraw)) throw new Error('Resposta Binance inválida');
+  const ts=[], close=[];
+  kraw.forEach(k=>{ if(Array.isArray(k)&&k.length>=5){ const t=Number(k[0]); const c=parseFloat(k[4]); if(!isNaN(t)&&!isNaN(c)){ ts.push(t); close.push(c); } } });
+  // 2) Média móvel de 200 dias, Múltiplo de Mayer e MVRV estimado
+  const ma=[], mayer=[], mvrv=[];
+  for(let i=0;i<close.length;i++){
+    if(i>=199){
+      let s=0; for(let j=i-199;j<=i;j++) s+=close[j];
+      const m=s/200; ma.push(m);
+      const my=+(close[i]/m).toFixed(3); mayer.push(my);
+      // proxy MVRV simples: mayer^1.5 × 1.5 — bottom ~0.7-1, acumulação 1-2, topo 4-6+
+      mvrv.push(+(Math.pow(my,1.5)*1.5).toFixed(2));
+    } else { ma.push(null); mayer.push(null); mvrv.push(null); }
+  }
+  // 3) Índice de Medo & Ganância histórico (Alternative.me), mapeado por data
+  const fg = new Array(ts.length).fill(null);
+  try{
+    const fgRes = await fetch('https://api.alternative.me/fng/?limit=0&format=json',{signal:AbortSignal.timeout(9000)});
+    if(fgRes.ok){
+      const fd = await fgRes.json();
+      const map = {};
+      (fd?.data||[]).forEach(e=>{ const d=new Date(Number(e.timestamp)*1000).toISOString().slice(0,10); const v=parseInt(e.value); if(!isNaN(v)) map[d]=v; });
+      for(let i=0;i<ts.length;i++){ const d=new Date(ts[i]).toISOString().slice(0,10); if(map[d]!=null) fg[i]=map[d]; }
+    }
+  }catch(e){ console.warn('F&G histórico falhou',e); }
+  imDataCache = { ts, price:close, ma, mayer, mvrv, fg };
+  return imDataCache;
+}
+
+function imXMin(r){
+  if(!imDataCache||!imDataCache.ts.length) return undefined;
+  const ts=imDataCache.ts; const last=ts[ts.length-1];
+  if(r==='max') return ts[0];
+  return last - parseInt(r)*86400000;
+}
+
+function buildImChart(){
+  const data=imDataCache; if(!data) return;
+  const canvas=document.getElementById('indMarketChart'); if(!canvas) return;
+  if(imChartInst){ imChartInst.destroy(); imChartInst=null; }
+  const mk=(arr)=>arr.map((y,i)=>({x:data.ts[i],y}));
+  const sets=[
+    {key:'price',label:'Preço BTC',data:mk(data.price),borderColor:'#f7931a',yAxisID:'yPrice',borderWidth:2,pointRadius:0,tension:0.25,spanGaps:true,_unit:'$',hidden:!imVisible.price},
+    {key:'ma',label:'MA 200',data:mk(data.ma),borderColor:'#5aabff',yAxisID:'yPrice',borderWidth:1.6,borderDash:[5,4],pointRadius:0,tension:0.25,spanGaps:true,_unit:'$',hidden:!imVisible.ma},
+    {key:'mvrv',label:'MVRV (estimado)',data:mk(data.mvrv),borderColor:'#b388ff',yAxisID:'yMVRV',borderWidth:1.6,pointRadius:0,tension:0.25,spanGaps:true,_unit:'x',hidden:!imVisible.mvrv},
+    {key:'mayer',label:'Múltiplo de Mayer',data:mk(data.mayer),borderColor:'#29d9c2',yAxisID:'yMayer',borderWidth:1.6,pointRadius:0,tension:0.25,spanGaps:true,_unit:'x',hidden:!imVisible.mayer},
+    {key:'fg',label:'Medo & Ganância',data:mk(data.fg),borderColor:'#ffd166',yAxisID:'yFG',borderWidth:1.6,pointRadius:0,tension:0.25,spanGaps:true,_unit:'/100',hidden:!imVisible.fg},
+  ];
+  imChartInst=new Chart(canvas.getContext('2d'),{
+    type:'line',
+    data:{datasets:sets},
+    options:{
+      responsive:true,maintainAspectRatio:false,animation:{duration:250},
+      interaction:{mode:'index',intersect:false},
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          backgroundColor:'#1a1a26',titleColor:'#cdd0e0',bodyColor:'#8890aa',
+          borderColor:'rgba(255,255,255,0.1)',borderWidth:1,padding:10,
+          callbacks:{
+            title:items=>items.length?new Date(items[0].parsed.x).toLocaleDateString('pt-BR',{day:'2-digit',month:'short',year:'numeric'}):'',
+            label:item=>{
+              const u=item.dataset._unit; const v=item.parsed.y;
+              if(v==null) return null;
+              if(u==='$') return ' '+item.dataset.label+': $'+Math.round(v).toLocaleString('en-US');
+              if(u==='x') return ' '+item.dataset.label+': '+v.toFixed(2)+'x';
+              if(u==='/100') return ' '+item.dataset.label+': '+Math.round(v)+'/100';
+              if(u==='z') return ' '+item.dataset.label+': '+v.toFixed(2);
+              return ' '+item.dataset.label+': '+v;
+            },
+            labelColor:item=>({backgroundColor:item.dataset.borderColor,borderColor:'transparent'})
+          }
+        },
+        zoom:{zoom:{wheel:{enabled:true,speed:0.08},pinch:{enabled:true},mode:'x'},pan:{enabled:true,mode:'x'}}
+      },
+      scales:{
+        x:{type:'timeseries',min:imXMin(imRange),time:{unit:'month',displayFormats:{month:'MMM yy'}},adapters:{date:{}},
+          grid:{color:'rgba(255,255,255,0.03)'},
+          ticks:{color:'#55576e',font:{family:'JetBrains Mono',size:9},maxTicksLimit:12}},
+        yPrice:{type:'logarithmic',position:'left',
+          title:{display:true,text:'Preço / MA200 (USD, log)',color:'#55576e',font:{family:'JetBrains Mono',size:9}},
+          grid:{color:'rgba(255,255,255,0.03)'},
+          ticks:{color:'#55576e',font:{family:'JetBrains Mono',size:9},callback:v=>{const m=[1000,2000,5000,10000,20000,30000,50000,70000,100000,150000];return m.includes(v)?'$'+(v>=1000?v/1000+'k':v):null;}}},
+        yFG:{type:'linear',position:'right',min:0,max:100,
+          title:{display:true,text:'Medo & Ganância',color:'#7a6a3a',font:{family:'JetBrains Mono',size:9}},
+          grid:{drawOnChartArea:false},
+          ticks:{color:'#7a6a3a',font:{family:'JetBrains Mono',size:9}}},
+        yMayer:{type:'linear',position:'right',display:false,suggestedMin:0,suggestedMax:3},
+        yMVRV:{type:'linear',position:'right',display:false,suggestedMin:0,suggestedMax:6}
+      }
+    }
+  });
+}
+
+function toggleIm(key){
+  imVisible[key]=!imVisible[key];
+  const btn=document.getElementById('im-btn-'+key);
+  if(btn) imVisible[key]?btn.classList.add('active'):btn.classList.remove('active');
+  if(imChartInst){
+    const ds=imChartInst.data.datasets.find(d=>d.key===key);
+    if(ds){ ds.hidden=!imVisible[key]; imChartInst.update(); }
+  }
+}
+
+function setImRange(r){
+  imRange=r;
+  ['30','90','365','max'].forEach(x=>{const b=document.getElementById('im-p-'+x); if(b) (x===r)?b.classList.add('active'):b.classList.remove('active');});
+  if(imChartInst) buildImChart(); // dados em cache — só redesenha a janela
+}
+
+function resetImZoom(){ if(imChartInst) imChartInst.resetZoom(); }
+function zoomImIn(){ if(imChartInst) imChartInst.zoom(1.3); }
+function zoomImOut(){ if(imChartInst) imChartInst.zoom(0.7); }
+
+async function buildIndMarketChart(){
+  const status=document.getElementById('im-status');
+  if(status){ status.textContent='Carregando…'; status.style.color='var(--hint)'; }
+  try{
+    await fetchImData();
+    buildImChart();
+    if(status){
+      const t=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+      status.textContent=imDataCache.price.length+' dias · '+t;
+      status.style.color='var(--muted)';
+    }
+  }catch(e){
+    console.warn('Indicadores de Mercado falhou:',e.message);
+    if(status){ status.textContent='API indisponível'; status.style.color='var(--red)'; }
+  }
+}
+
+// ── VEREDITO ──────────────────────────────────────────────────
+function buildVeredito(p,dd,cycPct,dAth4,daysToBot,mvrz){
+  const fg=liveData.fgVal||50;
+  const ddA=Math.abs(dd);
+  const factors=[
+    {name:'Posição no ciclo',score:cycPct<52?72:cycPct<68?52:cycPct<80?38:28,note:'Dia '+db(HALVD.h4,new Date())+' de ~1460'},
+    {name:'Drawdown do ATH',score:ddA<10?45:ddA<25?52:ddA<40?65:ddA<55?78:88,note:dd.toFixed(1)+'% do ATH'},
+    {name:'NUPL',score:55,note:'~0,35 esperança'},
+    {name:'Mayer Multiple',score:liveData.mayer<0.8?85:liveData.mayer<1.0?72:liveData.mayer<1.5?52:35,note:'~'+liveData.mayer},
+    {name:'Fear & Greed',score:fg<=25?80:fg<=45?68:fg<=55?52:fg<=75?38:22,note:fg+'/100'},
+    {name:'Pi Cycle Top',score:60,note:'Sem novo cruzamento'},
+    {name:'Fundo projetado',score:daysToBot>100?55:daysToBot>30?65:daysToBot>0?72:60,note:daysToBot>0?'em '+daysToBot+'d':'proj. atingido'},
+    {name:'MVRV',score:mvrz<1?90:mvrz<2?78:mvrz<3?60:mvrz<4?38:20,note:'~'+mvrz},
+    {name:'Dias desde ATH',score:dAth4<90?42:dAth4<200?55:dAth4<300?65:dAth4<400?72:78,note:dAth4+'d desde ATH'},
+  ];
+  const avg=Math.round(factors.reduce((s,f)=>s+f.score,0)/factors.length);
+  const needle=document.getElementById('verd-needle');
+  if(needle) needle.style.left=avg+'%';
+
+  // Hero verdict
+  const hvs=document.getElementById('hero-verd-signal');
+  const hvsc=document.getElementById('hero-verd-score');
+  const hv=document.getElementById('hero-verdict-btn');
+  if(avg>=63){
+    if(hvs){hvs.textContent='🟢 ACUMULAR';hvs.style.color='var(--green)';}
+    if(hv){hv.style.background='rgba(0,217,126,0.1)';hv.style.borderColor='rgba(0,217,126,0.3)';}
+  }else if(avg>=45){
+    if(hvs){hvs.textContent='🟡 OBSERVAR';hvs.style.color='var(--yellow)';}
+    if(hv){hv.style.background='rgba(255,209,102,0.1)';hv.style.borderColor='rgba(255,209,102,0.3)';}
+  }else{
+    if(hvs){hvs.textContent='🔴 CAUTELA';hvs.style.color='var(--red)';}
+    if(hv){hv.style.background='rgba(255,77,109,0.1)';hv.style.borderColor='rgba(255,77,109,0.3)';}
+  }
+  if(hvsc) hvsc.textContent='score '+avg+'/100 ↓';
+
+  const banner=document.getElementById('verd-banner');
+  const bIcon=document.getElementById('verd-banner-icon');
+  const bSig=document.getElementById('verd-banner-signal');
+  const bDesc=document.getElementById('verd-banner-desc');
+  const vTitle=document.getElementById('verd-title');
+  const vSig=document.getElementById('verd-signal');
+  const vSub=document.getElementById('verd-sub');
+  const vFactors=document.getElementById('verd-factors');
+  const vReason=document.getElementById('verd-reason');
+  if(avg>=63){
+    if(banner) banner.className='verd-banner buy';
+    if(bIcon) bIcon.textContent='🟢';
+    if(bSig){bSig.textContent='COMPRA / ACUMULAÇÃO';bSig.style.color='var(--green)';}
+    if(bDesc) bDesc.textContent='Score '+avg+'/100 — Correção pós-ATH com múltiplos indicadores em zona de acumulação.';
+    if(vTitle){vTitle.textContent='Compra / Acumulação';vTitle.style.color='var(--green)';}
+    if(vSig){vSig.textContent='🟢 COMPRAR / ACUMULAR';vSig.style.color='var(--green)';}
+    if(vSub) vSub.textContent='Score: '+avg+'/100 — Indicadores favoráveis para acumulação de longo prazo';
+  }else if(avg>=45){
+    if(banner) banner.className='verd-banner neut';
+    if(bIcon) bIcon.textContent='🟡';
+    if(bSig){bSig.textContent='NEUTRO — OBSERVAR';bSig.style.color='var(--yellow)';}
+    if(bDesc) bDesc.textContent='Score '+avg+'/100 — Fase de transição. Fundo ainda não confirmado. Aguardar sinais.';
+    if(vTitle){vTitle.textContent='Neutro — Observar';vTitle.style.color='var(--yellow)';}
+    if(vSig){vSig.textContent='🟡 AGUARDAR / NEUTRO';vSig.style.color='var(--yellow)';}
+    if(vSub) vSub.textContent='Score: '+avg+'/100 — Sinais mistos';
+  }else{
+    if(banner) banner.className='verd-banner sell';
+    if(bIcon) bIcon.textContent='🔴';
+    if(bSig){bSig.textContent='CAUTELA — REDUZIR EXPOSIÇÃO';bSig.style.color='var(--red)';}
+    if(bDesc) bDesc.textContent='Score '+avg+'/100 — Indicadores de risco elevado.';
+    if(vTitle){vTitle.textContent='Cautela';vTitle.style.color='var(--red)';}
+    if(vSig){vSig.textContent='🔴 CAUTELA / VENDA PARCIAL';vSig.style.color='var(--red)';}
+    if(vSub) vSub.textContent='Score: '+avg+'/100 — Cautela';
+  }
+  // vFactors: f.name is a static string, f.note is built from validated numbers only
+  if(vFactors) vFactors.innerHTML=factors.map(f=>{
+    const c=f.score>=63?'var(--green)':f.score>=45?'var(--yellow)':'var(--red)';
+    return`<div class="vf"><div class="vf-name">${f.name}</div><div class="vf-val" style="color:${c}">${f.score}/100 · ${f.note}</div></div>`;
+  }).join('');
+  // vReason: all values are internal numbers/dates — no external input
+  if(vReason) vReason.innerHTML=`
+    <strong style="color:var(--text)">Análise:</strong><br>
+    Ciclo 4 no dia <strong>${db(HALVD.h4,new Date())}</strong>/~1460 (fase pós-ATH).
+    ATH em <strong>06 out 2025</strong> ($126.198, dia 535 — próximo à média de 531d).
+    Fundo projetado: <strong>${fmtDate(botEst4)}</strong> (ATH + 383d, restam ${daysToBot}d).
+    Drawdown atual: ${dd.toFixed(1)}% do ATH. Mayer: ~${liveData.mayer} (abaixo de 1 = acumulação).
+    MVRV: ~${mvrz}. F&G: ${fg}/100.
+  `;
+}
+
+// ── NEWS — RSS FEEDS ─────────────────────────────────────────
+// Multiple RSS sources via allorigins CORS proxy
+// Refreshes every 30 min, classifies by keyword scoring
+
+// Sanitize: strip HTML tags from external data before inserting into DOM
+function sanitize(str) {
+  if (!str) return '';
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+// Safe URL: only allow http/https protocols to prevent javascript: URLs
+function safeUrl(url) {
+  try {
+    const u = new URL(url);
+    if (u.protocol !== 'https:' && u.protocol !== 'http:') return '#';
+    return u.href;
+  } catch(e) { return '#'; }
+}
+
+const RSS_FEEDS = [
+  { url: 'https://www.coindesk.com/arc/outboundfeeds/rss/', source: 'CoinDesk' },
+  { url: 'https://cointelegraph.com/rss', source: 'Cointelegraph' },
+  { url: 'https://bitcoinmagazine.com/.rss/full/', source: 'Bitcoin Magazine' },
+  { url: 'https://decrypt.co/feed', source: 'Decrypt' },
+];
+
+const PROXY = 'https://api.allorigins.win/get?url=';
+
+// Keyword scoring — positive = bullish, negative = bearish
+const BULL_WORDS = ['alta','high','ath','record','surge','rally','gains','adoption','approved','etf inflow','institutional','accumulate','bullish','rise','pump','breakout','support','buy','growth','halving','milestone','partnership','launch','upgrade','legal','regulation pass','approved','clarity'];
+const BEAR_WORDS = ['queda','crash','dump','sell','bearish','fear','loss','drop','decline','hack','exploit','ban','restrict','lawsuit','fine','penalty','outflow','liquidation','correction','resistance','fail','scam','fraud','bubble','warning','risk','inflation','rate hike','sanctions','seized','arrested'];
+
+function scoreSentiment(text) {
+  const t = text.toLowerCase();
+  let score = 0;
+  BULL_WORDS.forEach(w => { if (t.includes(w)) score++; });
+  BEAR_WORDS.forEach(w => { if (t.includes(w)) score--; });
+  if (score > 0) return 'bull';
+  if (score < 0) return 'bear';
+  return 'neut';
+}
+
+function parsePubDate(str) {
+  try { return new Date(str); } catch(e) { return new Date(); }
+}
+
+function fmtNewsDate(date) {
+  try {
+    const d = date instanceof Date ? date : new Date(date);
+    const now = new Date();
+    const diff = Math.floor((now - d) / 60000);
+    if (diff < 60) return diff + 'min atrás';
+    if (diff < 1440) return Math.floor(diff / 60) + 'h atrás';
+    if (diff < 2880) return 'ontem';
+    return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
+  } catch(e) { return ''; }
+}
+
+function parseRSS(xml, sourceName) {
+  const items = [];
+  try {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(xml, 'text/xml');
+    const entries = doc.querySelectorAll('item');
+    entries.forEach(item => {
+      const title = item.querySelector('title')?.textContent?.trim() || '';
+      const link = item.querySelector('link')?.textContent?.trim() ||
+                   item.querySelector('link')?.getAttribute('href') || '#';
+      const pubDate = item.querySelector('pubDate')?.textContent ||
+                      item.querySelector('dc\\:date')?.textContent || '';
+      const desc = item.querySelector('description')?.textContent?.trim() || '';
+      // Only include if mentions BTC/Bitcoin
+      const combined = (title + ' ' + desc).toLowerCase();
+      if (!combined.includes('bitcoin') && !combined.includes('btc') && !combined.includes('crypto') && !combined.includes('cripto')) return;
+      items.push({
+        title,
+        url: safeUrl(link.replace(/^<!\[CDATA\[|\]\]>$/g, '').trim()),
+        source: sourceName,
+        published_at: parsePubDate(pubDate),
+        sentiment: scoreSentiment(title + ' ' + desc),
+      });
+    });
+  } catch(e) { console.warn('RSS parse error:', e); }
+  return items;
+}
+
+// Fallback used if all feeds fail
+const NEWS_FALLBACK = [
+  { title: 'ETF outflows de $635M sinalizam pressão vendedora', url: 'https://www.coindesk.com', source: 'CoinDesk', published_at: new Date('2026-05-20'), sentiment: 'bear' },
+  { title: 'CLARITY Act aprovado — marco regulatório para cripto nos EUA', url: 'https://www.theblock.co', source: 'The Block', published_at: new Date('2026-05-12'), sentiment: 'bull' },
+  { title: 'Dominância do BTC atinge 60,1% — maior nível desde 2021', url: 'https://coinmarketcap.com', source: 'CoinMarketCap', published_at: new Date('2026-05-21'), sentiment: 'bull' },
+  { title: 'Strategy acumula 576.000+ BTC consolidando posição como maior holder', url: 'https://bitcoinmagazine.com', source: 'Bitcoin Magazine', published_at: new Date('2026-05-16'), sentiment: 'bull' },
+  { title: 'Harvard corta 43% da posição em ETF de Bitcoin da BlackRock', url: 'https://fortune.com', source: 'Fortune', published_at: new Date('2026-05-18'), sentiment: 'bear' },
+  { title: 'Dados de PPI acima do esperado afastam cortes do FED em junho', url: 'https://www.cnbc.com', source: 'CNBC', published_at: new Date('2026-05-15'), sentiment: 'bear' },
+  { title: 'Bitcoin testa suporte em $75k — analistas monitoram MMA200', url: 'https://cointelegraph.com', source: 'Cointelegraph', published_at: new Date('2026-05-19'), sentiment: 'neut' },
+];
+
+let newsCache = null;
+let newsLastFetch = 0;
+const NEWS_TTL = 30 * 60 * 1000; // 30 min
+
+function renderNewsItems(items) {
+  const classified = { bull: [], bear: [], neut: [] };
+
+  // Deduplicate by title similarity, sort newest first
+  const seen = new Set();
+  items
+    .sort((a, b) => new Date(b.published_at) - new Date(a.published_at))
+    .forEach(item => {
+      const key = item.title.toLowerCase().slice(0, 40);
+      if (seen.has(key)) return;
+      seen.add(key);
+      classified[item.sentiment].push(item);
+    });
+
+  // Sentiment bar
+  const bull = classified.bull.length;
+  const bear = classified.bear.length;
+  const total = bull + bear + classified.neut.length;
+  if (total > 0) {
+    const bullPct = Math.round(bull / total * 100);
+    const bearPct = Math.round(bear / total * 100);
+    setEl('nsb-bull',el=>el.style.width=bullPct+'%');
+    setEl('nsb-bear',el=>el.style.width=bearPct+'%');
+    setEl('nsb-bull-count',el=>el.textContent=bull);
+    setEl('nsb-bear-count',el=>el.textContent=bear);
+    setEl('news-sentiment-bar',el=>el.style.display='flex');
+  }
+
+  // Tab labels with counts
+  setEl('tab-bull',el=>el.textContent='🟢 Alta ('+bull+')');
+  setEl('tab-bear',el=>el.textContent='🔴 Baixa ('+bear+')');
+  setEl('tab-neut',el=>el.textContent='⚪ Neutro ('+classified.neut.length+')');
+
+  // Render panels
+  ['bull', 'bear', 'neut'].forEach(tab => {
+    const panel = document.getElementById('news-' + tab);
+    panel.innerHTML = '';
+    if (!classified[tab].length) {
+      panel.innerHTML = '<div class="news-empty">Nenhuma notícia nesta categoria no momento.</div>';
+      return;
+    }
+    classified[tab].slice(0, 12).forEach(item => {
+      const card = document.createElement('a');
+      card.className = 'news-card ' + tab + '-card';
+      card.target = '_blank';
+      card.rel = 'noopener noreferrer';
+      card.innerHTML = `
+        <div class="news-dot ${tab}"></div>
+        <div class="news-body">
+          <div class="news-headline">${sanitize(item.title)}</div>
+          <div class="news-meta">
+            <span class="news-tag tag-${tab}">${tab === 'bull' ? 'Alta' : tab === 'bear' ? 'Baixa' : 'Neutro'}</span>
+            <span class="news-source">${sanitize(item.source)}</span>
+            <span class="news-date">${fmtNewsDate(item.published_at)}</span>
+            <span class="news-link">Ver fonte ↗</span>
+          </div>
+        </div>`;
+      panel.appendChild(card);
+    });
+  });
+}
+
+function showNewsSkeletons() {
+  ['bull', 'bear', 'neut'].forEach(tab => {
+    const panel = document.getElementById('news-' + tab);
+    if(!panel) return;
+    panel.innerHTML = [1,2,3].map(() => `
+      <div class="news-skeleton">
+        <div class="news-skel-dot"></div>
+        <div class="news-skel-body">
+          <div class="news-skel-line" style="width:80%"></div>
+          <div class="news-skel-line" style="width:45%"></div>
+        </div>
+      </div>`).join('');
+  });
+}
+
+async function fetchOneFeed(feed) {
+  const proxyUrl = PROXY + encodeURIComponent(feed.url);
+  const res = await fetch(proxyUrl, { signal: AbortSignal.timeout(7000) });
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  const wrapper = await res.json();
+  return parseRSS(wrapper.contents, feed.source);
+}
+
+async function fetchNews(force = false) {
+  const now = Date.now();
+  if (!force && newsCache && (now - newsLastFetch) < NEWS_TTL) return;
+
+  const dot = document.getElementById('news-dot');
+  const txt = document.getElementById('news-status-txt');
+  dot.className = 'news-status-dot loading';
+  txt.textContent = 'Buscando notícias…';
+  if (!newsCache) showNewsSkeletons();
+
+  // Fetch all feeds in parallel, collect whatever succeeds
+  const results = await Promise.allSettled(RSS_FEEDS.map(fetchOneFeed));
+  const allItems = [];
+  let successCount = 0;
+  results.forEach(r => {
+    if (r.status === 'fulfilled' && r.value.length > 0) {
+      allItems.push(...r.value);
+      successCount++;
+    }
+  });
+
+  if (allItems.length > 0) {
+    newsCache = allItems;
+    newsLastFetch = now;
+    renderNewsItems(newsCache);
+    dot.className = 'news-status-dot';
+    const ts = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    txt.textContent = successCount + '/' + RSS_FEEDS.length + ' feeds · ' + ts;
+  } else {
+    // All feeds failed — use fallback
+    if (!newsCache) {
+      newsCache = NEWS_FALLBACK;
+      renderNewsItems(newsCache);
+    }
+    dot.className = 'news-status-dot error';
+    txt.textContent = 'Feeds indisponíveis — usando cache local';
+  }
+}
+
+function switchNewsTab(tab) {
+  document.querySelectorAll('.news-tab').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  document.querySelectorAll('.news-panel').forEach(el => el.classList.remove('active'));
+  document.getElementById('news-' + tab).classList.add('active');
+}
+
+// ── INIT ─────────────────────────────────────────────────────
+refreshUI();
+fetchLiveData();
+resetRefreshBar();
+setInterval(fetchLiveData, 5*60*1000);
+setInterval(fetchNews, 30*60*1000);
+setInterval(resetRefreshBar, 5*60*1000);
+</script>
+</div><!-- end page-content -->
+</div><!-- end app-shell -->
+</body>
+</html>
