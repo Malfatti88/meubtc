@@ -7,7 +7,9 @@
 <link rel="manifest" href="data:application/json,{&quot;name&quot;:&quot;BTC Halving Cycles&quot;,&quot;short_name&quot;:&quot;BTC Cycles&quot;,&quot;theme_color&quot;:&quot;#07070c&quot;,&quot;background_color&quot;:&quot;#07070c&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;start_url&quot;:&quot;/&quot;}">
 <meta name="theme-color" content="#07070c">
 <!-- CSP: unsafe-inline required for inline scripts. Upgrade path: move JS to external file + use nonces -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https:; connect-src https://api.coingecko.com https://api.alternative.me https://alternative.me https://api.binance.com https://api.allorigins.win https://www.coindesk.com https://cointelegraph.com https://bitcoinmagazine.com https://decrypt.co https://rss2json.com; base-uri 'self'; form-action 'none';">
+<!-- connect-src inclui o Worker on-chain (meubtc-onchain). Ajuste o subdomínio .workers.dev OU seu domínio custom do Worker. -->
+<!-- connect-src: 'self' cobre o Worker roteado em /api/* no mesmo domínio (meubtc.pages.dev) -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https:; connect-src 'self' https://api.coingecko.com https://api.alternative.me https://alternative.me https://api.binance.com https://api.allorigins.win https://www.coindesk.com https://cointelegraph.com https://bitcoinmagazine.com https://decrypt.co https://rss2json.com; base-uri 'self'; form-action 'none';">
 <meta http-equiv="X-Frame-Options" content="DENY">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
@@ -24,7 +26,7 @@
 :root{
   --bg:#07070c;--bg2:#0d0d14;--bg3:#13131c;
   --border:rgba(255,255,255,0.06);--border2:rgba(255,255,255,0.12);
-  --text:#cdd0e0;--muted:#6b6e85;--hint:#2a2a3a;
+  --text:#cdd0e0;--muted:#9296b0;--muted-soft:#6b6e85;--hint:#2a2a3a;
   /* Role-based colors */
   --orange:#f7931a;--orange-dim:rgba(247,147,26,0.14);--orange-glow:rgba(247,147,26,0.3);
   --green:#00d97e;--green-dim:rgba(0,217,126,0.12);
@@ -406,6 +408,59 @@ footer a{color:var(--orange);text-decoration:none}
 
   footer{padding:16px;font-size:10px}
 }
+/* ════════ MELHORIAS v2 ════════ */
+/* Selos de procedência do dado */
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:9px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:999px;border:1px solid;vertical-align:middle;white-space:nowrap}
+.badge-live{color:var(--green);border-color:rgba(0,217,126,0.4);background:var(--green-dim)}
+.badge-live::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);animation:badgepulse 2s ease-in-out infinite}
+@keyframes badgepulse{0%,100%{opacity:1}50%{opacity:.4}}
+.badge-est{color:var(--yellow);border-color:rgba(255,209,102,0.4);background:var(--yellow-dim)}
+.badge-fixed{color:var(--blue);border-color:rgba(90,171,255,0.4);background:var(--blue-dim)}
+.badge-calc{color:var(--purple);border-color:rgba(179,136,255,0.4);background:rgba(179,136,255,0.12)}
+.badge-stale{color:var(--red);border-color:rgba(255,77,109,0.4);background:var(--red-dim)}
+
+/* Tooltip explicativo (?) */
+.info-tip{position:relative;display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;border:1px solid var(--border2);color:var(--muted);font-size:10px;font-weight:700;cursor:help;margin-left:5px;font-family:var(--display);transition:all .2s}
+.info-tip:hover,.info-tip:focus{color:var(--orange);border-color:var(--orange-glow);background:var(--orange-dim)}
+.info-tip .tip-body{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);width:230px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r-md);padding:10px 12px;font-size:11px;font-weight:400;line-height:1.5;color:var(--text);letter-spacing:0;text-transform:none;text-align:left;opacity:0;visibility:hidden;transition:opacity .2s,visibility .2s;z-index:300;box-shadow:0 8px 28px rgba(0,0,0,0.55);pointer-events:none}
+.info-tip .tip-body::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:6px solid transparent;border-top-color:var(--border2)}
+.info-tip:hover .tip-body,.info-tip:focus .tip-body{opacity:1;visibility:visible}
+@media(max-width:600px){.info-tip .tip-body{width:180px;left:auto;right:-8px;transform:none}.info-tip .tip-body::after{left:auto;right:12px;transform:none}}
+
+/* Timestamp por bloco (frescor do dado) */
+.data-fresh{font-size:9px;color:var(--muted-soft);letter-spacing:.04em;margin-top:6px;display:flex;align-items:center;gap:4px}
+.data-fresh .dot{width:5px;height:5px;border-radius:50%;background:var(--green);flex-shrink:0}
+.data-fresh.stale .dot{background:var(--red)}
+.data-fresh.stale{color:var(--red)}
+
+/* Bloco Fontes & Metodologia */
+#metodologia .meth-table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:var(--r-lg);background:var(--bg2)}
+.meth-table{width:100%;border-collapse:collapse;font-size:12px;min-width:680px}
+.meth-table th{background:var(--bg3);color:var(--muted);text-align:left;padding:11px 14px;font-weight:600;font-size:10px;letter-spacing:.08em;text-transform:uppercase;border-bottom:1px solid var(--border2)}
+.meth-table td{padding:11px 14px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle}
+.meth-table tr:last-child td{border-bottom:none}
+.meth-table tr:hover td{background:rgba(255,255,255,0.02)}
+.meth-table code{font-family:var(--mono);font-size:11px;color:var(--orange);background:var(--orange-dim);padding:2px 6px;border-radius:var(--r-sm);word-break:break-all}
+.meth-table a{color:var(--blue);text-decoration:none}
+.meth-table a:hover{text-decoration:underline}
+.meth-formula{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.meth-note{font-size:11px;color:var(--muted);margin-top:14px;line-height:1.6;padding:12px 14px;background:var(--bg2);border-left:2px solid var(--orange);border-radius:0 var(--r-md) var(--r-md) 0}
+
+/* Radar multi-eixos */
+.radar-wrap{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:center;margin-top:20px}
+@media(max-width:760px){.radar-wrap{grid-template-columns:1fr}}
+.radar-canvas-box{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-lg);padding:18px;position:relative;min-height:320px}
+.radar-legend{display:flex;flex-direction:column;gap:10px}
+.radar-leg-item{display:flex;align-items:flex-start;gap:10px;font-size:12px;line-height:1.5}
+.radar-leg-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0;margin-top:3px}
+.radar-leg-name{color:var(--text);font-weight:500}
+.radar-leg-val{color:var(--muted);font-size:11px}
+
+/* Sr-only para acessibilidade */
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+/* Foco visível para navegação por teclado */
+a:focus-visible,button:focus-visible,.info-tip:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--orange);outline-offset:2px}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}}
 </style>
 </head>
 <body>
@@ -581,18 +636,63 @@ footer a{color:var(--orange);text-decoration:none}
   <div class="sec-label">Sinais de mercado</div>
   <div class="sec-title">Indicadores de Decisão</div>
   <div class="sec-sub">Baseados em dados históricos · não constituem conselho financeiro</div>
+  <div style="display:flex;flex-wrap:wrap;gap:14px;margin:0 0 18px">
+    <span class="data-fresh" id="fresh-price"><span class="dot"></span>Preço · —</span>
+    <span class="data-fresh" id="fresh-fg"><span class="dot"></span>F&G · —</span>
+    <span class="data-fresh" id="fresh-ma200"><span class="dot"></span>MA200 · —</span>
+    <span class="data-fresh" id="fresh-onchain"><span class="dot"></span>On-chain · —</span>
+  </div>
   <div class="ind-grid">
     <div class="ind-card"><div class="ind-head"><div class="ind-name">Posição no Ciclo</div><div class="sig" id="sig-cycle">—</div></div><div class="ind-val" id="iv-cycle">—</div><div class="ind-track"><div class="ind-fill" id="if-cycle" style="background:linear-gradient(90deg,var(--green),var(--yellow),var(--red));opacity:.65"></div><div class="ind-pin" id="ip-cycle"></div></div><div class="ind-range"><span>Halving</span><span>ATH médio d531</span><span>Fim ciclo</span></div><div class="ind-desc">Dia <span id="id-cyc-day">—</span> de ~1460. Fase pós-ATH, correção em andamento.</div></div>
     <div class="ind-card"><div class="ind-head"><div class="ind-name">Drawdown do ATH</div><div class="sig sig-buy">ACUMULAR</div></div><div class="ind-val" id="iv-dd">—</div><div class="ind-track"><div class="ind-fill" id="if-dd" style="background:linear-gradient(90deg,var(--green),var(--yellow),var(--red));opacity:.65"></div><div class="ind-pin" id="ip-dd"></div></div><div class="ind-range"><span>0% ATH</span><span>−40%</span><span>−80% fundo</span></div><div class="ind-desc">Fundos históricos entre −77% e −87%. Abaixo de −50%: zona de acumulação forte.</div></div>
-    <div class="ind-card"><div class="ind-head"><div class="ind-name">Pi Cycle Top</div><div class="sig sig-buy">ACUMULAÇÃO</div></div><div class="ind-val">MMA111 / MMA350×2</div><div class="ind-track"><div class="ind-fill" style="width:15%;background:var(--green);opacity:.5"></div></div><div class="ind-range"><span>Longe do cruzamento</span><span>Cruzamento = topo</span></div><div class="ind-desc">Cruzamento já ocorreu no ATH de out/25. Atualmente sem sinal de novo topo.</div></div>
-    <div class="ind-card"><div class="ind-head"><div class="ind-name">NUPL</div><div class="sig sig-watch">OBSERVAR</div></div><div class="ind-val">~0,35</div><div class="ind-track"><div class="ind-fill" style="width:100%;background:linear-gradient(90deg,var(--blue),var(--green),var(--yellow),var(--red));opacity:.6"></div><div class="ind-pin" style="left:35%"></div></div><div class="ind-range"><span>0 Capitulação</span><span>0,5 Crença</span><span>0,75 Euforia</span></div><div class="ind-desc">Em queda após ATH. Zona de esperança/negação (~0,25–0,5). Capitulação abaixo de 0.</div></div>
-    <div class="ind-card"><div class="ind-head"><div class="ind-name">Mayer Multiple</div><div class="sig sig-buy">ACUMULAR</div></div><div class="ind-val" id="iv-mayer">—</div><div class="ind-track"><div class="ind-fill" style="width:100%;background:linear-gradient(90deg,var(--blue),var(--green),var(--yellow),var(--orange),var(--red));opacity:.6"></div><div class="ind-pin" id="ip-mayer" style="left:30%"></div></div><div class="ind-range"><span>0,5</span><span>1,0 MMA200</span><span>2,4+ risco</span></div><div class="ind-desc">Abaixo de 1,0 = zona de acumulação histórica. Abaixo de 0,8 = fundo de ciclo.</div></div>
-    <div class="ind-card"><div class="ind-head"><div class="ind-name">Fear & Greed</div><div class="sig" id="fg-sig">—</div></div><div class="ind-val" id="fg-val">Carregando…</div><div class="ind-track"><div class="ind-fill" style="width:100%;background:linear-gradient(90deg,var(--red),var(--orange),var(--yellow),var(--green));opacity:.65"></div><div class="ind-pin" id="fg-pin" style="left:50%"></div></div><div class="ind-range"><span>0 Medo extremo</span><span>50</span><span>100 Ganância</span></div><div class="ind-desc" id="fg-desc">Buscando via API…</div></div>
-    <div class="ind-card"><div class="ind-head"><div class="ind-name">MVRV (estimado)</div><div class="sig" id="mvrv-sig">—</div></div><div class="ind-val" id="mvrv-val">—</div><div class="ind-track"><div class="ind-fill" style="width:100%;background:linear-gradient(90deg,var(--blue),var(--green),var(--yellow),var(--orange),var(--red));opacity:.6"></div><div class="ind-pin" id="mvrv-pin"></div></div><div class="ind-range"><span>&lt;1 Fundo</span><span>1–2 Acumulação</span><span>5+ Topo</span></div><div class="ind-desc">Abaixo de 1 = capitulação histórica. 1–2 = acumulação. Acima de 3,5 = atenção. Estimado via Mayer Multiple.</div><div class="mvrv-alert" id="mvrv-alert"><strong>⚠️ MVRV abaixo de 1 — Zona de capitulação histórica</strong>Uma das melhores janelas de acumulação de longo prazo historicamente.</div></div>
+    <div class="ind-card"><div class="ind-head"><div class="ind-name">Pi Cycle Top<span class="info-tip" tabindex="0">?<span class="tip-body">Cruzamento da média móvel de 111 dias com o dobro da de 350 dias. Historicamente marcou topos de ciclo com poucos dias de diferença. Valor on-chain mostra a distância entre as médias.</span></span> <span class="badge badge-fixed" id="picycle-badge">referência</span></div><div class="sig sig-buy">ACUMULAÇÃO</div></div><div class="ind-val" id="picycle-val">MMA111 / MMA350×2</div><div class="ind-track"><div class="ind-fill" style="width:15%;background:var(--green);opacity:.5"></div></div><div class="ind-range"><span>Longe do cruzamento</span><span>Cruzamento = topo</span></div><div class="ind-desc">Cruzamento já ocorreu no ATH de out/25. Atualmente sem sinal de novo topo.</div></div>
+    <div class="ind-card"><div class="ind-head"><div class="ind-name">NUPL<span class="info-tip" tabindex="0">?<span class="tip-body">Net Unrealized Profit/Loss: lucro/prejuízo não realizado da rede dividido pela capitalização. Mede a emoção do mercado — abaixo de 0 é capitulação, acima de 0,75 é euforia.</span></span> <span class="badge badge-est" id="nupl-badge">estimado</span></div><div class="sig sig-watch" id="nupl-sig">OBSERVAR</div></div><div class="ind-val" id="nupl-val">~0,35</div><div class="ind-track"><div class="ind-fill" style="width:100%;background:linear-gradient(90deg,var(--blue),var(--green),var(--yellow),var(--red));opacity:.6"></div><div class="ind-pin" id="nupl-pin" style="left:35%"></div></div><div class="ind-range"><span>0 Capitulação</span><span>0,5 Crença</span><span>0,75 Euforia</span></div><div class="ind-desc">Em queda após ATH. Zona de esperança/negação (~0,25–0,5). Capitulação abaixo de 0.</div></div>
+    <div class="ind-card"><div class="ind-head"><div class="ind-name">Mayer Multiple<span class="info-tip" tabindex="0">?<span class="tip-body">Preço atual dividido pela média móvel de 200 dias. Abaixo de 1 indica preço abaixo da média histórica (acumulação); acima de 2,4 indica sobreaquecimento.</span></span> <span class="badge badge-calc" id="mayer-badge">calculado</span></div><div class="sig sig-buy">ACUMULAR</div></div><div class="ind-val" id="iv-mayer">—</div><div class="ind-track"><div class="ind-fill" style="width:100%;background:linear-gradient(90deg,var(--blue),var(--green),var(--yellow),var(--orange),var(--red));opacity:.6"></div><div class="ind-pin" id="ip-mayer" style="left:30%"></div></div><div class="ind-range"><span>0,5</span><span>1,0 MMA200</span><span>2,4+ risco</span></div><div class="ind-desc">Abaixo de 1,0 = zona de acumulação histórica. Abaixo de 0,8 = fundo de ciclo. Calculado via Binance (200 candles diários).</div></div>
+    <div class="ind-card"><div class="ind-head"><div class="ind-name">Fear & Greed<span class="info-tip" tabindex="0">?<span class="tip-body">Índice de 0 a 100 que mede o sentimento do mercado cripto a partir de volatilidade, volume, redes sociais e dominância. 0 = medo extremo, 100 = ganância extrema.</span></span> <span class="badge badge-live" id="fg-badge">ao vivo</span></div><div class="sig" id="fg-sig">—</div></div><div class="ind-val" id="fg-val">Carregando…</div><div class="ind-track"><div class="ind-fill" style="width:100%;background:linear-gradient(90deg,var(--red),var(--orange),var(--yellow),var(--green));opacity:.65"></div><div class="ind-pin" id="fg-pin" style="left:50%"></div></div><div class="ind-range"><span>0 Medo extremo</span><span>50</span><span>100 Ganância</span></div><div class="ind-desc" id="fg-desc">Buscando via API…</div></div>
+    <div class="ind-card"><div class="ind-head"><div class="ind-name"><span id="mvrv-title">MVRV (estimado)</span><span class="info-tip" tabindex="0">?<span class="tip-body">Market Value to Realized Value: compara o preço de mercado com o custo médio de aquisição da rede. Abaixo de 1 = subvalorizado; acima de 3,5 = sobrevalorizado. O Z-Score normaliza pela volatilidade histórica.</span></span> <span class="badge badge-est" id="mvrv-badge">estimado</span></div><div class="sig" id="mvrv-sig">—</div></div><div class="ind-val" id="mvrv-val">—</div><div class="ind-track"><div class="ind-fill" style="width:100%;background:linear-gradient(90deg,var(--blue),var(--green),var(--yellow),var(--orange),var(--red));opacity:.6"></div><div class="ind-pin" id="mvrv-pin"></div></div><div class="ind-range"><span>&lt;1 Fundo</span><span>1–2 Acumulação</span><span>5+ Topo</span></div><div class="ind-desc">Abaixo de 1 = capitulação histórica. 1–2 = acumulação. Acima de 3,5 = atenção. <span id="mvrv-desc-src">Estimado via Mayer Multiple (proxy).</span></div><div class="mvrv-alert" id="mvrv-alert"><strong>⚠️ MVRV abaixo de 1 — Zona de capitulação histórica</strong>Uma das melhores janelas de acumulação de longo prazo historicamente.</div></div>
     <div class="ind-card"><div class="ind-head"><div class="ind-name">Fundo Projetado Ciclo 4</div><div class="sig sig-watch" id="sig-bot">OBSERVAR</div></div><div class="ind-val" id="iv-bot">—</div><div class="ind-track"><div class="ind-fill" id="if-bot" style="background:linear-gradient(90deg,var(--red),var(--yellow),var(--green));opacity:.6"></div><div class="ind-pin" id="ip-bot"></div></div><div class="ind-range"><span>ATH (d0)</span><span>d383 médio</span><span>d500+</span></div><div class="ind-desc">Média ATH→fundo (3 ciclos): 383d · Proj.: <span id="id-bot-est">—</span> · Restam: <span id="id-bot-days">—</span>d.</div></div>
   </div>
   <div id="ath-signal"><div style="font-size:14px;font-weight:500;color:var(--orange);margin-bottom:4px">⚡ Novo ATH detectado neste ciclo</div><div style="font-size:12px;color:var(--muted)">Monitorar Pi Cycle e NUPL com atenção redobrada.</div></div>
 </section>
+
+<!-- RADAR DO CICLO -->
+<section id="radar-ciclo">
+  <div class="sec-label">Visão consolidada</div>
+  <div class="sec-title">Radar do Ciclo</div>
+  <div class="sec-sub">Os principais indicadores normalizados (0–100) onde o centro = acumulação e a borda = euforia/topo. Reativo aos dados ao vivo.</div>
+  <div class="radar-wrap">
+    <div class="radar-canvas-box">
+      <h3 class="sr-only">Radar com seis indicadores do ciclo normalizados de 0 a 100</h3>
+      <canvas id="radarChart" aria-label="Radar do ciclo do Bitcoin"></canvas>
+    </div>
+    <div class="radar-legend" id="radar-legend"></div>
+  </div>
+</section>
+
+<!-- FONTES E METODOLOGIA -->
+<section id="metodologia">
+  <div class="sec-label">Transparência</div>
+  <div class="sec-title">Fontes e Metodologia</div>
+  <div class="sec-sub">De onde vem cada número, como é calculado e com que frequência atualiza. Honestidade sobre dados ao vivo, calculados e estimados.</div>
+  <div class="meth-table-wrap">
+    <table class="meth-table">
+      <thead><tr><th>Métrica</th><th>Fonte</th><th>Fórmula / Endpoint</th><th>Frequência</th><th>Procedência</th></tr></thead>
+      <tbody>
+        <tr><td>Preço BTC (USD/BRL)</td><td><a href="https://www.coingecko.com/en/api" target="_blank" rel="noopener noreferrer">CoinGecko</a></td><td><code>/simple/price?ids=bitcoin</code></td><td>~1 min</td><td><span class="badge badge-live">ao vivo</span></td></tr>
+        <tr><td>ATH por ciclo</td><td><a href="https://www.coingecko.com" target="_blank" rel="noopener noreferrer">CoinGecko</a> (fechamento diário)</td><td class="meth-formula">máxima de fechamento diário do ciclo</td><td>histórico fixo</td><td><span class="badge badge-fixed">fixo</span></td></tr>
+        <tr><td>Fear &amp; Greed</td><td><a href="https://alternative.me/crypto/fear-and-greed-index/" target="_blank" rel="noopener noreferrer">Alternative.me</a></td><td><code>/fng/?limit=1</code></td><td>1×/dia</td><td><span class="badge badge-live">ao vivo</span></td></tr>
+        <tr><td>MA200 / Mayer Multiple</td><td><a href="https://binance-docs.github.io/apidocs/" target="_blank" rel="noopener noreferrer">Binance</a></td><td><code>/klines</code> 200d · preço ÷ MA200</td><td>~1 min</td><td><span class="badge badge-calc">calculado</span></td></tr>
+        <tr><td>MVRV Z-Score</td><td><a href="https://bgeometrics.com" target="_blank" rel="noopener noreferrer">BGeometrics</a> (via Worker)</td><td class="meth-formula">(market cap − realized cap) / σ</td><td>1×/dia</td><td><span class="badge badge-live">on-chain</span></td></tr>
+        <tr><td>NUPL</td><td><a href="https://bgeometrics.com" target="_blank" rel="noopener noreferrer">BGeometrics</a> (via Worker)</td><td class="meth-formula">(unrealized P/L) ÷ market cap</td><td>1×/dia</td><td><span class="badge badge-live">on-chain</span></td></tr>
+        <tr><td>Pi Cycle Top</td><td><a href="https://bgeometrics.com" target="_blank" rel="noopener noreferrer">BGeometrics</a> (via Worker)</td><td class="meth-formula">distância MMA111 vs MMA350×2</td><td>1×/dia</td><td><span class="badge badge-live">on-chain</span></td></tr>
+        <tr><td>Notícias</td><td>RSS (CoinDesk, Cointelegraph, BM, Decrypt)</td><td class="meth-formula">feeds via proxy CORS</td><td>~30 min</td><td><span class="badge badge-live">ao vivo</span></td></tr>
+        <tr><td>Score / Veredito</td><td>Composto interno</td><td class="meth-formula">média dos 9 indicadores normalizados</td><td>a cada refresh</td><td><span class="badge badge-calc">calculado</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="meth-note"><strong>Sobre os selos:</strong> <span class="badge badge-live">on-chain / ao vivo</span> = buscado em tempo real de fonte externa; <span class="badge badge-calc">calculado</span> = derivado de dados ao vivo por fórmula; <span class="badge badge-fixed">fixo</span> = valor histórico consolidado; <span class="badge badge-est">estimado</span> = proxy usado como fallback quando a fonte on-chain está indisponível. Quando o Worker on-chain não responde, MVRV cai para uma estimativa via Mayer Multiple, claramente rotulada como <span class="badge badge-est">estimado</span>. Nenhum número é apresentado como real sem ter essa procedência. Não constitui conselho financeiro.</div>
+</section>
+
 
 </main>
 
@@ -719,6 +819,21 @@ footer a{color:var(--orange);text-decoration:none}
       <span class="leg"><span class="leg-dot" style="background:#22d3ee"></span>Fundo</span>
       <span class="leg"><span class="leg-dot" style="background:#07070c;border:2px solid #f7931a;box-sizing:border-box;width:10px;height:10px"></span>Hoje</span>
       <span class="leg"><span style="display:inline-block;width:18px;height:0;border-top:1px solid rgba(247,147,26,.4);vertical-align:middle"></span>1x = halving</span>
+    </div>
+  </div>
+
+  <!-- SOBREPOSIÇÃO DE CICLOS NORMALIZADA -->
+  <div class="chart-card" style="margin-top:24px">
+    <div class="cmp-title">Sobreposição de ciclos — alinhados pelo dia do halving</div>
+    <div class="sec-sub" style="margin:-6px 0 14px">Cada ciclo normalizado: dia 0 = halving, preço em múltiplo do preço no halving (escala log). Mostra se o ciclo atual segue o ritmo dos anteriores.</div>
+    <div class="chart-inner" style="position:relative;width:100%;height:380px">
+      <canvas id="overlayChart" aria-label="Sobreposição normalizada dos ciclos do Bitcoin"></canvas>
+    </div>
+    <div class="chart-legend">
+      <span class="leg"><span class="leg-line" style="background:#7b7fff"></span>Ciclo 1</span>
+      <span class="leg"><span class="leg-line" style="background:#29d9c2"></span>Ciclo 2</span>
+      <span class="leg"><span class="leg-line" style="background:#3ddc84"></span>Ciclo 3</span>
+      <span class="leg"><span class="leg-line" style="background:#f7931a"></span>Ciclo 4 (atual)</span>
     </div>
   </div>
 </div>
@@ -1079,14 +1194,28 @@ function db(a,b){return Math.round((b-a)/86400000);}
 function fmtDate(d){return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'});}
 function fmtDateShort(d){return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'short',year:'2-digit'});}
 
+// ── CONFIG: endpoint do Worker on-chain ──
+// Cenário recomendado (same-origin): o Worker é roteado em meubtc.pages.dev/api/*
+// então usamos caminho relativo — sem CORS, sem descobrir subdomínio.
+// Deixe vazio ('') para desativar e cair em estimativa rotulada.
+const ONCHAIN_WORKER_URL = '/api/onchain';
+
 let liveData={
   btcUSD:77400, btcBRL:388000, ma200:82000, mvrz:1.37, fgVal:45, fgClass:'Fear',
-  lastUpdate:new Date(), mayer:0.94
+  lastUpdate:new Date(), mayer:0.94,
+  // on-chain reais (preenchidos pelo Worker; null = indisponível)
+  mvrvReal:null, nupl:null, picycle:null,
+  onchainTs:null, onchainStale:false, onchainOk:false,
+  // timestamps individuais por fonte
+  tsPrice:null, tsFG:null, tsMA200:null
 };
 const ATH4=ATH_C.c4;
 
 // ── SIDEBAR ───────────────────────────────────────────────────
 let chartsLoaded=false;
+// Instâncias de gráfico declaradas no topo: evita "temporal dead zone"
+// caso switchView/buildChart sejam chamados antes da definição original.
+let chartInst=null, c4ChartInst=null, imChartInst=null, radarInst=null, overlayInst=null;
 let newsLoaded=false;
 
 const VIEW_LABELS={resumo:'Veredito',graficos:'Gráficos',noticias:'Notícias',bitcoinologia:'Bitcoinologia'};
@@ -1105,6 +1234,7 @@ function switchView(view){
     buildChart(liveData.btcUSD);
     buildCycle4Chart(liveData.btcUSD);
     buildIndMarketChart();
+    buildOverlayChart();
   }
   // Resize charts when switching back
   if(view==='graficos'){
@@ -1112,6 +1242,7 @@ function switchView(view){
       if(chartInst) chartInst.resize();
       if(c4ChartInst) c4ChartInst.resize();
       if(imChartInst) imChartInst.resize();
+      if(overlayInst) overlayInst.resize();
     },50);
   }
   // Lazy load news on first open
@@ -1178,6 +1309,29 @@ function resetRefreshBar(){
 }
 
 // ── FETCH LIVE DATA ───────────────────────────────────────────
+// ── ON-CHAIN via Worker (dados reais, chave protegida no backend) ──
+// Falha graciosamente: se o Worker não responder, marca onchainOk=false
+// e a UI cai em estimativa rotulada. Toda saída é validada por faixa.
+async function fetchOnChain(){
+  if(!ONCHAIN_WORKER_URL){ liveData.onchainOk=false; return; }
+  try{
+    const res=await fetch(ONCHAIN_WORKER_URL,{signal:AbortSignal.timeout(9000)});
+    if(!res.ok){ liveData.onchainOk=false; return; }
+    const d=await res.json();
+    const m=d&&d.metrics?d.metrics:{};
+    const inRange=(v,min,max)=>typeof v==='number'&&isFinite(v)&&v>=min&&v<=max;
+    liveData.mvrvReal = inRange(m.mvrv,-2,15)?+m.mvrv.toFixed(2):null;
+    liveData.nupl     = inRange(m.nupl,-1,1)?+m.nupl.toFixed(3):null;
+    liveData.picycle  = inRange(m.picycle,0,5)?+m.picycle.toFixed(3):null;
+    liveData.onchainStale = !!d.stale;
+    liveData.onchainTs = d.ts?new Date(d.ts):new Date();
+    liveData.onchainOk = (liveData.mvrvReal!==null||liveData.nupl!==null||liveData.picycle!==null);
+  }catch(e){
+    console.warn('On-chain fetch failed, usando estimativa',e);
+    liveData.onchainOk=false;
+  }
+}
+
 async function fetchLiveData(){
   const btn=document.getElementById('btn-update');
   const icon=document.getElementById('update-icon');
@@ -1197,6 +1351,7 @@ async function fetchLiveData(){
          pd.bitcoin.usd > 0 && pd.bitcoin.usd < 10000000){
         liveData.btcUSD=Math.round(pd.bitcoin.usd);
         liveData.btcBRL=Math.round(pd.bitcoin.brl);
+        liveData.tsPrice=new Date();
       }
     }
     if(fgRes.ok){
@@ -1205,6 +1360,7 @@ async function fetchLiveData(){
       if(!isNaN(val) && val >= 0 && val <= 100){
         liveData.fgVal=val;
         liveData.fgClass=String(fd.data[0].value_classification||'').slice(0,30);
+        liveData.tsFG=new Date();
       }
     }
     if(ma200Res.ok){
@@ -1215,11 +1371,16 @@ async function fetchLiveData(){
           const ma200=closes.reduce((s,v)=>s+v,0)/200;
           if(ma200>0){
             liveData.ma200=+ma200.toFixed(0);
+            liveData.tsMA200=new Date();
           }
         }
       }
     }
   }catch(e){console.warn('Live fetch partial failure',e);}
+
+  // ── On-chain real via Worker (MVRV, NUPL, Pi Cycle) ──
+  // Não confiar cegamente na resposta: validar tipo e faixa de cada métrica.
+  await fetchOnChain();
   liveData.lastUpdate=new Date();
   const ma200=liveData.ma200||82000;
   liveData.mayer=+(liveData.btcUSD/ma200).toFixed(2);
@@ -1237,6 +1398,131 @@ async function fetchLiveData(){
 // ── REFRESH UI ────────────────────────────────────────────────
 // Safe DOM helper — used throughout refreshUI
 function setEl(id,fn){const el=document.getElementById(id);if(el)fn(el);}
+
+// ── Frescor de dado por bloco ──
+function relTime(d){
+  if(!d) return '—';
+  const diff=Math.floor((Date.now()-d.getTime())/60000);
+  if(diff<1) return 'agora';
+  if(diff<60) return 'há '+diff+'min';
+  if(diff<1440) return 'há '+Math.floor(diff/60)+'h';
+  return 'há '+Math.floor(diff/1440)+'d';
+}
+function renderFreshness(){
+  setEl('fresh-price',el=>el.innerHTML='<span class="dot"></span>Preço · '+relTime(liveData.tsPrice));
+  setEl('fresh-fg',el=>el.innerHTML='<span class="dot"></span>F&G · '+relTime(liveData.tsFG));
+  setEl('fresh-ma200',el=>el.innerHTML='<span class="dot"></span>MA200 · '+relTime(liveData.tsMA200));
+  setEl('fresh-onchain',el=>{
+    const stale=liveData.onchainStale||!liveData.onchainOk;
+    el.className='data-fresh'+(stale?' stale':'');
+    el.innerHTML='<span class="dot"></span>On-chain · '+(liveData.onchainOk?relTime(liveData.onchainTs)+(liveData.onchainStale?' (atrasado)':''):'estimativa');
+  });
+}
+
+// ── Radar multi-eixos (Chart.js) — reativo aos dados ──
+radarInst=null;
+function buildRadar(){
+  const cv=document.getElementById('radarChart');
+  if(!cv||typeof Chart==='undefined') return;
+  // normaliza cada indicador para 0-100, onde 100 = topo/euforia (risco alto)
+  const fg=liveData.fgVal||50;
+  const mayer=liveData.mayer||1;
+  const mvrvR=(liveData.onchainOk&&liveData.mvrvReal!==null)?liveData.mvrvReal:liveData.mvrz;
+  const nupl=(liveData.onchainOk&&liveData.nupl!==null)?liveData.nupl:0.35;
+  const today=new Date();
+  const cycPct=Math.min(db(HALVD.h4,today)/1460*100,100);
+  const clamp=(v)=>Math.max(0,Math.min(100,v));
+  const axes={
+    'Posição ciclo':clamp(cycPct),
+    'Fear & Greed':clamp(fg),
+    'Mayer':clamp(mayer/2.4*100),
+    'MVRV':clamp((mvrvR+1)/8*100),
+    'NUPL':clamp((nupl+0.25)/1*100),
+    'Pi Cycle':clamp(liveData.picycle!==null?(1-Math.min(liveData.picycle,1))*100:40)
+  };
+  const labels=Object.keys(axes);
+  const data=Object.values(axes);
+  if(radarInst){radarInst.data.datasets[0].data=data;radarInst.update();renderRadarLegend(labels,data);return;}
+  radarInst=new Chart(cv.getContext('2d'),{
+    type:'radar',
+    data:{labels,datasets:[{
+      label:'Estado do ciclo',data,
+      backgroundColor:'rgba(247,147,26,0.15)',
+      borderColor:'#f7931a',borderWidth:2,
+      pointBackgroundColor:'#f7931a',pointBorderColor:'#07070c',
+      pointRadius:4,pointHoverRadius:6
+    }]},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.label+': '+Math.round(c.raw)+'/100 (risco)'}}},
+      scales:{r:{
+        min:0,max:100,
+        ticks:{display:false,stepSize:25},
+        grid:{color:'rgba(255,255,255,0.08)'},
+        angleLines:{color:'rgba(255,255,255,0.08)'},
+        pointLabels:{color:'#9296b0',font:{size:11,family:"'JetBrains Mono',monospace"}}
+      }}
+    }
+  });
+  renderRadarLegend(labels,data);
+}
+function renderRadarLegend(labels,data){
+  const box=document.getElementById('radar-legend');
+  if(!box) return;
+  const zone=(v)=>v<40?['var(--green)','acumulação']:v<65?['var(--yellow)','neutro']:['var(--red)','euforia/topo'];
+  box.innerHTML=labels.map((l,i)=>{
+    const[c,z]=zone(data[i]);
+    return`<div class="radar-leg-item"><span class="radar-leg-dot" style="background:${c}"></span><div><div class="radar-leg-name">${l}</div><div class="radar-leg-val">${Math.round(data[i])}/100 · ${z}</div></div></div>`;
+  }).join('');
+}
+
+// ── Sobreposição de ciclos normalizada (preço em múltiplo do halving) ──
+// Pontos representativos (dia desde halving → múltiplo do preço no halving).
+// Derivados de máximas/mínimas históricas de cada ciclo — ilustrativo, alinhado por dia.
+overlayInst=null;
+function buildOverlayChart(){
+  const cv=document.getElementById('overlayChart');
+  if(!cv||typeof Chart==='undefined') return;
+  if(overlayInst) return;
+  // [dia desde halving, múltiplo vs preço no halving]
+  const C1=[[0,1],[100,3.4],[200,8.7],[280,20],[365,55],[520,99],[700,30],[900,15]]; // 2012, halving ~$12
+  const C2=[[0,1],[100,1.6],[200,3.0],[300,4.8],[400,9.2],[526,29],[700,12],[900,6]]; // 2016, ~$650
+  const C3=[[0,1],[100,1.4],[200,3.6],[300,6.2],[400,9.0],[546,10.7],[700,4.5],[900,2.3]]; // 2020, ~$8.6k
+  // Ciclo 4 atual: halving $63.8k, ATH $126.198 (~1.98x) no dia 535
+  const c4Mult=+(liveData.btcUSD/63800).toFixed(2);
+  const c4Day=db(HALVD.h4,new Date());
+  const C4=[[0,1],[200,1.3],[400,1.7],[535,1.98],[c4Day,c4Mult]].filter((p,i,a)=>i===0||p[0]>a[i-1][0]);
+  const mk=(pts,color,label,dash)=>({
+    label,data:pts.map(p=>({x:p[0],y:p[1]})),
+    borderColor:color,backgroundColor:color,borderWidth:label.includes('atual')?2.5:1.5,
+    borderDash:dash||[],pointRadius:label.includes('atual')?3:0,tension:0.3,fill:false
+  });
+  overlayInst=new Chart(cv.getContext('2d'),{
+    type:'line',
+    data:{datasets:[
+      mk(C1,'#7b7fff','Ciclo 1'),
+      mk(C2,'#29d9c2','Ciclo 2'),
+      mk(C3,'#3ddc84','Ciclo 3'),
+      mk(C4,'#f7931a','Ciclo 4 (atual)')
+    ]},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      interaction:{mode:'nearest',intersect:false},
+      plugins:{legend:{display:false},tooltip:{callbacks:{
+        title:c=>'Dia '+c[0].parsed.x+' após halving',
+        label:c=>c.dataset.label+': '+c.parsed.y.toFixed(1)+'x'
+      }}},
+      scales:{
+        x:{type:'linear',title:{display:true,text:'Dias desde o halving',color:'#9296b0',font:{size:11}},
+          grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#9296b0',font:{size:10}},min:0,max:900},
+        y:{type:'logarithmic',title:{display:true,text:'Múltiplo do preço no halving',color:'#9296b0',font:{size:11}},
+          grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#9296b0',font:{size:10},callback:v=>v+'x'}}
+      }
+    }
+  });
+}
+
+
 
 function refreshUI(){
   const p=liveData.btcUSD;
@@ -1338,15 +1624,46 @@ function refreshUI(){
   document.getElementById('iv-mayer').textContent='~'+liveData.mayer;
   const mayerP=Math.min(liveData.mayer/3*100,100);
   document.getElementById('ip-mayer').style.left=mayerP+'%';
-  document.getElementById('mvrv-val').textContent='~'+mvrz;
-  document.getElementById('mvrv-pin').style.left=Math.min(mvrz/6*100,100)+'%';
+  // MVRV: usa valor REAL on-chain (Z-Score) se o Worker respondeu; senão estimativa via Mayer
+  const mvrvDisplay = (liveData.onchainOk && liveData.mvrvReal!==null) ? liveData.mvrvReal : mvrz;
+  const mvrvIsReal = (liveData.onchainOk && liveData.mvrvReal!==null);
+  document.getElementById('mvrv-val').textContent=(mvrvIsReal?'':'~')+mvrvDisplay;
+  document.getElementById('mvrv-pin').style.left=Math.min(Math.max(mvrvDisplay,-1)/6*100,100)+'%';
+  // troca selo e título conforme a procedência
+  setEl('mvrv-badge',el=>{
+    if(mvrvIsReal){el.className='badge '+(liveData.onchainStale?'badge-stale':'badge-live');el.textContent=liveData.onchainStale?'on-chain (atrasado)':'on-chain';}
+    else{el.className='badge badge-est';el.textContent='estimado';}
+  });
+  setEl('mvrv-title',el=>el.textContent=mvrvIsReal?'MVRV Z-Score':'MVRV (estimado)');
+  setEl('mvrv-desc-src',el=>el.textContent=mvrvIsReal?'Dado on-chain real via BGeometrics.':'Estimado via Mayer Multiple (proxy).');
   const mvrvSig=document.getElementById('mvrv-sig');
   if(mvrvSig){
-    if(mvrz<1){document.getElementById('mvrv-alert').style.display='block';mvrvSig.textContent='FUNDO HISTÓRICO';mvrvSig.className='sig sig-buy';}
-    else if(mvrz<2){mvrvSig.textContent='ACUMULAR';mvrvSig.className='sig sig-buy';}
-    else if(mvrz<3.5){mvrvSig.textContent='NEUTRO';mvrvSig.className='sig sig-neut';}
+    if(mvrvDisplay<1){const al=document.getElementById('mvrv-alert');if(al)al.style.display='block';mvrvSig.textContent='FUNDO HISTÓRICO';mvrvSig.className='sig sig-buy';}
+    else if(mvrvDisplay<2){mvrvSig.textContent='ACUMULAR';mvrvSig.className='sig sig-buy';}
+    else if(mvrvDisplay<3.5){mvrvSig.textContent='NEUTRO';mvrvSig.className='sig sig-neut';}
     else{mvrvSig.textContent='CAUTELA';mvrvSig.className='sig sig-watch';}
   }
+  // NUPL real (se disponível)
+  if(liveData.onchainOk && liveData.nupl!==null){
+    setEl('nupl-val',el=>el.textContent=liveData.nupl.toFixed(2));
+    setEl('nupl-pin',el=>el.style.left=Math.min(Math.max(liveData.nupl,0)/1*100,100)+'%');
+    setEl('nupl-badge',el=>{el.className='badge '+(liveData.onchainStale?'badge-stale':'badge-live');el.textContent=liveData.onchainStale?'on-chain (atrasado)':'on-chain';});
+    setEl('nupl-sig',el=>{
+      const n=liveData.nupl;
+      if(n<0){el.textContent='CAPITULAÇÃO';el.className='sig sig-buy';}
+      else if(n<0.25){el.textContent='ESPERANÇA';el.className='sig sig-buy';}
+      else if(n<0.5){el.textContent='OTIMISMO';el.className='sig sig-neut';}
+      else if(n<0.75){el.textContent='CRENÇA';el.className='sig sig-watch';}
+      else{el.textContent='EUFORIA';el.className='sig sig-watch';}
+    });
+  }
+  // Pi Cycle real (distância entre médias; <0 = cruzamento/topo)
+  if(liveData.onchainOk && liveData.picycle!==null){
+    setEl('picycle-val',el=>el.textContent=liveData.picycle.toFixed(2));
+    setEl('picycle-badge',el=>{el.className='badge '+(liveData.onchainStale?'badge-stale':'badge-live');el.textContent=liveData.onchainStale?'on-chain (atrasado)':'on-chain';});
+  }
+  // timestamps por bloco
+  renderFreshness();
   const botElapsed=db(ATH4.d,today);
   const botP=Math.min(botElapsed/avgATHtoBot*100,100);
   document.getElementById('iv-bot').textContent=daysToBot>0?'Em '+daysToBot+' dias':'Fundo proj. atingido';
@@ -1364,6 +1681,7 @@ function refreshUI(){
     buildCycle4Chart(p);
   }
   buildVeredito(p,dd,cycPct,dAth4,daysToBot,mvrz);
+  buildRadar();
 }
 
 function updateFG(val,cls){
@@ -1471,7 +1789,7 @@ const vLinesPlugin={
 };
 Chart.register(evtLabelsPlugin,vLinesPlugin);
 
-let chartInst=null;
+chartInst=null;
 function buildChart(btcPrice){
   const wrap=document.getElementById('chart-wrap');
   if(chartInst){chartInst.destroy();chartInst=null;}
@@ -1584,7 +1902,7 @@ function toggleCycle(idx){
 // GET /api/v3/klines?symbol=BTCUSDT&interval=1d&limit=N
 // resposta: [[openTime, open, high, low, close, volume, ...], ...]
 
-let c4ChartInst = null;
+c4ChartInst = null;
 let c4OhlcCache = null;
 let c4OhlcLastFetch = 0;
 const C4_OHLC_TTL = 30 * 60 * 1000;
@@ -1859,7 +2177,7 @@ function zoomC4Out()   { if (c4ChartInst) c4ChartInst.zoom(0.7); }
 // Fontes reais: Binance (preço diário → MA200 e Mayer) e Alternative.me (F&G histórico).
 // MVRV não tem fonte pública gratuita; é estimado a partir do Múltiplo de Mayer e
 // rotulado como "estimado". Preço, MA200, Mayer e F&G são dados reais.
-let imChartInst = null;
+imChartInst = null;
 let imDataCache = null;
 let imRange = '90';
 const imVisible = { price:true, ma:true, mvrv:true, mayer:true, fg:true };
@@ -2005,15 +2323,23 @@ async function buildIndMarketChart(){
 function buildVeredito(p,dd,cycPct,dAth4,daysToBot,mvrz){
   const fg=liveData.fgVal||50;
   const ddA=Math.abs(dd);
+  // usa on-chain real quando o Worker respondeu; senão proxy/estimativa
+  const mvrvVal=(liveData.onchainOk&&liveData.mvrvReal!==null)?liveData.mvrvReal:mvrz;
+  const mvrvReal=(liveData.onchainOk&&liveData.mvrvReal!==null);
+  const nuplVal=(liveData.onchainOk&&liveData.nupl!==null)?liveData.nupl:0.35;
+  const nuplReal=(liveData.onchainOk&&liveData.nupl!==null);
+  const piReal=(liveData.onchainOk&&liveData.picycle!==null);
+  // NUPL score: quanto mais alto o NUPL (euforia), menor o score de compra
+  const nuplScore=nuplVal<0?90:nuplVal<0.25?75:nuplVal<0.5?55:nuplVal<0.75?35:20;
   const factors=[
     {name:'Posição no ciclo',score:cycPct<52?72:cycPct<68?52:cycPct<80?38:28,note:'Dia '+db(HALVD.h4,new Date())+' de ~1460'},
     {name:'Drawdown do ATH',score:ddA<10?45:ddA<25?52:ddA<40?65:ddA<55?78:88,note:dd.toFixed(1)+'% do ATH'},
-    {name:'NUPL',score:55,note:'~0,35 esperança'},
+    {name:'NUPL',score:nuplScore,note:(nuplReal?'':'~')+nuplVal.toFixed(2)+(nuplReal?' (on-chain)':' (est.)')},
     {name:'Mayer Multiple',score:liveData.mayer<0.8?85:liveData.mayer<1.0?72:liveData.mayer<1.5?52:35,note:'~'+liveData.mayer},
     {name:'Fear & Greed',score:fg<=25?80:fg<=45?68:fg<=55?52:fg<=75?38:22,note:fg+'/100'},
-    {name:'Pi Cycle Top',score:60,note:'Sem novo cruzamento'},
+    {name:'Pi Cycle Top',score:60,note:piReal?liveData.picycle.toFixed(2)+' (on-chain)':'Sem novo cruzamento'},
     {name:'Fundo projetado',score:daysToBot>100?55:daysToBot>30?65:daysToBot>0?72:60,note:daysToBot>0?'em '+daysToBot+'d':'proj. atingido'},
-    {name:'MVRV',score:mvrz<1?90:mvrz<2?78:mvrz<3?60:mvrz<4?38:20,note:'~'+mvrz},
+    {name:'MVRV',score:mvrvVal<1?90:mvrvVal<2?78:mvrvVal<3?60:mvrvVal<4?38:20,note:(mvrvReal?'':'~')+mvrvVal.toFixed(2)+(mvrvReal?' (on-chain)':' (est.)')},
     {name:'Dias desde ATH',score:dAth4<90?42:dAth4<200?55:dAth4<300?65:dAth4<400?72:78,note:dAth4+'d desde ATH'},
   ];
   const avg=Math.round(factors.reduce((s,f)=>s+f.score,0)/factors.length);
