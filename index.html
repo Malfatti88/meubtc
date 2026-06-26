@@ -9,7 +9,7 @@
 <!-- CSP: unsafe-inline required for inline scripts. Upgrade path: move JS to external file + use nonces -->
 <!-- connect-src inclui o Worker on-chain (meubtc-onchain). Ajuste o subdomínio .workers.dev OU seu domínio custom do Worker. -->
 <!-- connect-src: 'self' cobre o Worker roteado em /api/* no mesmo domínio (meubtc.pages.dev) -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https:; connect-src 'self' https://api.coingecko.com https://api.alternative.me https://alternative.me https://api.binance.com https://api.allorigins.win https://www.coindesk.com https://cointelegraph.com https://bitcoinmagazine.com https://decrypt.co https://rss2json.com; base-uri 'self'; form-action 'none';">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https:; connect-src 'self' https://api.coingecko.com https://api.alternative.me https://alternative.me https://api.binance.com https://api.allorigins.win https://www.coindesk.com https://cointelegraph.com https://bitcoinmagazine.com https://decrypt.co https://rss2json.com; manifest-src 'self' data:; base-uri 'self'; form-action 'none';">
 <meta http-equiv="X-Frame-Options" content="DENY">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
@@ -206,6 +206,18 @@ tr.hl td{background:rgba(247,147,26,.04)}
 .verd-factors{display:grid;grid-template-columns:repeat(auto-fit,minmax(195px,1fr));gap:8px;margin-top:14px}
 .vf{background:var(--bg3);border-radius:var(--r-sm);padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px}
 .vf-name{font-size:11px;color:var(--muted)}.vf-val{font-size:11px;font-weight:500;text-align:right}
+/* Checkboxes de indicadores no veredito */
+.vf-toggle{cursor:pointer;transition:opacity .2s,background .2s;user-select:none;justify-content:flex-start!important}
+.vf-toggle input{accent-color:var(--orange);width:15px;height:15px;cursor:pointer;flex-shrink:0;margin:0}
+.vf-toggle .vf-body{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}
+.vf-toggle.off{opacity:.42}
+.vf-toggle.off .vf-val{text-decoration:line-through}
+.vf-toggle:hover{background:var(--bg2)}
+.verd-selection{font-size:12px;color:var(--text);line-height:1.6;margin-top:14px;padding:11px 13px;background:var(--orange-dim);border:1px solid var(--orange-glow);border-radius:var(--r-md)}
+.verd-selection .vf-reset{background:none;border:none;color:var(--orange);font-family:var(--mono);font-size:12px;cursor:pointer;text-decoration:underline;padding:0;margin-left:2px}
+.verd-selection .vf-reset:hover{color:var(--text)}
+.verd-explore-note{font-size:11px;color:var(--muted);line-height:1.65;margin-top:10px;padding:10px 12px;background:var(--bg2);border-left:2px solid var(--muted-soft);border-radius:0 var(--r-md) var(--r-md) 0}
+.verd-explore-note strong{color:var(--text)}
 .verd-reason{font-size:12px;color:var(--muted);line-height:1.75;border-top:1px solid var(--border);padding-top:14px;margin-top:14px}
 .verd-disclaimer{background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:var(--r-sm);padding:13px 16px;margin-top:14px;font-size:11px;color:var(--muted);line-height:1.6}
 .verd-disclaimer strong{color:var(--text);display:block;margin-bottom:3px}
@@ -624,8 +636,10 @@ a:focus-visible,button:focus-visible,.info-tip:focus-visible,[tabindex]:focus-vi
       <div class="verd-track"><div class="verd-needle" id="verd-needle" style="left:50%"></div></div>
     </div>
     <div class="verd-signal" id="verd-signal"></div>
-    <div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:14px 0 8px">Indicadores utilizados</div>
+    <div style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:14px 0 8px">Indicadores utilizados <span style="text-transform:none;letter-spacing:0;color:var(--muted-soft)">— marque/desmarque para ajustar o cálculo</span></div>
     <div class="verd-factors" id="verd-factors"></div>
+    <div class="verd-selection" id="verd-selection"></div>
+    <div class="verd-explore-note"><strong>ℹ️ Modo exploratório:</strong> ajustar quais indicadores entram no cálculo é uma ferramenta para você testar cenários ("e se eu ignorar o Fear & Greed?"). O resultado de "compra/acumulação" <strong>não é uma orientação</strong> — é apenas um informativo baseado no comportamento histórico de outros ciclos e na seleção de indicadores que você marcou. Não constitui aconselhamento financeiro.</div>
     <div class="verd-reason" id="verd-reason"></div>
     <button class="share-btn" id="share-btn" onclick="shareVeredito()">↗ Compartilhar sinal</button>
     <div class="verd-disclaimer"><strong>⚠️ Aviso importante</strong>Análise gerada automaticamente a partir de indicadores técnicos e padrões históricos de ciclos. Não constitui aconselhamento financeiro. Bitcoin é altamente volátil e ciclos passados não garantem resultados futuros. Faça sua própria pesquisa (DYOR).</div>
@@ -1457,9 +1471,11 @@ function buildRadar(){
       plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.label+': '+Math.round(c.raw)+'/100 (risco)'}}},
       scales:{r:{
         min:0,max:100,
-        ticks:{display:false,stepSize:25},
-        grid:{color:'rgba(255,255,255,0.08)'},
-        angleLines:{color:'rgba(255,255,255,0.08)'},
+        ticks:{display:true,stepSize:25,
+          color:'#6b6e85',backdropColor:'transparent',font:{size:9,family:"'JetBrains Mono',monospace"},
+          callback:v=>v===0?'centro':v===50?'neutro':v===100?'euforia':''},
+        grid:{color:'rgba(255,255,255,0.10)'},
+        angleLines:{color:'rgba(255,255,255,0.10)'},
         pointLabels:{color:'#9296b0',font:{size:11,family:"'JetBrains Mono',monospace"}}
       }}
     }
@@ -1492,11 +1508,19 @@ function buildOverlayChart(){
   const c4Mult=+(liveData.btcUSD/63800).toFixed(2);
   const c4Day=db(HALVD.h4,new Date());
   const C4=[[0,1],[200,1.3],[400,1.7],[535,1.98],[c4Day,c4Mult]].filter((p,i,a)=>i===0||p[0]>a[i-1][0]);
-  const mk=(pts,color,label,dash)=>({
-    label,data:pts.map(p=>({x:p[0],y:p[1]})),
-    borderColor:color,backgroundColor:color,borderWidth:label.includes('atual')?2.5:1.5,
-    borderDash:dash||[],pointRadius:label.includes('atual')?3:0,tension:0.3,fill:false
-  });
+  const mk=(pts,color,label,dash)=>{
+    const atual=label.includes('atual');
+    return{
+      label,data:pts.map(p=>({x:p[0],y:p[1]})),
+      borderColor:color,backgroundColor:atual?'rgba(247,147,26,0.10)':color,
+      borderWidth:atual?3.5:1.5,
+      borderDash:dash||[],
+      pointRadius:atual?4:0,
+      pointBackgroundColor:color,pointBorderColor:'#07070c',pointBorderWidth:atual?1.5:0,
+      tension:0.3,fill:atual?'origin':false,
+      order:atual?0:1 // ciclo atual desenhado por cima
+    };
+  };
   overlayInst=new Chart(cv.getContext('2d'),{
     type:'line',
     data:{datasets:[
@@ -1508,15 +1532,18 @@ function buildOverlayChart(){
     options:{
       responsive:true,maintainAspectRatio:false,
       interaction:{mode:'nearest',intersect:false},
-      plugins:{legend:{display:false},tooltip:{callbacks:{
+      plugins:{legend:{display:false},
+        title:{display:true,text:'Sobreposição de ciclos — múltiplo do preço desde o halving',color:'#cdd0e0',font:{family:"'JetBrains Mono',monospace",size:12,weight:'normal'},padding:{bottom:12}},
+        tooltip:{callbacks:{
         title:c=>'Dia '+c[0].parsed.x+' após halving',
         label:c=>c.dataset.label+': '+c.parsed.y.toFixed(1)+'x'
       }}},
       scales:{
         x:{type:'linear',title:{display:true,text:'Dias desde o halving',color:'#9296b0',font:{size:11}},
           grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#9296b0',font:{size:10}},min:0,max:900},
-        y:{type:'logarithmic',title:{display:true,text:'Múltiplo do preço no halving',color:'#9296b0',font:{size:11}},
-          grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#9296b0',font:{size:10},callback:v=>v+'x'}}
+        y:{type:'logarithmic',min:0.8,title:{display:true,text:'Múltiplo do preço no halving',color:'#9296b0',font:{size:11}},
+          grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#9296b0',font:{size:10},
+            callback:v=>{const m=[1,1.5,2,3,5,10,20,30,50,100];return m.includes(v)?v+'x':null;}}}
       }
     }
   });
@@ -1737,7 +1764,9 @@ const visible=[true,true,true,true];
 const evtLabelsPlugin={
   id:'evtLabels',
   afterDatasetsDraw(chart){
-    const {ctx,scales:{x,y},chartArea:ca}=chart;
+    const x=chart.scales&&chart.scales.x, y=chart.scales&&chart.scales.y;
+    if(!x||!y||typeof x.getPixelForValue!=='function'||typeof y.getPixelForValue!=='function') return;
+    const {ctx,chartArea:ca}=chart;
     // Helper: draw outlined text (no shadowBlur — faster)
     function outlinedText(text,tx,ty,fillColor,size){
       ctx.font=(size||9)+'px JetBrains Mono';
@@ -1770,10 +1799,15 @@ const evtLabelsPlugin={
 const vLinesPlugin={
   id:'vLines',
   afterDraw(chart){
-    const {ctx,chartArea:{top,bottom,left,right},scales:{x}}=chart;
+    // Só atua em gráficos com eixo x linear (o gráfico de ciclos).
+    // Radar e outros sem eixo 'x' são ignorados — evita TypeError em getPixelForValue.
+    const x=chart.scales&&chart.scales.x;
+    if(!x||typeof x.getPixelForValue!=='function') return;
+    if(chart._todayD4===undefined && chart._botD4===undefined) return;
+    const {ctx,chartArea:{top,bottom,left,right}}=chart;
     const vline=(xv,color,lbl,dash)=>{
       const xp=x.getPixelForValue(xv);
-      if(xp<left||xp>right) return;
+      if(!isFinite(xp)||xp<left||xp>right) return;
       ctx.save();ctx.beginPath();ctx.moveTo(xp,top);ctx.lineTo(xp,bottom);
       ctx.setLineDash(dash||[4,4]);ctx.strokeStyle=color;ctx.lineWidth=1;ctx.stroke();
       if(lbl){ctx.fillStyle=color;ctx.font='9px JetBrains Mono';ctx.textAlign='center';ctx.fillText(lbl,xp,top+10);}
@@ -2223,6 +2257,16 @@ function imXMin(r){
   if(r==='max') return ts[0];
   return last - parseInt(r)*86400000;
 }
+// Estende o eixo X além do último dado, criando uma área "futura" em preto
+// que o usuário pode arrastar para visualizar/imaginar a trajetória adiante.
+function imXMax(r){
+  if(!imDataCache||!imDataCache.ts.length) return undefined;
+  const ts=imDataCache.ts; const last=ts[ts.length-1];
+  const min=imXMin(r); const span=(min!==undefined)?(last-min):(180*86400000);
+  // almofada futura = ~35% da janela visível (mínimo 60 dias)
+  const pad=Math.max(span*0.35, 60*86400000);
+  return last+pad;
+}
 
 function buildImChart(){
   const data=imDataCache; if(!data) return;
@@ -2244,6 +2288,7 @@ function buildImChart(){
       interaction:{mode:'index',intersect:false},
       plugins:{
         legend:{display:false},
+        title:{display:true,text:'Indicadores de Mercado — preço vs. on-chain ao longo do tempo',color:'#cdd0e0',font:{family:"'JetBrains Mono',monospace",size:12,weight:'normal'},padding:{bottom:10}},
         tooltip:{
           backgroundColor:'#1a1a26',titleColor:'#cdd0e0',bodyColor:'#8890aa',
           borderColor:'rgba(255,255,255,0.1)',borderWidth:1,padding:10,
@@ -2261,10 +2306,10 @@ function buildImChart(){
             labelColor:item=>({backgroundColor:item.dataset.borderColor,borderColor:'transparent'})
           }
         },
-        zoom:{zoom:{wheel:{enabled:true,speed:0.08},pinch:{enabled:true},mode:'x'},pan:{enabled:true,mode:'x'}}
+        zoom:{zoom:{wheel:{enabled:true,speed:0.08},pinch:{enabled:true},mode:'x'},pan:{enabled:true,mode:'x'},limits:{x:{minRange:14*86400000}}}
       },
       scales:{
-        x:{type:'timeseries',min:imXMin(imRange),time:{unit:'month',displayFormats:{month:'MMM yy'}},adapters:{date:{}},
+        x:{type:'timeseries',min:imXMin(imRange),max:imXMax(imRange),time:{unit:'month',displayFormats:{month:'MMM yy'}},adapters:{date:{}},
           grid:{color:'rgba(255,255,255,0.03)'},
           ticks:{color:'#55576e',font:{family:'JetBrains Mono',size:9},maxTicksLimit:12}},
         yPrice:{type:'logarithmic',position:'left',
@@ -2320,33 +2365,16 @@ async function buildIndMarketChart(){
 }
 
 // ── VEREDITO ──────────────────────────────────────────────────
-function buildVeredito(p,dd,cycPct,dAth4,daysToBot,mvrz){
-  const fg=liveData.fgVal||50;
-  const ddA=Math.abs(dd);
-  // usa on-chain real quando o Worker respondeu; senão proxy/estimativa
-  const mvrvVal=(liveData.onchainOk&&liveData.mvrvReal!==null)?liveData.mvrvReal:mvrz;
-  const mvrvReal=(liveData.onchainOk&&liveData.mvrvReal!==null);
-  const nuplVal=(liveData.onchainOk&&liveData.nupl!==null)?liveData.nupl:0.35;
-  const nuplReal=(liveData.onchainOk&&liveData.nupl!==null);
-  const piReal=(liveData.onchainOk&&liveData.picycle!==null);
-  // NUPL score: quanto mais alto o NUPL (euforia), menor o score de compra
-  const nuplScore=nuplVal<0?90:nuplVal<0.25?75:nuplVal<0.5?55:nuplVal<0.75?35:20;
-  const factors=[
-    {name:'Posição no ciclo',score:cycPct<52?72:cycPct<68?52:cycPct<80?38:28,note:'Dia '+db(HALVD.h4,new Date())+' de ~1460'},
-    {name:'Drawdown do ATH',score:ddA<10?45:ddA<25?52:ddA<40?65:ddA<55?78:88,note:dd.toFixed(1)+'% do ATH'},
-    {name:'NUPL',score:nuplScore,note:(nuplReal?'':'~')+nuplVal.toFixed(2)+(nuplReal?' (on-chain)':' (est.)')},
-    {name:'Mayer Multiple',score:liveData.mayer<0.8?85:liveData.mayer<1.0?72:liveData.mayer<1.5?52:35,note:'~'+liveData.mayer},
-    {name:'Fear & Greed',score:fg<=25?80:fg<=45?68:fg<=55?52:fg<=75?38:22,note:fg+'/100'},
-    {name:'Pi Cycle Top',score:60,note:piReal?liveData.picycle.toFixed(2)+' (on-chain)':'Sem novo cruzamento'},
-    {name:'Fundo projetado',score:daysToBot>100?55:daysToBot>30?65:daysToBot>0?72:60,note:daysToBot>0?'em '+daysToBot+'d':'proj. atingido'},
-    {name:'MVRV',score:mvrvVal<1?90:mvrvVal<2?78:mvrvVal<3?60:mvrvVal<4?38:20,note:(mvrvReal?'':'~')+mvrvVal.toFixed(2)+(mvrvReal?' (on-chain)':' (est.)')},
-    {name:'Dias desde ATH',score:dAth4<90?42:dAth4<200?55:dAth4<300?65:dAth4<400?72:78,note:dAth4+'d desde ATH'},
-  ];
-  const avg=Math.round(factors.reduce((s,f)=>s+f.score,0)/factors.length);
+// Estado da seleção de indicadores (reset ao recarregar a página — sem persistência).
+// Guarda os NOMES dos fatores que o usuário DESMARCOU.
+const verdictDisabled = new Set();
+// Guarda os últimos fatores calculados, para recálculo ao marcar/desmarcar.
+let lastFactors = [];
+
+// Aplica o score (0-100) a todos os elementos visuais do veredito.
+function renderVerdict(avg, activeCount, totalCount){
   const needle=document.getElementById('verd-needle');
   if(needle) needle.style.left=avg+'%';
-
-  // Hero verdict
   const hvs=document.getElementById('hero-verd-signal');
   const hvsc=document.getElementById('hero-verd-score');
   const hv=document.getElementById('hero-verdict-btn');
@@ -2361,7 +2389,6 @@ function buildVeredito(p,dd,cycPct,dAth4,daysToBot,mvrz){
     if(hv){hv.style.background='rgba(255,77,109,0.1)';hv.style.borderColor='rgba(255,77,109,0.3)';}
   }
   if(hvsc) hvsc.textContent='score '+avg+'/100 ↓';
-
   const banner=document.getElementById('verd-banner');
   const bIcon=document.getElementById('verd-banner-icon');
   const bSig=document.getElementById('verd-banner-signal');
@@ -2369,8 +2396,6 @@ function buildVeredito(p,dd,cycPct,dAth4,daysToBot,mvrz){
   const vTitle=document.getElementById('verd-title');
   const vSig=document.getElementById('verd-signal');
   const vSub=document.getElementById('verd-sub');
-  const vFactors=document.getElementById('verd-factors');
-  const vReason=document.getElementById('verd-reason');
   if(avg>=63){
     if(banner) banner.className='verd-banner buy';
     if(bIcon) bIcon.textContent='🟢';
@@ -2396,11 +2421,85 @@ function buildVeredito(p,dd,cycPct,dAth4,daysToBot,mvrz){
     if(vSig){vSig.textContent='🔴 CAUTELA / VENDA PARCIAL';vSig.style.color='var(--red)';}
     if(vSub) vSub.textContent='Score: '+avg+'/100 — Cautela';
   }
-  // vFactors: f.name is a static string, f.note is built from validated numbers only
-  if(vFactors) vFactors.innerHTML=factors.map(f=>{
+}
+
+// Renderiza os fatores como checkboxes e a explicação dinâmica abaixo.
+function renderFactorControls(){
+  const vFactors=document.getElementById('verd-factors');
+  const vSel=document.getElementById('verd-selection');
+  if(!vFactors) return;
+  const active=lastFactors.filter(f=>!verdictDisabled.has(f.name));
+  // checkboxes
+  vFactors.innerHTML=lastFactors.map(f=>{
+    const on=!verdictDisabled.has(f.name);
     const c=f.score>=63?'var(--green)':f.score>=45?'var(--yellow)':'var(--red)';
-    return`<div class="vf"><div class="vf-name">${f.name}</div><div class="vf-val" style="color:${c}">${f.score}/100 · ${f.note}</div></div>`;
+    // data-factor com nome; o handler usa o próprio dataset (sem injeção de string)
+    return`<label class="vf vf-toggle${on?'':' off'}"><input type="checkbox" ${on?'checked':''} data-factor="${f.name.replace(/"/g,'')}" onchange="toggleFactor(this)"><span class="vf-body"><span class="vf-name">${f.name}</span><span class="vf-val" style="color:${c}">${f.score}/100 · ${f.note}</span></span></label>`;
   }).join('');
+  // explicação dinâmica
+  if(vSel){
+    const total=lastFactors.length, n=active.length;
+    if(n===0){
+      vSel.innerHTML='<strong style="color:var(--yellow)">Nenhum indicador selecionado.</strong> Marque ao menos um para calcular o score.';
+    }else{
+      const avg=Math.round(active.reduce((s,f)=>s+f.score,0)/n);
+      const zona=avg>=63?'acumulação':avg>=45?'neutra/transição':'cautela';
+      const allOn=n===total;
+      vSel.innerHTML=`Score atual baseado em <strong>${n} de ${total}</strong> indicadores`+
+        (allOn?' (todos)':' selecionados')+`. Resultado: <strong>${avg}/100</strong>, zona de <strong>${zona}</strong>. `+
+        (allOn?'':'Você ajustou a seleção — ')+
+        `<button class="vf-reset" onclick="resetFactors()">restaurar todos</button>`;
+    }
+  }
+}
+
+// Recalcula score a partir dos fatores ativos e atualiza tudo.
+function recomputeVerdict(){
+  const active=lastFactors.filter(f=>!verdictDisabled.has(f.name));
+  const avg=active.length?Math.round(active.reduce((s,f)=>s+f.score,0)/active.length):0;
+  renderVerdict(avg, active.length, lastFactors.length);
+  renderFactorControls();
+}
+
+// Handlers chamados pelos checkboxes (usam dataset, não string interpolada).
+function toggleFactor(el){
+  const name=el.getAttribute('data-factor');
+  if(!name) return;
+  if(el.checked) verdictDisabled.delete(name); else verdictDisabled.add(name);
+  recomputeVerdict();
+}
+function resetFactors(){
+  verdictDisabled.clear();
+  recomputeVerdict();
+}
+
+function buildVeredito(p,dd,cycPct,dAth4,daysToBot,mvrz){
+  const fg=liveData.fgVal||50;
+  const ddA=Math.abs(dd);
+  // usa on-chain real quando o Worker respondeu; senão proxy/estimativa
+  const mvrvVal=(liveData.onchainOk&&liveData.mvrvReal!==null)?liveData.mvrvReal:mvrz;
+  const mvrvReal=(liveData.onchainOk&&liveData.mvrvReal!==null);
+  const nuplVal=(liveData.onchainOk&&liveData.nupl!==null)?liveData.nupl:0.35;
+  const nuplReal=(liveData.onchainOk&&liveData.nupl!==null);
+  const piReal=(liveData.onchainOk&&liveData.picycle!==null);
+  // NUPL score: quanto mais alto o NUPL (euforia), menor o score de compra
+  const nuplScore=nuplVal<0?90:nuplVal<0.25?75:nuplVal<0.5?55:nuplVal<0.75?35:20;
+  const factors=[
+    {name:'Posição no ciclo',score:cycPct<52?72:cycPct<68?52:cycPct<80?38:28,note:'Dia '+db(HALVD.h4,new Date())+' de ~1460'},
+    {name:'Drawdown do ATH',score:ddA<10?45:ddA<25?52:ddA<40?65:ddA<55?78:88,note:dd.toFixed(1)+'% do ATH'},
+    {name:'NUPL',score:nuplScore,note:(nuplReal?'':'~')+nuplVal.toFixed(2)+(nuplReal?' (on-chain)':' (est.)')},
+    {name:'Mayer Multiple',score:liveData.mayer<0.8?85:liveData.mayer<1.0?72:liveData.mayer<1.5?52:35,note:'~'+liveData.mayer},
+    {name:'Fear & Greed',score:fg<=25?80:fg<=45?68:fg<=55?52:fg<=75?38:22,note:fg+'/100'},
+    {name:'Pi Cycle Top',score:60,note:piReal?liveData.picycle.toFixed(2)+' (on-chain)':'Sem novo cruzamento'},
+    {name:'Fundo projetado',score:daysToBot>100?55:daysToBot>30?65:daysToBot>0?72:60,note:daysToBot>0?'em '+daysToBot+'d':'proj. atingido'},
+    {name:'MVRV',score:mvrvVal<1?90:mvrvVal<2?78:mvrvVal<3?60:mvrvVal<4?38:20,note:(mvrvReal?'':'~')+mvrvVal.toFixed(2)+(mvrvReal?' (on-chain)':' (est.)')},
+    {name:'Dias desde ATH',score:dAth4<90?42:dAth4<200?55:dAth4<300?65:dAth4<400?72:78,note:dAth4+'d desde ATH'},
+  ];
+  lastFactors=factors;
+  // recalcula respeitando a seleção atual do usuário (mantida durante a sessão)
+  recomputeVerdict();
+
+  const vReason=document.getElementById('verd-reason');
   // vReason: all values are internal numbers/dates — no external input
   if(vReason) vReason.innerHTML=`
     <strong style="color:var(--text)">Análise:</strong><br>
