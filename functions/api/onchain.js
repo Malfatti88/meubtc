@@ -34,7 +34,7 @@ const UPSTREAM_TIMEOUT_MS = 8000;
 const METRICS = {
   mvrv:    ['mvrv'],                                  // MVRV Z-Score
   nupl:    ['nupl'],                                  // Net Unrealized Profit/Loss
-  picycle: ['pi-cycle'],                              // Pi Cycle Top
+  picycle: ['pi-cycle','pi_cycle','picycle','pi-cycle-top','pi-cycle-top-indicator'], // Pi Cycle Top
   realized:['realized-price','realized_price','realized','realised-price','realizedprice','realized-price-usd','rprice'], // Preço Realizado (US$)
 };
 
@@ -100,6 +100,35 @@ async function fetchUpstreamMetric(slugs, token, diag) {
   return null;
 }
 
+// Busca a SÉRIE HISTÓRICA do preço realizado (sem /last). Retorna [{t, v}].
+// Normaliza diferentes formatos: array de {d/date, <valor>} ou {data:[...]}.
+async function fetchRealizedHistory(token) {
+  const slugs = ['realized-price','realized_price','realized'];
+  for (const base of BGEO_BASES) {
+    for (const slug of slugs) {
+      const payload = await fetchOne(`${base}${slug}`, token);
+      const arr = Array.isArray(payload) ? payload
+                : (payload && Array.isArray(payload.data) ? payload.data : null);
+      if (!arr || arr.length < 30) continue;
+      const out = [];
+      for (const row of arr) {
+        if (!row || typeof row !== 'object') continue;
+        // acha a data
+        let t = null, v = null;
+        for (const [k, val] of Object.entries(row)) {
+          if (/^(d|date|day|t|time)$/i.test(k)) { t = val; continue; }
+          if (/^(unixts|timestamp|ts)$/i.test(k)) { if(t===null) t = val; continue; }
+          const n = sanitizeNumber(val, 0, 5000000);
+          if (n !== null && v === null) v = n;
+        }
+        if (t !== null && v !== null) out.push({ t: String(t), v });
+      }
+      if (out.length >= 30) return out;
+    }
+  }
+  return null;
+}
+
 // Extrai o primeiro valor numérico do payload que não seja data/timestamp.
 // A BGeometrics retorna algo como { d:'2026-06-25', unixTs:'...', <metric>:'0.41' }.
 function extractValue(payload) {
@@ -137,6 +166,28 @@ async function buildFreshData(token, diagOut) {
 // Entry point da Pages Function. Responde GET /api/onchain.
 export async function onRequestGet(context) {
   const { env, request } = context;
+
+  // Série histórica: /api/onchain?series=realized retorna o histórico do
+  // preço realizado [{t,v}] (para a linha MVRV=1 no gráfico de ciclos).
+  // Cacheado 1x/dia no KV sob outra chave.
+  try {
+    const u = new URL(request.url);
+    if (u.searchParams.get('series') === 'realized') {
+      const SKEY = 'onchain:realized-history';
+      let hist = null;
+      try { const raw = await env.ONCHAIN_KV.get(SKEY); if (raw) hist = JSON.parse(raw); } catch (_e) {}
+      const fresh = hist && (Date.now() - hist.ts) < CACHE_TTL_SECONDS * 1000;
+      if (fresh) return json({ ts: hist.ts, series: hist.series, source: 'cache' }, 200);
+      const series = await fetchRealizedHistory(env.BGEO_TOKEN);
+      if (series) {
+        const payload = { ts: Date.now(), series };
+        try { await env.ONCHAIN_KV.put(SKEY, JSON.stringify(payload), { expirationTtl: CACHE_TTL_SECONDS + 3600 }); } catch (_e) {}
+        return json({ ts: payload.ts, series, source: 'BGeometrics' }, 200);
+      }
+      if (hist) return json({ ts: hist.ts, series: hist.series, stale: true, source: 'stale' }, 200);
+      return json({ error: 'series_unavailable', series: [] }, 503);
+    }
+  } catch (_e) { /* segue */ }
 
   // Modo diagnóstico: /api/onchain?debug=1 mostra qual endpoint funcionou
   // para cada métrica (NÃO expõe o token). Use só para depurar e remova
