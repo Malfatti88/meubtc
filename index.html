@@ -92,7 +92,9 @@ body.light-mode .theme-toggle .tt-knob{transform:translateX(20px)}
 .tb-help:hover{color:var(--text);border-color:var(--border2)}
 
 /* ── PRICE STRIP ── */
-.price-strip{background:var(--bg2);border-bottom:1px solid var(--border);display:grid;grid-template-columns:repeat(7,1fr);overflow:hidden}
+.price-strip{background:var(--bg2);border-bottom:1px solid var(--border);display:grid;grid-template-columns:repeat(6,1fr);overflow:hidden}
+@media(max-width:900px){.price-strip{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:560px){.price-strip{grid-template-columns:repeat(2,1fr)}}
 .ps-cell{padding:10px 14px;border-right:1px solid var(--border);display:flex;flex-direction:column;gap:3px}
 .ps-cell:last-child{border-right:none}
 .ps-label{font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
@@ -172,9 +174,9 @@ body.light-mode .theme-toggle .tt-knob{transform:translateX(20px)}
 @media(max-width:1100px){.ind-grid-new{grid-template-columns:repeat(2,1fr)}.ind-grid-new-row2{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:600px){.ind-grid-new{grid-template-columns:1fr}.ind-grid-new-row2{grid-template-columns:1fr}}
 /* Indicator card new style */
-.ind-card-new{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-lg);padding:0;overflow:hidden;transition:border-color .2s}
+.ind-card-new{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-lg);padding:0;overflow:visible;transition:border-color .2s}
 .ind-card-new:hover{border-color:var(--border2)}
-.ind-card-new-header{padding:10px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+.ind-card-new-header{padding:10px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);border-radius:var(--r-lg) var(--r-lg) 0 0}
 .ind-card-new-left{display:flex;align-items:center;gap:8px}
 .ind-cb{width:16px;height:16px;border-radius:3px;border:1px solid var(--border2);background:var(--bg3);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:9px;font-weight:900;color:transparent;transition:all .2s;flex-shrink:0}
 .ind-cb.checked{border-color:var(--orange);color:var(--orange)}
@@ -338,6 +340,7 @@ body.light-mode .theme-toggle .tt-knob{transform:translateX(20px)}
 .info-tip:hover{color:var(--orange);border-color:var(--orange-glow);background:var(--orange-dim)}
 .info-tip .tip-body{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);width:230px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r-md);padding:10px 12px;font-size:11px;font-weight:400;line-height:1.5;color:var(--text);text-transform:none;letter-spacing:0;text-align:left;opacity:0;visibility:hidden;transition:opacity .2s,visibility .2s;z-index:300;box-shadow:0 8px 28px rgba(0,0,0,.55);pointer-events:none}
 .info-tip:hover .tip-body{opacity:1;visibility:visible}
+.info-tip:hover{z-index:400}
 
 /* ── MISC ── */
 .sec-label{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:8px;margin-bottom:8px}
@@ -472,6 +475,9 @@ tr.hl td{background:rgba(247,147,26,.04)}
   .bola-proj-cells{grid-template-columns:1fr}
   .bola-hero{margin:20px auto}
 }
+.bola-score-radar{display:grid;grid-template-columns:200px 1fr;gap:20px;align-items:start}
+.bola-score-box{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r-md);padding:18px 14px}
+@media(max-width:700px){.bola-score-radar{grid-template-columns:1fr}}
 </style>
 </style>
 </head>
@@ -533,6 +539,11 @@ tr.hl td{background:rgba(247,147,26,.04)}
     <div class="ps-sub">via CoinGecko</div>
   </div>
   <div class="ps-cell">
+    <div class="ps-label">ATH do Ciclo 4</div>
+    <div class="ps-val">$126.198</div>
+    <div class="ps-sub">06/out/2025</div>
+  </div>
+  <div class="ps-cell">
     <div class="ps-label">Ciclo atual</div>
     <div class="ps-val">4 (2024–2026)</div>
     <div class="ps-sub" id="ps-cycle-day">dia — do halving</div>
@@ -556,18 +567,8 @@ tr.hl td{background:rgba(247,147,26,.04)}
   <!-- Painel Executivo (fatos) -->
   <div style="margin-top:8px">
     <div class="exec-panel">
-      <div class="exec-panel-header">⬆ Painel Executivo</div>
+      <div class="exec-panel-header">⬆ Indicadores</div>
       <div class="exec-cards">
-        <div class="exec-card">
-          <div class="exec-card-lbl">Preço Atual BTC</div>
-          <div class="exec-card-val" id="ep-price">—</div>
-          <div class="exec-card-sub" id="ep-price-sub" style="color:var(--green)">+0,00% (24h)</div>
-        </div>
-        <div class="exec-card">
-          <div class="exec-card-lbl">ATH do Ciclo 4</div>
-          <div class="exec-card-val">$126.198</div>
-          <div class="exec-card-sub">06/out/2025</div>
-        </div>
         <div class="exec-card">
           <div class="exec-card-lbl">Drawdown Atual</div>
           <div class="exec-card-val" id="ep-dd" style="color:var(--red)">—</div>
@@ -578,15 +579,143 @@ tr.hl td{background:rgba(247,147,26,.04)}
           <div class="exec-card-val" id="ep-fg" style="color:var(--yellow)">—</div>
           <div class="exec-card-sub" id="ep-fg-class">Carregando…</div>
         </div>
-        <div class="exec-card" style="align-items:center">
-          <div class="exec-card-lbl" style="text-align:center">Score Geral do Ciclo</div>
-          <canvas id="gaugeCanvas" width="80" height="80" style="margin:4px 0"></canvas>
-          <div class="exec-card-sub" id="ep-score-label" style="color:var(--green)">Zona Favorável</div>
+        <div class="exec-card">
+          <div class="exec-card-lbl">MVRV Z-Score</div>
+          <div class="exec-card-val" id="ep-mvrv" style="color:var(--green)">—</div>
+          <div class="exec-card-sub" id="ep-mvrv-sub">on-chain</div>
+        </div>
+        <div class="exec-card">
+          <div class="exec-card-lbl">Mayer Multiple</div>
+          <div class="exec-card-val" id="ep-mayer" style="color:var(--green)">—</div>
+          <div class="exec-card-sub" id="ep-mayer-sub">vs MM200d</div>
         </div>
       </div>
     </div>
   </div>
 
+  <!-- Halvings table -->
+  <section id="halvings" style="margin-bottom:40px">
+  <div class="sec-label">Dados históricos</div>
+  <div class="sec-title">Tabela de Halvings</div>
+  <div class="sec-sub">Comparativo completo de todos os ciclos</div>
+
+  <!-- Desktop table -->
+  <div class="table-wrap"><table>
+    <thead><tr><th>#</th><th>Data</th><th>Preço no Halving</th><th>ATH do Ciclo</th><th>Dias até ATH</th><th>Multiplicador</th><th>Fundo Pós-ATH</th><th>Queda do ATH</th><th>Dias ATH→Fundo</th></tr></thead>
+    <tbody>
+      <tr><td><span class="badge b-blue">1º</span></td><td>28 nov 2012</td><td>$12,35</td><td><strong>$1.242</strong> <small style="color:var(--muted)">nov/13</small></td><td>516 dias</td><td class="up">+100x</td><td>$152 <small style="color:var(--muted)">jan/15</small></td><td class="dn">−87%</td><td>411 dias</td></tr>
+      <tr><td><span class="badge b-green">2º</span></td><td>09 jul 2016</td><td>$650</td><td><strong>$19.783</strong> <small style="color:var(--muted)">dez/17</small></td><td>526 dias</td><td class="up">+30x</td><td>$3.122 <small style="color:var(--muted)">dez/18</small></td><td class="dn">−84%</td><td>363 dias</td></tr>
+      <tr><td><span class="badge b-yellow">3º</span></td><td>11 mai 2020</td><td>$8.787</td><td><strong>$68.789</strong> <small style="color:var(--muted)">nov/21</small></td><td>546 dias</td><td class="up">+7,8x</td><td>$15.760 <small style="color:var(--muted)">nov/22</small></td><td class="dn">−77%</td><td>376 dias</td></tr>
+      <tr class="hl"><td><span class="badge b-now">4º ●</span></td><td>19 abr 2024</td><td>$63.800</td><td><strong>$126.198</strong> <small style="color:var(--muted)">out/25</small></td><td>535 dias</td><td class="up">+1,98x</td><td id="td-bot-real"><span style="color:var(--text)">—</span><br><small style="color:var(--muted-soft);font-size:9px" id="td-bot-asof"></small></td><td class="dn" id="td-dd-real">—</td><td id="td-days-real" style="color:var(--text)">—</td></tr>
+    </tbody>
+  </table></div>
+
+  <!-- Mobile cards (shown on mobile, hidden on desktop) -->
+  <div class="table-cards">
+    <div class="tc">
+      <div class="tc-header">
+        <div class="tc-cycle">1º Halving · 2012</div>
+        <span class="badge b-blue">1º</span>
+      </div>
+      <div class="tc-grid">
+        <div class="tc-item"><div class="tc-label">Preço no halving</div><div class="tc-val">$12,35</div></div>
+        <div class="tc-item"><div class="tc-label">ATH do ciclo</div><div class="tc-val up">$1.242</div></div>
+        <div class="tc-item"><div class="tc-label">Multiplicador</div><div class="tc-val up">+100x</div></div>
+        <div class="tc-item"><div class="tc-label">Queda do ATH</div><div class="tc-val dn">−87%</div></div>
+        <div class="tc-item"><div class="tc-label">Dias até ATH</div><div class="tc-val">516 dias</div></div>
+        <div class="tc-item"><div class="tc-label">Fundo pós-ATH</div><div class="tc-val">$152</div></div>
+      </div>
+    </div>
+    <div class="tc">
+      <div class="tc-header">
+        <div class="tc-cycle">2º Halving · 2016</div>
+        <span class="badge b-green">2º</span>
+      </div>
+      <div class="tc-grid">
+        <div class="tc-item"><div class="tc-label">Preço no halving</div><div class="tc-val">$650</div></div>
+        <div class="tc-item"><div class="tc-label">ATH do ciclo</div><div class="tc-val up">$19.783</div></div>
+        <div class="tc-item"><div class="tc-label">Multiplicador</div><div class="tc-val up">+30x</div></div>
+        <div class="tc-item"><div class="tc-label">Queda do ATH</div><div class="tc-val dn">−84%</div></div>
+        <div class="tc-item"><div class="tc-label">Dias até ATH</div><div class="tc-val">526 dias</div></div>
+        <div class="tc-item"><div class="tc-label">Fundo pós-ATH</div><div class="tc-val">$3.122</div></div>
+      </div>
+    </div>
+    <div class="tc">
+      <div class="tc-header">
+        <div class="tc-cycle">3º Halving · 2020</div>
+        <span class="badge b-yellow">3º</span>
+      </div>
+      <div class="tc-grid">
+        <div class="tc-item"><div class="tc-label">Preço no halving</div><div class="tc-val">$8.787</div></div>
+        <div class="tc-item"><div class="tc-label">ATH do ciclo</div><div class="tc-val up">$68.789</div></div>
+        <div class="tc-item"><div class="tc-label">Multiplicador</div><div class="tc-val up">+7,8x</div></div>
+        <div class="tc-item"><div class="tc-label">Queda do ATH</div><div class="tc-val dn">−77%</div></div>
+        <div class="tc-item"><div class="tc-label">Dias até ATH</div><div class="tc-val">546 dias</div></div>
+        <div class="tc-item"><div class="tc-label">Fundo pós-ATH</div><div class="tc-val">$15.760</div></div>
+      </div>
+    </div>
+    <div class="tc hl">
+      <div class="tc-header">
+        <div class="tc-cycle">4º Halving · 2024 <span class="live-dot" style="display:inline-block;vertical-align:middle;margin-left:6px"></span></div>
+        <span class="badge b-now">4º ●</span>
+      </div>
+      <div class="tc-grid">
+        <div class="tc-item"><div class="tc-label">Preço no halving</div><div class="tc-val">$63.800</div></div>
+        <div class="tc-item"><div class="tc-label">ATH do ciclo</div><div class="tc-val up">$126.198</div></div>
+        <div class="tc-item"><div class="tc-label">Multiplicador</div><div class="tc-val up">+1,98x</div></div>
+        <div class="tc-item"><div class="tc-label">Drawdown atual</div><div class="tc-val dn" id="tc-dd">—</div></div>
+        <div class="tc-item"><div class="tc-label">Dias até ATH</div><div class="tc-val">535 dias</div></div>
+        <div class="tc-item"><div class="tc-label">Menor valor (fundo)</div><div class="tc-val" id="tc-bot-real">—</div><div class="tc-label" style="font-size:9px;margin-top:2px" id="tc-bot-asof"></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+  <div class="compare-box">
+    <div class="cmp-title">Dias do halving até o ATH — comparação entre ciclos</div>
+    <div class="cmp-row"><div class="cmp-lbl" style="color:var(--c1)">1º · 2012</div><div class="cmp-track"><div class="cmp-fill" style="width:97%;background:rgba(123,127,255,.22);color:var(--c1)">516 dias</div></div><div class="cmp-days">516 d</div></div>
+    <div class="cmp-row"><div class="cmp-lbl" style="color:var(--c2)">2º · 2016</div><div class="cmp-track"><div class="cmp-fill" style="width:99%;background:rgba(41,217,194,.18);color:var(--c2)">526 dias</div></div><div class="cmp-days">526 d</div></div>
+    <div class="cmp-row"><div class="cmp-lbl" style="color:var(--c3)">3º · 2020</div><div class="cmp-track"><div class="cmp-fill" style="width:100%;background:rgba(61,220,132,.18);color:var(--c3)">546 dias</div></div><div class="cmp-days">546 d</div></div>
+    <div class="cmp-row"><div class="cmp-lbl" style="color:var(--orange)">4º · 2024</div><div class="cmp-track"><div class="cmp-fill" style="width:100%;background:rgba(247,147,26,.28);color:var(--orange)">535 dias</div></div><div class="cmp-days">535 d</div></div>
+    <hr class="cmp-divider">
+    <div class="cmp-row" id="cmp-c5-row">
+      <div class="cmp-lbl" style="color:var(--muted)">5º · 2028 <span style="font-size:10px">(proj.)</span></div>
+      <div class="cmp-track" style="position:relative">
+        <div id="cmp-c5-elapsed" style="height:100%;background:rgba(179,136,255,.15);color:var(--purple);display:flex;align-items:center;padding-left:8px;font-size:11px;font-weight:500;border-radius:3px 0 0 3px;position:absolute;left:0;top:0"></div>
+        <div id="cmp-c5-remain" style="height:100%;background:rgba(179,136,255,.07);border:1px dashed rgba(179,136,255,.3);color:rgba(179,136,255,.6);display:flex;align-items:center;padding-left:6px;font-size:11px;border-radius:0 3px 3px 0;position:absolute;top:0"></div>
+      </div>
+      <div class="cmp-days" id="cmp-c5-days" style="color:var(--purple)">—</div>
+    </div>
+    <div style="font-size:11px;color:var(--muted);margin-top:6px" id="cmp-c5-note">—</div>
+    <hr class="cmp-divider">
+    <div class="cmp-note">📊 Média 4 ciclos: 531 dias · Fundo proj. ciclo 4: 24 out 2026 (ATH + 383d) · Dias restantes: <span id="cmp-days-bot">—</span></div>
+  </div>
+
+  <div class="compare-box">
+    <div class="cmp-title">Dias do ATH até o fundo — comparação entre ciclos</div>
+    <div class="cmp-row">
+      <div class="cmp-lbl" style="color:var(--c1)">1º · 2012</div>
+      <div class="cmp-track"><div class="cmp-fill" style="width:100%;background:rgba(123,127,255,.22);color:var(--c1)">411 dias</div></div>
+      <div class="cmp-days">411 d</div>
+    </div>
+    <div class="cmp-row">
+      <div class="cmp-lbl" style="color:var(--c2)">2º · 2016</div>
+      <div class="cmp-track"><div class="cmp-fill" style="width:88%;background:rgba(41,217,194,.18);color:var(--c2)">363 dias</div></div>
+      <div class="cmp-days">363 d</div>
+    </div>
+    <div class="cmp-row">
+      <div class="cmp-lbl" style="color:var(--c3)">3º · 2020</div>
+      <div class="cmp-track"><div class="cmp-fill" style="width:91%;background:rgba(61,220,132,.18);color:var(--c3)">376 dias</div></div>
+      <div class="cmp-days">376 d</div>
+    </div>
+    <hr class="cmp-divider">
+    <div class="cmp-row">
+      <div class="cmp-lbl" style="color:var(--orange)">4º · 2024</div>
+      <div class="cmp-track"><div class="cmp-fill" id="bot-elapsed-bar" style="background:rgba(247,147,26,.4);color:var(--orange)">—</div></div>
+      <div class="cmp-days" id="bot-total-days" style="color:var(--orange)">—</div>
+    </div>
+    <div class="cmp-note" id="bot-cmp-note">📊 Média 3 ciclos (1-3): 383 dias até o fundo</div>
+  </div>
   <!-- Bottom row: Notícias + Bitcoinologia + Aviso/Share -->
   <div class="bottom-grid">
     <!-- Notícias -->
@@ -607,11 +736,8 @@ tr.hl td{background:rgba(247,147,26,.04)}
       </div>
       <div id="btc-list-mini"></div>
     </div>
-    <!-- Aviso + Compartilhe -->
+    <!-- Compartilhe -->
     <div class="aviso-card">
-      <div class="aviso-header">⚠ Aviso Importante</div>
-      <div class="aviso-body">Este site não constitui aconselhamento financeiro. Todas as informações são para fins educacionais e informativos apenas. Invista com responsabilidade e faça sua própria pesquisa.</div>
-      <button class="aviso-btn" onclick="this.style.display='none'">✓ Entendi</button>
       <div class="share-section">
         <div class="share-label">Compartilhe</div>
         <div class="share-icons">
@@ -672,194 +798,8 @@ tr.hl td{background:rgba(247,147,26,.04)}
     </div>
   </div>
 
-  <!-- Gráfico Candlestick Ciclo 4 -->
-  <div class="chart-section">
-    <div class="chart-header-new">
-      <div class="chart-sec-label">Ciclo 4 em detalhe</div>
-      <div class="chart-sec-title">Preço BTC — Projeção de Fundo</div>
-      <div class="chart-sec-sub">Candles diários via CoinGecko · Pontilhado = projeção · Escala linear</div>
-    </div>
-    <div class="chart-controls-new">
-      <span style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:10px;color:var(--muted)">
-        <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:14px;background:var(--green);border-radius:1px;display:inline-block"></span>Alta</span>
-        <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:14px;background:var(--red);border-radius:1px;display:inline-block"></span>Baixa</span>
-        <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;background:rgba(255,77,109,.3);border-radius:2px;display:inline-block"></span>Pessimista ~$29k</span>
-        <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;background:rgba(255,209,102,.25);border-radius:2px;display:inline-block"></span>Moderado ~$48k</span>
-        <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;background:rgba(0,217,126,.2);border-radius:2px;display:inline-block"></span>Otimista ~$69k</span>
-      </span>
-      <div class="ctrl-sep-new"></div>
-      <select id="c4-range" onchange="onC4RangeChange()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r-sm);color:var(--muted);font-family:var(--mono);font-size:11px;padding:5px 10px;cursor:pointer">
-        <option value="30" selected>30 dias</option><option value="90">90 dias</option><option value="180">180 dias</option><option value="365">1 ano</option><option value="max">Tudo</option>
-      </select>
-      <button class="btn-reset-new" onclick="resetC4Zoom()">↺ Reset zoom</button>
-      <span id="c4-status" style="font-size:10px;color:var(--muted-soft);font-style:italic">Carregando candles…</span>
-    </div>
-    <div class="chart-canvas-wrap" id="cycle4Chart-wrap" style="height:340px;position:relative">
-      <canvas id="cycle4Chart" style="position:absolute;top:0;left:0;width:100%;height:100%"></canvas>
-    </div>
-  </div>
-
-  <!-- Múltiplo do Preço no Halving -->
-  <div class="chart-section">
-    <div class="chart-header-new">
-      <div class="chart-sec-label">Visualização histórica</div>
-      <div class="chart-sec-title">Múltiplo do Preço no Halving</div>
-      <div class="chart-sec-sub">Eixo Y = múltiplo (1x = preço no halving) · Eixo X = dias desde o halving de cada ciclo</div>
-    </div>
-    <div class="chart-controls-new">
-      <span style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)">Ciclos:</span>
-      <button class="btn-ctrl-new active" id="btn-c1" onclick="toggleCycle(0)"><span class="dot-sw" style="background:#7b7fff"></span>1º 2012</button>
-      <button class="btn-ctrl-new active" id="btn-c2" onclick="toggleCycle(1)"><span class="dot-sw" style="background:#29d9c2"></span>2º 2016</button>
-      <button class="btn-ctrl-new active" id="btn-c3" onclick="toggleCycle(2)"><span class="dot-sw" style="background:#3ddc84"></span>3º 2020</button>
-      <button class="btn-ctrl-new active" id="btn-c4" onclick="toggleCycle(3)"><span class="dot-sw" style="background:#f7931a"></span>4º 2024</button>
-      <div class="ctrl-sep-new"></div>
-      <button class="btn-reset-new" onclick="resetZoom()">↺ Reset zoom</button>
-    </div>
-    <div class="chart-canvas-wrap" style="height:440px;position:relative">
-      <canvas id="mainChart" style="position:absolute;top:0;left:0;width:100%;height:100%"></canvas>
-    </div>
-    <div class="chart-legend-new">
-      <span class="leg-new"><span class="leg-line-new" style="background:#7b7fff"></span>Ciclo 1</span>
-      <span class="leg-new"><span class="leg-line-new" style="background:#29d9c2"></span>Ciclo 2</span>
-      <span class="leg-new"><span class="leg-line-new" style="background:#3ddc84"></span>Ciclo 3</span>
-      <span class="leg-new"><span class="leg-line-new" style="background:#f7931a"></span>Ciclo 4 (atual)</span>
-      <span class="leg-new"><span style="display:inline-block;width:18px;height:0;border-top:1px solid rgba(247,147,26,.4);vertical-align:middle;margin-right:4px"></span>1x = halving</span>
-    </div>
-  </div>
-
-  <!-- Halvings table -->
-  <section id="halvings" style="margin-bottom:40px">
-  <div class="sec-label">Dados históricos</div>
-  <div class="sec-title">Tabela de Halvings</div>
-  <div class="sec-sub">Comparativo completo de todos os ciclos</div>
-
-  <!-- Desktop table -->
-  <div class="table-wrap"><table>
-    <thead><tr><th>#</th><th>Data</th><th>Preço no Halving</th><th>ATH do Ciclo</th><th>Dias até ATH</th><th>Multiplicador</th><th>Fundo Pós-ATH</th><th>Queda do ATH</th><th>Dias ATH→Fundo</th></tr></thead>
-    <tbody>
-      <tr><td><span class="badge b-blue">1º</span></td><td>28 nov 2012</td><td>$12,35</td><td><strong>$1.242</strong> <small style="color:var(--muted)">nov/13</small></td><td>516 dias</td><td class="up">+100x</td><td>$152 <small style="color:var(--muted)">jan/15</small></td><td class="dn">−87%</td><td>411 dias</td></tr>
-      <tr><td><span class="badge b-green">2º</span></td><td>09 jul 2016</td><td>$650</td><td><strong>$19.783</strong> <small style="color:var(--muted)">dez/17</small></td><td>526 dias</td><td class="up">+30x</td><td>$3.122 <small style="color:var(--muted)">dez/18</small></td><td class="dn">−84%</td><td>363 dias</td></tr>
-      <tr><td><span class="badge b-yellow">3º</span></td><td>11 mai 2020</td><td>$8.787</td><td><strong>$68.789</strong> <small style="color:var(--muted)">nov/21</small></td><td>546 dias</td><td class="up">+7,8x</td><td>$15.760 <small style="color:var(--muted)">nov/22</small></td><td class="dn">−77%</td><td>376 dias</td></tr>
-      <tr class="hl"><td><span class="badge b-now">4º ●</span></td><td>19 abr 2024</td><td>$63.800</td><td><strong>$126.198</strong> <small style="color:var(--muted)">out/25</small></td><td>535 dias</td><td class="up">+1,98x</td><td style="color:var(--muted)" id="td-bot-proj">Proj. out/26</td><td style="color:var(--muted)" id="td-dd-proj">—</td><td style="color:var(--muted)">Proj. 383d</td></tr>
-    </tbody>
-  </table></div>
-
-  <!-- Mobile cards (shown on mobile, hidden on desktop) -->
-  <div class="table-cards">
-    <div class="tc">
-      <div class="tc-header">
-        <div class="tc-cycle">1º Halving · 2012</div>
-        <span class="badge b-blue">1º</span>
-      </div>
-      <div class="tc-grid">
-        <div class="tc-item"><div class="tc-label">Preço no halving</div><div class="tc-val">$12,35</div></div>
-        <div class="tc-item"><div class="tc-label">ATH do ciclo</div><div class="tc-val up">$1.242</div></div>
-        <div class="tc-item"><div class="tc-label">Multiplicador</div><div class="tc-val up">+100x</div></div>
-        <div class="tc-item"><div class="tc-label">Queda do ATH</div><div class="tc-val dn">−87%</div></div>
-        <div class="tc-item"><div class="tc-label">Dias até ATH</div><div class="tc-val">516 dias</div></div>
-        <div class="tc-item"><div class="tc-label">Fundo pós-ATH</div><div class="tc-val">$152</div></div>
-      </div>
-    </div>
-    <div class="tc">
-      <div class="tc-header">
-        <div class="tc-cycle">2º Halving · 2016</div>
-        <span class="badge b-green">2º</span>
-      </div>
-      <div class="tc-grid">
-        <div class="tc-item"><div class="tc-label">Preço no halving</div><div class="tc-val">$650</div></div>
-        <div class="tc-item"><div class="tc-label">ATH do ciclo</div><div class="tc-val up">$19.783</div></div>
-        <div class="tc-item"><div class="tc-label">Multiplicador</div><div class="tc-val up">+30x</div></div>
-        <div class="tc-item"><div class="tc-label">Queda do ATH</div><div class="tc-val dn">−84%</div></div>
-        <div class="tc-item"><div class="tc-label">Dias até ATH</div><div class="tc-val">526 dias</div></div>
-        <div class="tc-item"><div class="tc-label">Fundo pós-ATH</div><div class="tc-val">$3.122</div></div>
-      </div>
-    </div>
-    <div class="tc">
-      <div class="tc-header">
-        <div class="tc-cycle">3º Halving · 2020</div>
-        <span class="badge b-yellow">3º</span>
-      </div>
-      <div class="tc-grid">
-        <div class="tc-item"><div class="tc-label">Preço no halving</div><div class="tc-val">$8.787</div></div>
-        <div class="tc-item"><div class="tc-label">ATH do ciclo</div><div class="tc-val up">$68.789</div></div>
-        <div class="tc-item"><div class="tc-label">Multiplicador</div><div class="tc-val up">+7,8x</div></div>
-        <div class="tc-item"><div class="tc-label">Queda do ATH</div><div class="tc-val dn">−77%</div></div>
-        <div class="tc-item"><div class="tc-label">Dias até ATH</div><div class="tc-val">546 dias</div></div>
-        <div class="tc-item"><div class="tc-label">Fundo pós-ATH</div><div class="tc-val">$15.760</div></div>
-      </div>
-    </div>
-    <div class="tc hl">
-      <div class="tc-header">
-        <div class="tc-cycle">4º Halving · 2024 <span class="live-dot" style="display:inline-block;vertical-align:middle;margin-left:6px"></span></div>
-        <span class="badge b-now">4º ●</span>
-      </div>
-      <div class="tc-grid">
-        <div class="tc-item"><div class="tc-label">Preço no halving</div><div class="tc-val">$63.800</div></div>
-        <div class="tc-item"><div class="tc-label">ATH do ciclo</div><div class="tc-val up">$126.198</div></div>
-        <div class="tc-item"><div class="tc-label">Multiplicador</div><div class="tc-val up">+1,98x</div></div>
-        <div class="tc-item"><div class="tc-label">Drawdown atual</div><div class="tc-val dn" id="tc-dd">—</div></div>
-        <div class="tc-item"><div class="tc-label">Dias até ATH</div><div class="tc-val">535 dias</div></div>
-        <div class="tc-item"><div class="tc-label">Fundo proj.</div><div class="tc-val" style="color:var(--muted)" id="tc-bot">out/26</div></div>
-      </div>
-    </div>
-  </div>
-</section>
-
-  <div class="compare-box">
-    <div class="cmp-title">Dias do halving até o ATH — comparação entre ciclos</div>
-    <div class="cmp-row"><div class="cmp-lbl" style="color:var(--c1)">1º · 2012</div><div class="cmp-track"><div class="cmp-fill" style="width:97%;background:rgba(123,127,255,.22);color:var(--c1)">516 dias</div></div><div class="cmp-days">516 d</div></div>
-    <div class="cmp-row"><div class="cmp-lbl" style="color:var(--c2)">2º · 2016</div><div class="cmp-track"><div class="cmp-fill" style="width:99%;background:rgba(41,217,194,.18);color:var(--c2)">526 dias</div></div><div class="cmp-days">526 d</div></div>
-    <div class="cmp-row"><div class="cmp-lbl" style="color:var(--c3)">3º · 2020</div><div class="cmp-track"><div class="cmp-fill" style="width:100%;background:rgba(61,220,132,.18);color:var(--c3)">546 dias</div></div><div class="cmp-days">546 d</div></div>
-    <div class="cmp-row"><div class="cmp-lbl" style="color:var(--orange)">4º · 2024</div><div class="cmp-track"><div class="cmp-fill" style="width:100%;background:rgba(247,147,26,.28);color:var(--orange)">535 dias</div></div><div class="cmp-days">535 d</div></div>
-    <hr class="cmp-divider">
-    <div class="cmp-row" id="cmp-c5-row">
-      <div class="cmp-lbl" style="color:var(--muted)">5º · 2028 <span style="font-size:10px">(proj.)</span></div>
-      <div class="cmp-track" style="position:relative">
-        <div id="cmp-c5-elapsed" style="height:100%;background:rgba(179,136,255,.15);color:var(--purple);display:flex;align-items:center;padding-left:8px;font-size:11px;font-weight:500;border-radius:3px 0 0 3px;position:absolute;left:0;top:0"></div>
-        <div id="cmp-c5-remain" style="height:100%;background:rgba(179,136,255,.07);border:1px dashed rgba(179,136,255,.3);color:rgba(179,136,255,.6);display:flex;align-items:center;padding-left:6px;font-size:11px;border-radius:0 3px 3px 0;position:absolute;top:0"></div>
-      </div>
-      <div class="cmp-days" id="cmp-c5-days" style="color:var(--purple)">—</div>
-    </div>
-    <div style="font-size:11px;color:var(--muted);margin-top:6px" id="cmp-c5-note">—</div>
-    <hr class="cmp-divider">
-    <div class="cmp-note">📊 Média 4 ciclos: 531 dias · Fundo proj. ciclo 4: 24 out 2026 (ATH + 383d) · Dias restantes: <span id="cmp-days-bot">—</span></div>
-  </div>
-
-  <div class="compare-box">
-    <div class="cmp-title">Dias do ATH até o fundo — comparação entre ciclos</div>
-    <div class="cmp-row">
-      <div class="cmp-lbl" style="color:var(--c1)">1º · 2012</div>
-      <div class="cmp-track"><div class="cmp-fill" style="width:100%;background:rgba(123,127,255,.22);color:var(--c1)">411 dias</div></div>
-      <div class="cmp-days">411 d</div>
-    </div>
-    <div class="cmp-row">
-      <div class="cmp-lbl" style="color:var(--c2)">2º · 2016</div>
-      <div class="cmp-track"><div class="cmp-fill" style="width:88%;background:rgba(41,217,194,.18);color:var(--c2)">363 dias</div></div>
-      <div class="cmp-days">363 d</div>
-    </div>
-    <div class="cmp-row">
-      <div class="cmp-lbl" style="color:var(--c3)">3º · 2020</div>
-      <div class="cmp-track"><div class="cmp-fill" style="width:91%;background:rgba(61,220,132,.18);color:var(--c3)">376 dias</div></div>
-      <div class="cmp-days">376 d</div>
-    </div>
-    <hr class="cmp-divider">
-    <div class="cmp-row">
-      <div class="cmp-lbl" style="color:var(--orange)">4º · 2024</div>
-      <div class="cmp-track" style="display:flex;overflow:hidden;background:transparent;gap:0">
-        <div id="bot-elapsed-bar" style="height:18px;background:rgba(247,147,26,.4);color:var(--orange);display:flex;align-items:center;padding:0 6px;font-size:11px;font-weight:500;border-radius:3px 0 0 3px;white-space:nowrap;min-width:0;transition:width .4s"></div>
-        <div id="bot-remaining-bar" style="height:18px;background:rgba(90,171,255,.18);color:var(--blue);display:flex;align-items:center;padding:0 6px;font-size:11px;font-weight:500;border-radius:0 3px 3px 0;white-space:nowrap;border-left:1px dashed rgba(90,171,255,.5);transition:width .4s;flex:1"></div>
-      </div>
-      <div class="cmp-days" id="bot-total-days" style="color:var(--orange)">—</div>
-    </div>
-    <div class="cmp-note" id="bot-cmp-note">📊 Média 3 ciclos: 383 dias · Fundo proj. ciclo 4: 24 out 2026</div>
-  </div>
 
 
-</main>
-
-</div><!-- end view-graficos -->
-
-  </div><!-- halvings -->
 </div><!-- view-inner graficos -->
 </div><!-- view-graficos -->
 
@@ -1002,10 +942,15 @@ tr.hl td{background:rgba(247,147,26,.04)}
     </div>
     </div>
 
-    <!-- Radar + Fase Dominante (movido do dashboard) -->
+    <!-- Score Geral + Radar + Fase Dominante (movido do dashboard) -->
     <div class="bola-section bola-radar-section">
-      <div class="exec-subsec-title" style="margin-bottom:12px">Radar do Ciclo &amp; Fase Dominante</div>
-      <div class="exec-bottom" style="grid-template-columns:1fr">
+      <div class="exec-subsec-title" style="margin-bottom:12px">Score do Ciclo, Radar &amp; Fase Dominante</div>
+      <div class="bola-score-radar">
+        <div class="bola-score-box">
+          <div class="exec-card-lbl" style="text-align:center;margin-bottom:8px">Score Geral do Ciclo</div>
+          <canvas id="gaugeCanvas" width="120" height="120" style="margin:4px auto;display:block"></canvas>
+          <div class="exec-card-sub" id="ep-score-label" style="color:var(--green);text-align:center;margin-top:6px">Zona Favorável</div>
+        </div>
         <div class="exec-radar-box">
           <div class="exec-subsec-title">Radar do Ciclo</div>
           <div class="radar-wrap-new">
@@ -1178,6 +1123,68 @@ tr.hl td{background:rgba(247,147,26,.04)}
     💡 Para MVRV atingir 1,0 (fundo histórico), o BTC precisaria estar em aprox. <strong id="mvrv-price-floor">calculando…</strong>
     &nbsp;·&nbsp; Para MVRV 3,5 (topo): <span class="red" id="mvrv-price-top">calculando…</span>
     &nbsp;·&nbsp; estimativa via Mayer Multiple
+  </div>
+
+
+
+  <!-- Gráficos de Projeção (movidos de Gráficos) -->
+  <div class="ind-section-header" style="margin-top:32px">
+    <div class="ind-section-title">Gráficos de Projeção</div>
+    <div class="ind-section-sub" style="font-size:11px;color:var(--muted)">Cenários e múltiplos projetados a partir de ciclos anteriores</div>
+  </div>
+  <!-- Gráfico Candlestick Ciclo 4 -->
+  <div class="chart-section">
+    <div class="chart-header-new">
+      <div class="chart-sec-label">Ciclo 4 em detalhe</div>
+      <div class="chart-sec-title">Preço BTC — Projeção de Fundo</div>
+      <div class="chart-sec-sub">Candles diários via CoinGecko · Pontilhado = projeção · Escala linear</div>
+    </div>
+    <div class="chart-controls-new">
+      <span style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:10px;color:var(--muted)">
+        <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:14px;background:var(--green);border-radius:1px;display:inline-block"></span>Alta</span>
+        <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:14px;background:var(--red);border-radius:1px;display:inline-block"></span>Baixa</span>
+        <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;background:rgba(255,77,109,.3);border-radius:2px;display:inline-block"></span>Pessimista ~$29k</span>
+        <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;background:rgba(255,209,102,.25);border-radius:2px;display:inline-block"></span>Moderado ~$48k</span>
+        <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;background:rgba(0,217,126,.2);border-radius:2px;display:inline-block"></span>Otimista ~$69k</span>
+      </span>
+      <div class="ctrl-sep-new"></div>
+      <select id="c4-range" onchange="onC4RangeChange()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r-sm);color:var(--muted);font-family:var(--mono);font-size:11px;padding:5px 10px;cursor:pointer">
+        <option value="30" selected>30 dias</option><option value="90">90 dias</option><option value="180">180 dias</option><option value="365">1 ano</option><option value="max">Tudo</option>
+      </select>
+      <button class="btn-reset-new" onclick="resetC4Zoom()">↺ Reset zoom</button>
+      <span id="c4-status" style="font-size:10px;color:var(--muted-soft);font-style:italic">Carregando candles…</span>
+    </div>
+    <div class="chart-canvas-wrap" id="cycle4Chart-wrap" style="height:340px;position:relative">
+      <canvas id="cycle4Chart" style="position:absolute;top:0;left:0;width:100%;height:100%"></canvas>
+    </div>
+  </div>
+
+  <!-- Múltiplo do Preço no Halving -->
+  <div class="chart-section">
+    <div class="chart-header-new">
+      <div class="chart-sec-label">Visualização histórica</div>
+      <div class="chart-sec-title">Múltiplo do Preço no Halving</div>
+      <div class="chart-sec-sub">Eixo Y = múltiplo (1x = preço no halving) · Eixo X = dias desde o halving de cada ciclo</div>
+    </div>
+    <div class="chart-controls-new">
+      <span style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)">Ciclos:</span>
+      <button class="btn-ctrl-new active" id="btn-c1" onclick="toggleCycle(0)"><span class="dot-sw" style="background:#7b7fff"></span>1º 2012</button>
+      <button class="btn-ctrl-new active" id="btn-c2" onclick="toggleCycle(1)"><span class="dot-sw" style="background:#29d9c2"></span>2º 2016</button>
+      <button class="btn-ctrl-new active" id="btn-c3" onclick="toggleCycle(2)"><span class="dot-sw" style="background:#3ddc84"></span>3º 2020</button>
+      <button class="btn-ctrl-new active" id="btn-c4" onclick="toggleCycle(3)"><span class="dot-sw" style="background:#f7931a"></span>4º 2024</button>
+      <div class="ctrl-sep-new"></div>
+      <button class="btn-reset-new" onclick="resetZoom()">↺ Reset zoom</button>
+    </div>
+    <div class="chart-canvas-wrap" style="height:440px;position:relative">
+      <canvas id="mainChart" style="position:absolute;top:0;left:0;width:100%;height:100%"></canvas>
+    </div>
+    <div class="chart-legend-new">
+      <span class="leg-new"><span class="leg-line-new" style="background:#7b7fff"></span>Ciclo 1</span>
+      <span class="leg-new"><span class="leg-line-new" style="background:#29d9c2"></span>Ciclo 2</span>
+      <span class="leg-new"><span class="leg-line-new" style="background:#3ddc84"></span>Ciclo 3</span>
+      <span class="leg-new"><span class="leg-line-new" style="background:#f7931a"></span>Ciclo 4 (atual)</span>
+      <span class="leg-new"><span style="display:inline-block;width:18px;height:0;border-top:1px solid rgba(247,147,26,.4);vertical-align:middle;margin-right:4px"></span>1x = halving</span>
+    </div>
   </div>
 
 
@@ -1515,6 +1522,7 @@ async function bolaCheckAuth(){
           bolaConsent = j.consent;
           hide(gate); hide(optin); show(contentEl);
           bolaRenderUserBadge();
+          bolaBuildCharts();
           return;
         }
         // logado mas sem aceite → opt-in
@@ -1545,6 +1553,22 @@ function bolaRenderOptinUser(){
   }
   const ver = document.getElementById('bola-termo-ver');
   if(ver) ver.textContent = TERMO_VERSAO;
+}
+
+// Constrói os gráficos de projeção quando o conteúdo da Bola fica visível.
+// (Precisa estar visível para o canvas ter dimensões corretas.)
+function bolaBuildCharts(){
+  // sempre re-renderiza gauge e radar quando o conteúdo fica visível
+  // (estavam num container oculto, então o canvas precisava de dimensões)
+  setTimeout(()=>{
+    try{ if(gaugeInst){ gaugeInst.destroy(); gaugeInst=null; } recomputeVerdict(); }catch(e){console.warn('gauge/verdict',e);}
+    try{ buildRadar(); }catch(e){console.warn('buildRadar',e);}
+    if(!projChartsLoaded){
+      projChartsLoaded = true;
+      try{ buildChart(liveData.btcUSD); }catch(e){console.warn('buildChart',e);}
+      try{ buildCycle4Chart(liveData.btcUSD); }catch(e){console.warn('buildCycle4Chart',e);}
+    }
+  }, 80);
 }
 
 function bolaRenderUserBadge(){
@@ -1632,6 +1656,8 @@ const ATH4=ATH_C.c4;
 
 // ── SIDEBAR ───────────────────────────────────────────────────
 let chartsLoaded=false;
+let bearChartLoaded=false;
+let projChartsLoaded=false;
 // Instâncias de gráfico declaradas no topo: evita "temporal dead zone"
 // caso switchView/buildChart sejam chamados antes da definição original.
 let chartInst=null, c4ChartInst=null, radarInst=null;
@@ -1788,10 +1814,9 @@ function switchView(view){
   const b=document.getElementById('nav-'+view);
   if(b) b.classList.add('active');
   window.scrollTo(0,0);
-  if(view==='graficos'&&!chartsLoaded){
-    chartsLoaded=true;
-    try{ buildChart(liveData.btcUSD); }catch(e){console.warn('buildChart',e);}
-    try{ buildCycle4Chart(liveData.btcUSD); }catch(e){console.warn('buildCycle4Chart',e);}
+  // Gráficos: só o "Comparando Ciclos de Baixa" fica aqui
+  if(view==='graficos'&&!bearChartLoaded){
+    bearChartLoaded=true;
     try{ buildBearChart(); }catch(e){console.warn('buildBearChart',e);}
   }
   if(view==='noticias') fetchNews(true);
@@ -1950,6 +1975,18 @@ function updateExecPanel(){
   setEl('ep-dd',el=>{el.textContent=dd.toFixed(2)+'%';el.style.color='var(--red)';});
   setEl('ep-fg',el=>{el.textContent=liveData.fgVal;const c=liveData.fgVal<=25?'var(--red)':liveData.fgVal<=45?'var(--orange)':liveData.fgVal<=55?'var(--yellow)':'var(--green)';el.style.color=c;});
   setEl('ep-fg-class',el=>el.textContent=liveData.fgClass||'—');
+  // MVRV Z-Score (usa o on-chain real se houver; senão a estimativa)
+  const mvrvNow=(liveData.onchainOk&&liveData.mvrvReal!==null)?liveData.mvrvReal:liveData.mvrz;
+  setEl('ep-mvrv',el=>{
+    el.textContent=(mvrvNow!=null?mvrvNow.toFixed(2):'—');
+    el.style.color=mvrvNow<1?'var(--green)':mvrvNow<3?'var(--yellow)':'var(--red)';
+  });
+  setEl('ep-mvrv-sub',el=>el.textContent=(liveData.onchainOk&&liveData.mvrvReal!==null)?'on-chain real':'estimado');
+  // Mayer Multiple
+  setEl('ep-mayer',el=>{
+    el.textContent='~'+(liveData.mayer!=null?liveData.mayer:'—');
+    el.style.color=liveData.mayer<1?'var(--green)':liveData.mayer<1.5?'var(--yellow)':'var(--red)';
+  });
 }
 
 // ── INDICATOR CARDS ──
@@ -2183,8 +2220,7 @@ function _baseRefreshUI(){
   // Mobile table cards
   const tcDd=document.getElementById('tc-dd');
   if(tcDd) tcDd.textContent=dd.toFixed(1)+'%';
-  const tcBot=document.getElementById('tc-bot');
-  if(tcBot) tcBot.textContent=fmtDateShort(botEst4);
+  // tc-bot-real é atualizado por updateCycle4Low()
 
   // C5 bar
   const daysSinceH5Start = db(halving5, today);
@@ -2204,25 +2240,16 @@ function _baseRefreshUI(){
     c5note.textContent='📅 5º Halving proj.: '+h5Str+' · ATH proj.: '+fmtDate(nextATH5)+' · '+(daysToNextATH>0?'em '+daysToNextATH+' dias':'atingido')+' · com base na média de '+avgDATH+'d';
   }
 
-  // ATH→bottom bars
-  const elapsedPct=Math.min(dAth4/avgATHtoBot*100,100);
+  // ATH→bottom bars — apenas dado real (dias decorridos desde o ATH), sem projeção
+  const maxRef=Math.max(avgATHtoBot, dAth4, 411); // escala pela maior barra
+  const elapsedPct=Math.min(dAth4/maxRef*100,100);
   const eBar=document.getElementById('bot-elapsed-bar');
-  const rBar=document.getElementById('bot-remaining-bar');
-  if(eBar){eBar.style.width=elapsedPct.toFixed(1)+'%';eBar.textContent=dAth4+'d';}
-  if(rBar){
-    const rp=Math.max(0,100-elapsedPct);
-    rBar.style.width=rp.toFixed(1)+'%';
-    rBar.style.flex=rp>0?'0 0 '+rp.toFixed(1)+'%':'0';
-    rBar.textContent=daysToBot>0?daysToBot+'d restantes':'';
-  }
+  if(eBar){eBar.style.width=Math.max(elapsedPct,8).toFixed(1)+'%';eBar.textContent=dAth4+'d';}
   const botTotalEl=document.getElementById('bot-total-days');
-  if(botTotalEl) botTotalEl.textContent=dAth4+'/'+avgATHtoBot+'d';
-  const botNoteEl=document.getElementById('bot-cmp-note');
-  if(botNoteEl) botNoteEl.textContent='📊 Média 3 ciclos: '+avgATHtoBot+'d · '+dAth4+'d desde ATH · Fundo proj.: '+fmtDate(botEst4)+(daysToBot>0?' (em '+daysToBot+'d)':' (atingido)');
+  if(botTotalEl) botTotalEl.textContent=dAth4+' d';
+  // nota sem projeção (a tabela acima já mostra o fundo real)
 
-  // Table
-  setEl('td-bot-proj',el=>el.textContent='Proj. '+fmtDateShort(botEst4));
-  setEl('td-dd-proj',el=>el.textContent=dd.toFixed(1)+'% atual');
+  // Table — o fundo real do ciclo 4 é atualizado por updateCycle4Low() (1x/dia)
 
   // Indicators
   setEl('iv-cycle',el=>el.textContent=cycPct.toFixed(0)+'% do ciclo');
@@ -2827,6 +2854,74 @@ let bearChartInst = null;
 let bearC4Data = []; // live data for bear 4 (populated from CoinGecko)
 const ATH4_DATE = ATH_C.c4.d; // Oct 6 2025
 const ATH4_PRICE = ATH_C.c4.p; // $126,198
+
+// ── Fundo REAL do Ciclo 4 (menor preço atingido desde o ATH) ──
+// Busca o histórico diário do ciclo 4 (CoinGecko), acha o menor preço,
+// calcula a queda vs ATH e atualiza a tabela de halvings. Cacheado 1x/dia.
+let c4LowCache = null;       // {low, lowDate, asOf}
+let c4LowLastFetch = 0;
+const C4LOW_TTL = 24 * 60 * 60 * 1000; // 1x por dia
+
+async function updateCycle4Low(force){
+  const now = Date.now();
+  // usa cache se ainda válido
+  if(!force && c4LowCache && (now - c4LowLastFetch) < C4LOW_TTL){
+    renderCycle4Low(c4LowCache);
+    return;
+  }
+  const daysFromATH = db(ATH4_DATE, new Date());
+  if(daysFromATH <= 0){ return; }
+  try{
+    const days = Math.min(daysFromATH + 2, 365);
+    const res = await fetch(`https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=${days}`,
+      {signal: AbortSignal.timeout(12000)});
+    if(!res.ok) throw new Error('CoinGecko '+res.status);
+    const data = await res.json();
+    if(!data || !Array.isArray(data.prices) || !data.prices.length) throw new Error('sem dados');
+    let low = Infinity, lowTs = null;
+    for(const [ts, price] of data.prices){
+      const d = new Date(ts);
+      if(db(ATH4_DATE, d) < 0) continue; // só após o ATH
+      if(price < low){ low = price; lowTs = ts; }
+    }
+    // considera também o preço ao vivo de hoje (pode ser uma nova mínima)
+    if(liveData.btcUSD > 0 && liveData.btcUSD < low){ low = liveData.btcUSD; lowTs = now; }
+    if(!isFinite(low)) throw new Error('mínimo inválido');
+    c4LowCache = {
+      low: Math.round(low),
+      lowDate: lowTs ? new Date(lowTs) : new Date(),
+      asOf: new Date()
+    };
+    c4LowLastFetch = now;
+    renderCycle4Low(c4LowCache);
+  }catch(e){
+    console.warn('updateCycle4Low falhou:', e.message);
+    // fallback: usa o preço atual como referência mínima provisória
+    if(liveData.btcUSD > 0){
+      renderCycle4Low({ low: Math.round(liveData.btcUSD), lowDate: new Date(), asOf: new Date(), provisional:true });
+    }
+  }
+}
+
+function renderCycle4Low(c){
+  if(!c) return;
+  const lowStr = '$'+c.low.toLocaleString('pt-BR');
+  const dropPct = ((c.low - ATH4_PRICE) / ATH4_PRICE * 100); // negativo
+  const daysToLow = db(ATH4_DATE, c.lowDate);
+  const asOfStr = c.asOf.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'});
+  // Desktop: Fundo Pós-ATH (menor valor real) + data
+  setEl('td-bot-real', el=>{
+    el.innerHTML = '<span style="color:var(--text)">'+lowStr+'</span>'
+      + '<br><small style="color:var(--muted-soft);font-size:9px">atualizado até '+asOfStr+'</small>';
+  });
+  // Desktop: Queda do ATH (real)
+  setEl('td-dd-real', el=>{ el.textContent = dropPct.toFixed(1)+'%'; });
+  // Desktop: Dias ATH→Fundo (real)
+  setEl('td-days-real', el=>{ el.textContent = (daysToLow>0?daysToLow:0)+' dias'; });
+  // Mobile card
+  setEl('tc-bot-real', el=>{ el.textContent = lowStr; });
+  setEl('tc-bot-asof', el=>{ el.textContent = 'até '+asOfStr; });
+}
 
 async function fetchBearC4Data(){
   // Preço diário do BTC do topo (06/out/2025) até hoje, via CoinGecko.
@@ -3578,7 +3673,9 @@ refreshUI();
 fetchLiveData();
 resetRefreshBar();
 buildRadar();
+updateCycle4Low();
 setInterval(fetchLiveData, 5*60*1000);
+setInterval(()=>updateCycle4Low(true), 24*60*60*1000); // fundo real do ciclo 4: 1x/dia
 setInterval(fetchNews, 30*60*1000);
 setInterval(resetRefreshBar, 5*60*1000);
 </script>
