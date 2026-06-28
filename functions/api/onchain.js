@@ -29,13 +29,18 @@ const CACHE_TTL_SECONDS = 24 * 60 * 60; // 1 dia (a fonte atualiza diariamente)
 const UPSTREAM_TIMEOUT_MS = 8000;
 
 // Só estas métricas. Menor privilégio: a função não busca nada além disso.
+// Cada métrica pode listar VÁRIOS slugs candidatos: a função tenta um por um
+// até obter resposta válida (a BGeometrics usa nomes diferentes p/ algumas).
 const METRICS = {
-  mvrv:    'mvrv',      // MVRV Z-Score
-  nupl:    'nupl',      // Net Unrealized Profit/Loss
-  picycle: 'pi-cycle',  // Pi Cycle Top (distância entre as médias)
+  mvrv:    ['mvrv'],                                  // MVRV Z-Score
+  nupl:    ['nupl'],                                  // Net Unrealized Profit/Loss
+  picycle: ['pi-cycle'],                              // Pi Cycle Top
+  realized:['realized-price','realized_price','realized','realised-price','realizedprice','realized-price-usd','rprice'], // Preço Realizado (US$)
 };
 
-const BGEO_BASE = 'https://api.bgeometrics.com/v1/';
+// A API da BGeometrics fica em api.bitcoin-data.com (o domínio antigo
+// api.bgeometrics.com ainda responde p/ algumas métricas). Tentamos os dois.
+const BGEO_BASES = ['https://api.bitcoin-data.com/v1/', 'https://api.bgeometrics.com/v1/'];
 
 function json(obj, status) {
   return new Response(JSON.stringify(obj), {
@@ -58,8 +63,7 @@ function sanitizeNumber(raw, min, max) {
   return n;
 }
 
-async function fetchUpstreamMetric(path, token) {
-  const url = `${BGEO_BASE}${path}/last`;
+async function fetchOne(url, token) {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), UPSTREAM_TIMEOUT_MS);
   try {
@@ -71,10 +75,29 @@ async function fetchUpstreamMetric(path, token) {
     if (!res.ok) return null;
     return await res.json();
   } catch (_e) {
-    return null; // fail securely — sem vazar detalhe de erro
+    return null;
   } finally {
     clearTimeout(timer);
   }
+}
+
+// Tenta cada combinação base + slug + sufixo até obter um payload com número.
+// Se 'diag' for passado, registra qual URL funcionou (para diagnóstico).
+async function fetchUpstreamMetric(slugs, token, diag) {
+  const list = Array.isArray(slugs) ? slugs : [slugs];
+  for (const base of BGEO_BASES) {
+    for (const slug of list) {
+      for (const suffix of ['/last', '']) {
+        const url = `${base}${slug}${suffix}`;
+        const payload = await fetchOne(url, token);
+        if (payload && extractValue(payload) !== null) {
+          if (diag) diag.url = url;
+          return payload;
+        }
+      }
+    }
+  }
+  return null;
 }
 
 // Extrai o primeiro valor numérico do payload que não seja data/timestamp.
@@ -92,17 +115,20 @@ function extractValue(payload) {
   return null;
 }
 
-async function buildFreshData(token) {
+async function buildFreshData(token, diagOut) {
   if (!token) return null;
   const out = { ts: new Date().toISOString(), metrics: {} };
-  for (const [key, path] of Object.entries(METRICS)) {
-    const payload = await fetchUpstreamMetric(path, token);
+  for (const [key, slugs] of Object.entries(METRICS)) {
+    const diag = {};
+    const payload = await fetchUpstreamMetric(slugs, token, diag);
     const value = extractValue(payload);
     let bounded = null;
     if (key === 'mvrv')    bounded = sanitizeNumber(value, -2, 15);
     if (key === 'nupl')    bounded = sanitizeNumber(value, -1, 1);
     if (key === 'picycle') bounded = sanitizeNumber(value, 0, 5);
+    if (key === 'realized')bounded = sanitizeNumber(value, 0, 5000000); // US$ (preço realizado)
     out.metrics[key] = bounded;
+    if (diagOut) diagOut[key] = { ok: bounded !== null, url: diag.url || null };
   }
   const anyValid = Object.values(out.metrics).some(v => v !== null);
   return anyValid ? out : null;
@@ -110,7 +136,24 @@ async function buildFreshData(token) {
 
 // Entry point da Pages Function. Responde GET /api/onchain.
 export async function onRequestGet(context) {
-  const { env } = context;
+  const { env, request } = context;
+
+  // Modo diagnóstico: /api/onchain?debug=1 mostra qual endpoint funcionou
+  // para cada métrica (NÃO expõe o token). Use só para depurar e remova
+  // o parâmetro depois. Ignora o cache para testar a fonte ao vivo.
+  try {
+    const u = new URL(request.url);
+    if (u.searchParams.get('debug') === '1') {
+      const diag = {};
+      const fresh = await buildFreshData(env.BGEO_TOKEN, diag);
+      return json({
+        debug: true,
+        hasToken: !!env.BGEO_TOKEN,
+        result: fresh ? fresh.metrics : null,
+        endpoints: diag,
+      }, 200);
+    }
+  } catch (_e) { /* segue fluxo normal */ }
 
   // 1) tenta cache
   let cached = null;
