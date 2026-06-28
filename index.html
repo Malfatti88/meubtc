@@ -6,7 +6,7 @@
 <title>meuBTC — Inteligência do Ciclo do Bitcoin</title>
 <link rel="manifest" href="data:application/json,{&quot;name&quot;:&quot;meuBTC&quot;,&quot;short_name&quot;:&quot;meuBTC&quot;,&quot;theme_color&quot;:&quot;#07070c&quot;,&quot;background_color&quot;:&quot;#07070c&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;start_url&quot;:&quot;/&quot;}">
 <meta name="theme-color" content="#07070c">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https:; connect-src 'self' https://cloudflareinsights.com https://api.coingecko.com https://api.alternative.me https://alternative.me https://api.binance.com https://api.allorigins.win https://www.coindesk.com https://cointelegraph.com https://bitcoinmagazine.com https://decrypt.co https://rss2json.com; base-uri 'self'; form-action 'none'; manifest-src 'self' data:;">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https:; connect-src 'self' https://cloudflareinsights.com https://api.coingecko.com https://api.alternative.me https://alternative.me https://api.binance.com https://api.allorigins.win https://corsproxy.io https://api.codetabs.com https://www.coindesk.com https://cointelegraph.com https://bitcoinmagazine.com https://decrypt.co https://rss2json.com; base-uri 'self'; form-action 'none'; manifest-src 'self' data:;">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
 <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=()">
@@ -32,6 +32,35 @@
   --mono:'JetBrains Mono',monospace;--display:'Inter',sans-serif;
   --r-sm:6px;--r-md:10px;--r-lg:14px;
 }
+/* ── TEMA CLARO ── */
+body.light-mode{
+  --bg:#f5f6fa;--bg2:#ffffff;--bg3:#eef0f6;--bg4:#e3e6ef;
+  --border:rgba(10,12,30,0.08);--border2:rgba(10,12,30,0.15);
+  --text:#1a1d2e;--muted:#5a5f78;--muted-soft:#84889e;--hint:#d0d3e0;
+  --orange:#e07e00;--orange-dim:rgba(224,126,0,0.10);--orange-glow:rgba(224,126,0,0.28);
+  --green:#00a862;--green-dim:rgba(0,168,98,0.10);
+  --red:#e03152;--red-dim:rgba(224,49,82,0.10);
+  --blue:#2f7fe0;--blue-dim:rgba(47,127,224,0.10);
+  --yellow:#d4a017;--yellow-dim:rgba(212,160,23,0.12);
+  --purple:#8b5cf6;--cyan:#0891b2;
+  --c1:#5a5fe0;--c2:#0fb5a0;--c3:#0fa85f;--c4:#e07e00;
+}
+body.light-mode{background:var(--bg);color:var(--text)}
+/* corrige textos brancos fixos que sumiriam no tema claro */
+body.light-mode .cycle-pct-num,
+body.light-mode .cycle-counter-num,
+body.light-mode .ind-section-title,
+body.light-mode .proj-item-val,
+body.light-mode .chart-sec-title,
+body.light-mode .sec-title,
+body.light-mode #verd-cycle-score-num,
+body.light-mode #gauge-overlay > div:first-child{color:var(--text)!important}
+body.light-mode #ps-bot-days,
+body.light-mode #ps-ath-days{color:var(--text)!important}
+/* topbar e logo no tema claro */
+body.light-mode .topbar{background:rgba(255,255,255,0.9)}
+body.light-mode .tb-logo-text,
+body.light-mode .tb-nav-item{color:var(--text)}
 html{scroll-behavior:smooth}
 body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:13px;line-height:1.6;overflow-x:hidden}
 
@@ -355,6 +384,47 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--orange);outline-off
 .bit-tease{font-size:13px;color:var(--blue);line-height:1.7;background:var(--blue-dim);border:1px solid rgba(90,171,255,.25);border-radius:var(--r-md);padding:12px 15px;margin-top:8px}
 .sec-title.large{font-size:32px}
 @media(max-width:700px){.bit-h{font-size:20px}.bit-p,.bit-callout,.bit-step,.bit-list li,.bit-article .bit-tease{font-size:13px}.bit-fig{padding:12px}}
+
+/* ── TABELA DE HALVINGS (desktop table + mobile cards) ── */
+.table-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-md);overflow:auto;margin-bottom:24px}
+table{width:100%;border-collapse:collapse;min-width:560px}
+thead tr{background:var(--bg3);border-bottom:1px solid var(--border2)}
+th{padding:11px 13px;text-align:left;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:500;white-space:nowrap}
+td{padding:11px 13px;font-size:12px;border-bottom:1px solid var(--border);color:var(--text);white-space:nowrap}
+tr:last-child td{border-bottom:none}
+tr.hl td{background:rgba(247,147,26,.04)}
+.badge{display:inline-block;padding:2px 9px;border-radius:var(--r-sm);font-size:10px;font-weight:500}
+.b-blue{background:rgba(90,171,255,.15);color:var(--blue)}.b-green{background:var(--green-dim);color:var(--green)}
+.b-yellow{background:var(--yellow-dim);color:var(--yellow)}.b-now{background:var(--orange-glow);color:var(--orange);animation:blink 2s ease-in-out infinite}
+.up{color:var(--green)}.dn{color:var(--red)}
+.table-cards{display:none;flex-direction:column;gap:10px;margin-bottom:24px}
+.tc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-md);padding:14px 16px}
+.tc.hl{border-color:var(--orange-glow);background:rgba(247,147,26,.03)}
+.tc-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.tc-cycle{font-family:var(--display);font-size:16px;font-weight:700;color:var(--text)}
+.tc-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tc-label{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
+.tc-val{font-size:13px;font-weight:500;color:var(--text)}
+@media(max-width:700px){
+  .table-wrap{display:none}
+  .table-cards{display:flex}
+}
+
+/* ── BARRAS DE COMPARAÇÃO (dias halving->ATH, ATH->fundo) ── */
+.compare-box{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-md);padding:18px 20px;margin-bottom:24px}
+.cmp-title{font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:14px}
+.cmp-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.cmp-lbl{font-size:11px;min-width:88px}
+.cmp-track{flex:1;background:var(--bg3);border-radius:3px;height:18px;overflow:hidden;position:relative}
+.cmp-fill{height:100%;display:flex;align-items:center;padding-left:8px;font-size:11px;font-weight:500;border-radius:3px;white-space:nowrap}
+.cmp-days{font-size:11px;color:var(--muted);min-width:65px;text-align:right}
+.cmp-divider{border:none;border-top:1px dashed var(--orange-glow);margin:10px 0}
+.cmp-note{font-size:11px;color:var(--orange);margin-top:8px}
+@media(max-width:700px){
+  .cmp-lbl{min-width:70px;font-size:10px}
+  .cmp-fill{font-size:10px}
+  .cmp-days{font-size:10px;min-width:50px}
+}
 </style>
 </style>
 </head>
@@ -810,6 +880,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--orange);outline-off
       <div class="ctrl-sep-new"></div>
       <button class="btn-ctrl-new" id="bear-btn-realized" onclick="toggleBear(4)"><span class="dot-sw" style="background:#ff4d6d"></span>Preço Realizado</button>
       <button class="btn-ctrl-new" id="bear-btn-maw200" onclick="toggleBear(5)"><span class="dot-sw" style="background:#ffd166"></span>MM200 Semanas</button>
+      <button class="btn-ctrl-new" id="bear-btn-mvrv" onclick="toggleBear(6)"><span class="dot-sw" style="background:#5aabff"></span>MVRV = 1</button>
       <div class="ctrl-sep-new"></div>
       <button class="btn-reset-new" onclick="resetBearZoom()">↺ Reset zoom</button>
       <span id="bear-status" style="font-size:10px;color:var(--muted-soft);font-style:italic">Carregando…</span>
@@ -824,6 +895,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--orange);outline-off
       <span class="leg-new"><span class="leg-line-new" style="background:#f7931a"></span>Baixa 4 · 2025–atual (ao vivo)</span>
       <span class="leg-new"><span class="leg-line-new" style="background:#ff4d6d;border-style:dashed"></span>Preço Realizado (on-chain)</span>
       <span class="leg-new"><span class="leg-line-new" style="background:#ffd166;border-style:dashed"></span>MM200 Semanas (on-chain)</span>
+      <span class="leg-new"><span class="leg-line-new" style="background:#5aabff"></span>MVRV = 1 · preço realizado (on-chain)</span>
     </div>
   </div>
 
@@ -883,10 +955,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--orange);outline-off
   </div>
 
   <!-- Halvings table -->
-  <div id="halvings" style="margin-bottom:40px">
-
-<main>
-<section id="halvings">
+  <section id="halvings" style="margin-bottom:40px">
   <div class="sec-label">Dados históricos</div>
   <div class="sec-title">Tabela de Halvings</div>
   <div class="sec-sub">Comparativo completo de todos os ciclos</div>
@@ -1525,7 +1594,7 @@ function drawGauge(avg){
     overlay.style.cssText='position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none';
     cv.parentNode.appendChild(overlay);
   }
-  overlay.innerHTML='<div style="font-size:20px;font-weight:800;font-family:var(--display);color:#fff;line-height:1">'+avg+'</div><div style="font-size:9px;color:var(--muted)">/100</div>';
+  overlay.innerHTML='<div style="font-size:20px;font-weight:800;font-family:var(--display);color:var(--text);line-height:1">'+avg+'</div><div style="font-size:9px;color:var(--muted)">/100</div>';
 }
 
 // ── BITCOINOLOGIA MINI LIST ──
@@ -1595,7 +1664,7 @@ function syncVerdictCycleBox(avg){
     if(svg) svg.setAttribute('stroke',col);
   }
   // score numérico + barra abaixo do nome
-  setEl('verd-cycle-score-num',el=>{el.textContent=avg;el.style.color='#fff';});
+  setEl('verd-cycle-score-num',el=>{el.textContent=avg;el.style.color='var(--text)';});
   setEl('verd-cycle-score-bar',el=>{el.style.width=avg+'%';el.style.background=col;});
 }
 
@@ -2530,6 +2599,7 @@ async function fetchBearC4Data(){
 // o Preço Realizado vem do Worker/BGeometrics quando disponível.
 let bearRealizedData = [];   // [[dia, ratio], ...]
 let bearMM200wData = [];     // [[dia, ratio], ...]
+let bearMvrvData = [];       // [[dia, ratio], ...] linha de referência do MVRV
 
 async function fetchBearReferenceLines(){
   bearRealizedData = [];
@@ -2576,6 +2646,38 @@ async function fetchBearReferenceLines(){
     const ratio = +(liveData.realizedPrice / ATH4_PRICE).toFixed(4);
     if(ratio>0 && ratio<=1.5) bearRealizedData = [[0, ratio],[daysFromATH, ratio]];
   }
+  // Linha "MVRV = 1": como MVRV = preço / preço_realizado, o ponto onde MVRV=1
+  // é exatamente o PREÇO REALIZADO de cada dia. Buscamos a SÉRIE HISTÓRICA do
+  // preço realizado no Worker (?series=realized) e normalizamos pelo topo do
+  // ciclo 4. Assim dá pra ver em que dia o BTC cruzou abaixo de MVRV=1.
+  bearMvrvData = [];
+  try{
+    const r = await fetch(ONCHAIN_WORKER_URL + '?series=realized', {signal: AbortSignal.timeout(12000)});
+    if(r.ok){
+      const j = await r.json();
+      if(j && Array.isArray(j.series) && j.series.length){
+        for(const pt of j.series){
+          // pt.t pode ser data ISO/yyyy-mm-dd ou unix; pt.v = preço realizado US$
+          let d = new Date(pt.t);
+          if(isNaN(d.getTime()) && /^\d+$/.test(pt.t)){
+            const num = parseInt(pt.t,10);
+            d = new Date(num < 1e12 ? num*1000 : num); // segundos ou ms
+          }
+          if(isNaN(d.getTime())) continue;
+          const dayN = db(ATH4_DATE, d);
+          if(dayN < 0 || dayN > daysFromATH+1) continue; // só do topo do ciclo 4 p/ frente
+          const ratio = +(pt.v / ATH4_PRICE).toFixed(4);
+          if(ratio>0 && ratio<=1.5) bearMvrvData.push([dayN, ratio]);
+        }
+        bearMvrvData.sort((a,b)=>a[0]-b[0]);
+      }
+    }
+  }catch(e){ console.warn('MVRV=1 (realized hist) falhou:', e.message); }
+  // fallback: se não veio histórico, usa o valor atual como linha de referência
+  if(!bearMvrvData.length && liveData.onchainOk && liveData.realizedPrice>0){
+    const ratio = +(liveData.realizedPrice / ATH4_PRICE).toFixed(4);
+    if(ratio>0 && ratio<=1.5) bearMvrvData = [[0, ratio],[daysFromATH, ratio]];
+  }
 }
 
 async function buildBearChart(){
@@ -2615,6 +2717,8 @@ async function buildBearChart(){
     {label:'Preço Realizado',data:bearRealizedData.map(p=>({x:p[0],y:p[1]})),borderColor:'#ff4d6d',borderWidth:1.5,borderDash:[5,3],pointRadius:0,tension:0.2,fill:false,hidden:true},
     // MM200 Semanas (calculada de preço histórico real) — começa oculta
     {label:'MM200 Semanas',data:bearMM200wData.map(p=>({x:p[0],y:p[1]})),borderColor:'#ffd166',borderWidth:1.5,borderDash:[5,3],pointRadius:0,tension:0.2,fill:false,hidden:true},
+    // MVRV (referência on-chain) — começa oculto
+    {label:'MVRV = 1 (preço realizado)',data:bearMvrvData.map(p=>({x:p[0],y:p[1]})),borderColor:'#5aabff',borderWidth:1.8,pointRadius:0,tension:0.2,fill:false,hidden:true},
   ];
 
   if(bearChartInst){ bearChartInst.destroy(); bearChartInst=null; }
@@ -2697,7 +2801,7 @@ function toggleBear(idx){
   if(!ds) return;
   ds.hidden=!ds.hidden;
   bearChartInst.update();
-  const ids=['bear-btn-c1','bear-btn-c2','bear-btn-c3','bear-btn-c4','bear-btn-realized','bear-btn-maw200'];
+  const ids=['bear-btn-c1','bear-btn-c2','bear-btn-c3','bear-btn-c4','bear-btn-realized','bear-btn-maw200','bear-btn-mvrv'];
   if(ids[idx]){const btn=document.getElementById(ids[idx]);if(btn) btn.classList.toggle('active',!ds.hidden);}
 }
 
@@ -2866,7 +2970,12 @@ const RSS_FEEDS = [
   { url: 'https://decrypt.co/feed', source: 'Decrypt' },
 ];
 
-const PROXY = 'https://api.allorigins.win/get?url=';
+// Vários proxies CORS de fallback — se um falhar/estiver fora, tenta o próximo.
+const PROXIES = [
+  { url:'https://api.allorigins.win/get?url=', extract:(r)=>r.json().then(j=>j.contents) },
+  { url:'https://corsproxy.io/?url=', extract:(r)=>r.text() },
+  { url:'https://api.codetabs.com/v1/proxy/?quest=', extract:(r)=>r.text() },
+];
 
 // Keyword scoring — positive = bullish, negative = bearish
 const BULL_WORDS = ['alta','high','ath','record','surge','rally','gains','adoption','approved','etf inflow','institutional','accumulate','bullish','rise','pump','breakout','support','buy','growth','halving','milestone','partnership','launch','upgrade','legal','regulation pass','approved','clarity'];
@@ -3019,11 +3128,20 @@ function showNewsSkeletons() {
 }
 
 async function fetchOneFeed(feed) {
-  const proxyUrl = PROXY + encodeURIComponent(feed.url);
-  const res = await fetch(proxyUrl, { signal: AbortSignal.timeout(7000) });
-  if (!res.ok) throw new Error('HTTP ' + res.status);
-  const wrapper = await res.json();
-  return parseRSS(wrapper.contents, feed.source);
+  let lastErr=null;
+  for(const proxy of PROXIES){
+    try{
+      const proxyUrl = proxy.url + encodeURIComponent(feed.url);
+      const res = await fetch(proxyUrl, { signal: AbortSignal.timeout(8000) });
+      if (!res.ok) { lastErr=new Error('HTTP '+res.status); continue; }
+      const xml = await proxy.extract(res);
+      if(!xml || xml.length<100){ lastErr=new Error('empty'); continue; }
+      const items = parseRSS(xml, feed.source);
+      if(items && items.length) return items;
+      lastErr=new Error('no items');
+    }catch(e){ lastErr=e; }
+  }
+  throw lastErr || new Error('all proxies failed');
 }
 
 async function _baseFetchNews(force = false) {
@@ -3032,9 +3150,9 @@ async function _baseFetchNews(force = false) {
 
   const dot = document.getElementById('news-dot');
   const txt = document.getElementById('news-status-txt');
-  dot.className = 'news-status-dot loading';
-  txt.textContent = 'Buscando notícias…';
-  if (!newsCache) showNewsSkeletons();
+  if(dot) dot.className = 'news-status-dot loading';
+  if(txt) txt.textContent = 'Buscando notícias…';
+  if (!newsCache && typeof showNewsSkeletons==='function') showNewsSkeletons();
 
   // Fetch all feeds in parallel, collect whatever succeeds
   const results = await Promise.allSettled(RSS_FEEDS.map(fetchOneFeed));
@@ -3050,18 +3168,18 @@ async function _baseFetchNews(force = false) {
   if (allItems.length > 0) {
     newsCache = allItems;
     newsLastFetch = now;
-    renderNewsItems(newsCache);
-    dot.className = 'news-status-dot';
+    if(typeof renderNewsItems==='function') renderNewsItems(newsCache);
+    if(dot) dot.className = 'news-status-dot';
     const ts = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-    txt.textContent = successCount + '/' + RSS_FEEDS.length + ' feeds · ' + ts;
+    if(txt) txt.textContent = successCount + '/' + RSS_FEEDS.length + ' feeds · ' + ts;
   } else {
     // All feeds failed — use fallback
     if (!newsCache) {
       newsCache = NEWS_FALLBACK;
-      renderNewsItems(newsCache);
+      if(typeof renderNewsItems==='function') renderNewsItems(newsCache);
     }
-    dot.className = 'news-status-dot error';
-    txt.textContent = 'Feeds indisponíveis — usando cache local';
+    if(dot) dot.className = 'news-status-dot error';
+    if(txt) txt.textContent = 'Feeds indisponíveis — usando cache local';
   }
 }
 
@@ -3099,13 +3217,19 @@ function renderNewsMini(items){
   const box=document.getElementById('news-list-mini');
   if(!box) return;
   const colors=['#f7931a','#5aabff','#29d9c2','#b388ff'];
-  box.innerHTML=(items||[]).slice(0,4).map((n,i)=>`
-    <a class="news-item" href="${n.url||'#'}" target="_blank" rel="noopener noreferrer">
+  const sorted=(items||[]).slice().sort((a,b)=>new Date(b.published_at)-new Date(a.published_at));
+  if(!sorted.length){
+    box.innerHTML='<div style="padding:20px;text-align:center;color:var(--muted);font-size:11px">Sem notícias no momento</div>';
+    return;
+  }
+  const age=(d)=>{ try{return (typeof fmtNewsDate==='function')?fmtNewsDate(d):'';}catch(_e){return '';} };
+  box.innerHTML=sorted.slice(0,4).map((n,i)=>`
+    <a class="news-item" href="${n.url||'#'}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">
       <div class="news-source-icon" style="background:${colors[i%colors.length]}">${(n.source||'?')[0].toUpperCase()}</div>
       <div class="news-body">
         <div class="news-source-name">${n.source||'—'}</div>
         <div class="news-title-text">${n.title||'—'}</div>
-        <div class="news-age">${n.age||''}</div>
+        <div class="news-age">${age(n.published_at)}</div>
       </div>
     </a>`).join('');
 }
@@ -3113,8 +3237,10 @@ function renderNewsMini(items){
 // Override fetchNews to also update mini list
 async function fetchNews(force){
   await _baseFetchNews(force);
-  // pull from news cache if available
-  if(typeof allNewsItems!=='undefined') renderNewsMini(allNewsItems);
+  // popula o mini list do dashboard a partir do cache de notícias
+  if(typeof newsCache!=='undefined' && newsCache && newsCache.length){
+    renderNewsMini(newsCache);
+  }
 }
 
 // Refresh bar
