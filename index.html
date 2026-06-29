@@ -1906,7 +1906,7 @@ async function bolaAcceptTerms(){
 }
 
 async function bolaLogout(){
-  try{ await fetch('/api/auth/logout', {method:'POST', credentials:'same-origin'}); }catch(_e){}
+  try{ await fetch('/api/auth/logout', {method:'POST', credentials:'same-origin', signal:AbortSignal.timeout(8000)}); }catch(_e){ console.warn('logout request falhou (sessão local limpa mesmo assim)'); }
   bolaUser=null; bolaConsent=null;
   bolaCheckAuth();
 }
