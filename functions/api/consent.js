@@ -66,7 +66,9 @@ export async function onRequestPost(context) {
       )
       .run();
   } catch (e) {
-    return json({ error: 'db_write_failed', detail: String(e).slice(0, 120) }, 500);
+    // não vaza detalhe interno ao cliente; registra só no log do servidor
+    console.error('consent db_write_failed:', String(e).slice(0, 200));
+    return json({ error: 'db_write_failed' }, 500);
   }
 
   return json({ ok: true, accepted_at: acceptedAt });
