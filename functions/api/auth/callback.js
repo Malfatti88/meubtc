@@ -68,6 +68,13 @@ export async function onRequestGet(context) {
   // Confere se o token foi emitido para o nosso client_id
   if (claims.aud !== env.GOOGLE_CLIENT_ID) return redirectErr(origin, 'aud_mismatch');
 
+  // Confere o emissor (precisa ser o Google)
+  const validIss = ['https://accounts.google.com', 'accounts.google.com'];
+  if (!validIss.includes(claims.iss)) return redirectErr(origin, 'iss_mismatch');
+
+  // Confere a expiração do id_token (exp vem em segundos no JWT)
+  if (!claims.exp || (claims.exp * 1000) < Date.now()) return redirectErr(origin, 'token_expired');
+
   // Monta o usuário (identidade mínima necessária)
   const user = {
     sub: String(claims.sub),
