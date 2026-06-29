@@ -74,7 +74,8 @@ async function fetchOne(url, token) {
     });
     if (!res.ok) return null;
     return await res.json();
-  } catch (_e) {
+  } catch (e) {
+    console.warn('onchain: upstream indisponível:', String(e).slice(0, 100));
     return null;
   } finally {
     clearTimeout(timer);
@@ -175,13 +176,13 @@ export async function onRequestGet(context) {
     if (u.searchParams.get('series') === 'realized') {
       const SKEY = 'onchain:realized-history';
       let hist = null;
-      try { const raw = await env.ONCHAIN_KV.get(SKEY); if (raw) hist = JSON.parse(raw); } catch (_e) {}
+      try { const raw = await env.ONCHAIN_KV.get(SKEY); if (raw) hist = JSON.parse(raw); } catch (e) { console.warn('onchain: falha ao ler histórico KV:', String(e).slice(0, 120)); }
       const fresh = hist && (Date.now() - hist.ts) < CACHE_TTL_SECONDS * 1000;
       if (fresh) return json({ ts: hist.ts, series: hist.series, source: 'cache' }, 200);
       const series = await fetchRealizedHistory(env.BGEO_TOKEN);
       if (series) {
         const payload = { ts: Date.now(), series };
-        try { await env.ONCHAIN_KV.put(SKEY, JSON.stringify(payload), { expirationTtl: CACHE_TTL_SECONDS + 3600 }); } catch (_e) {}
+        try { await env.ONCHAIN_KV.put(SKEY, JSON.stringify(payload), { expirationTtl: CACHE_TTL_SECONDS + 3600 }); } catch (e) { console.warn('onchain: falha ao gravar histórico KV:', String(e).slice(0, 120)); }
         return json({ ts: payload.ts, series, source: 'BGeometrics' }, 200);
       }
       if (hist) return json({ ts: hist.ts, series: hist.series, stale: true, source: 'stale' }, 200);
