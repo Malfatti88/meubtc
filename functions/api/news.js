@@ -75,12 +75,39 @@ function parseFeed(xml, source) {
       return m ? decodeEntities(m[1]) : '';
     };
     const title = tag('title');
-    // link: RSS usa <link>texto</link>; Atom usa <link href="..."/>
-    let url = tag('link');
-    if (!url) {
-      const m = block.match(/<link[^>]*href=["']([^"']+)["']/i);
-      if (m) url = m[1];
+    // ── Extração robusta do link do ARTIGO (não do feed) ──
+    let url = '';
+    // 1) RSS clássico: <link>https://artigo</link> (texto direto, sem atributos)
+    const rssLink = block.match(/<link>\s*([\s\S]*?)\s*<\/link>/i);
+    if (rssLink) {
+      url = rssLink[1].replace(/<!\[CDATA\[|\]\]>/g, '').trim();
     }
+    // 2) Atom: pode ter vários <link rel="..." href="..."/>. Preferimos rel="alternate"
+    //    (o link do artigo) e evitamos rel="self"/"edit" (que apontam pro próprio feed).
+    if (!url || !/^https?:\/\//i.test(url)) {
+      const linkTags = block.match(/<link\b[^>]*\/?>/gi) || [];
+      let alternate = '', firstHref = '';
+      for (const lt of linkTags) {
+        const hrefM = lt.match(/href=["']([^"']+)["']/i);
+        if (!hrefM) continue;
+        const href = hrefM[1];
+        const relM = lt.match(/rel=["']([^"']+)["']/i);
+        const rel = relM ? relM[1].toLowerCase() : '';
+        if (rel === 'self' || rel === 'edit' || rel === 'hub') continue;
+        if (rel === 'alternate' && !alternate) alternate = href;
+        if (!firstHref) firstHref = href;
+      }
+      url = alternate || firstHref || url;
+    }
+    // 3) Fallback: <guid> que seja permalink (muitos RSS usam o guid como URL)
+    if (!url || !/^https?:\/\//i.test(url)) {
+      const guid = block.match(/<guid[^>]*>\s*([\s\S]*?)\s*<\/guid>/i);
+      if (guid) {
+        const g = guid[1].replace(/<!\[CDATA\[|\]\]>/g, '').trim();
+        if (/^https?:\/\//i.test(g)) url = g;
+      }
+    }
+    url = (url || '').trim();
     const pub = tag('pubDate') || tag('published') || tag('updated') || '';
     const desc = tag('description') || tag('summary') || '';
     if (!title || !url) continue;
@@ -109,7 +136,8 @@ async function fetchFeed(feed) {
     if (!res.ok) return [];
     const xml = await res.text();
     return parseFeed(xml, feed.source);
-  } catch (_e) {
+  } catch (e) {
+    console.warn('news: feed indisponível (' + feed.source + '):', String(e).slice(0, 100));
     return [];
   } finally {
     clearTimeout(timer);
@@ -145,7 +173,7 @@ export async function onRequestGet(context) {
       const raw = await env.ONCHAIN_KV.get(CACHE_KEY);
       if (raw) cached = JSON.parse(raw);
     }
-  } catch (_e) {}
+  } catch (e) { console.warn('news: falha ao ler cache KV:', String(e).slice(0, 120)); }
 
   const fresh = cached && (Date.now() - cached.ts) < NEWS_TTL_MS;
   if (cached && fresh && !force) {
@@ -159,7 +187,7 @@ export async function onRequestGet(context) {
       if (env.ONCHAIN_KV) {
         await env.ONCHAIN_KV.put(CACHE_KEY, JSON.stringify(built), { expirationTtl: NEWS_TTL_HOURS * 3600 + 3600 });
       }
-    } catch (_e) {}
+    } catch (e) { console.warn('news: falha ao gravar cache KV:', String(e).slice(0, 120)); }
     return json({ ...built, source: 'fresh', next_update_in_min: NEWS_TTL_HOURS * 60 });
   }
 
