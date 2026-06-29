@@ -65,7 +65,8 @@ html{scroll-behavior:smooth}
 body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:13px;line-height:1.6;overflow-x:hidden}
 
 /* ── TOPBAR ── */
-.topbar{position:sticky;top:0;z-index:200;background:rgba(9,9,22,0.97);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:64px;gap:12px}
+.topbar{position:sticky;top:0;z-index:200;background:rgba(9,9,22,0.97);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:64px;gap:12px}
+@media(max-width:768px){.topbar{padding:0 12px;height:56px}}
 .tb-logo{display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0}
 .tb-logo-icon{width:36px;height:36px;background:var(--orange);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:#000;font-family:var(--display)}
 .tb-logo-text{display:flex;flex-direction:column}
@@ -107,7 +108,9 @@ body.light-mode .theme-toggle .tt-knob{transform:translateX(20px)}
 
 /* ── VIEWS ── */
 .view{display:none}.view.active{display:block}
-.view-inner{max-width:1340px;margin:0 auto;padding:28px 24px}
+.view-inner{max-width:1600px;margin:0 auto;padding:28px 32px}
+@media(max-width:768px){.view-inner{padding:16px 14px}}
+@media(max-width:480px){.view-inner{padding:12px 10px}}
 
 /* ── ONDE ESTAMOS (card estilo referência) ── */
 .cycle-card{background:var(--bg2);border:1px solid rgba(0,160,80,0.3);border-radius:var(--r-lg);padding:20px;position:relative;overflow:hidden}
@@ -478,6 +481,61 @@ tr.hl td{background:rgba(247,147,26,.04)}
 .bola-score-radar{display:grid;grid-template-columns:200px 1fr;gap:20px;align-items:start}
 .bola-score-box{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r-md);padding:18px 14px}
 @media(max-width:700px){.bola-score-radar{grid-template-columns:1fr}}
+
+/* ── PROJEÇÃO CICLO 5 (régua de cenários) ── */
+.cycle5-card{background:var(--bg2);border:1px solid rgba(179,136,255,.3);border-radius:var(--r-lg);padding:20px;margin-top:20px;position:relative;overflow:hidden}
+.cycle5-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(120,80,200,.1),transparent 60%);pointer-events:none}
+.cycle5-header{margin-bottom:24px;position:relative}
+.cycle5-title{font-family:var(--display);font-size:18px;font-weight:700;color:var(--purple)}
+.cycle5-sub{font-size:11px;color:var(--muted);margin-top:3px}
+.cycle5-ruler{position:relative}
+.c5-track{display:flex;height:14px;border-radius:7px;overflow:hidden;margin-bottom:6px}
+.c5-seg{height:100%}
+.c5-pess{width:53%;background:linear-gradient(90deg,#ff4d6d,#ffa94d)}
+.c5-base{width:0;border-left:2px solid var(--text)}
+.c5-otim{flex:1;background:linear-gradient(90deg,#ffd166,#00d97e)}
+.c5-marks{position:relative;height:38px;margin-bottom:14px}
+.c5-mark{position:absolute;transform:translateX(-50%);text-align:center;top:0}
+.c5-mark-tick{display:block;width:2px;height:8px;background:var(--muted);margin:0 auto 3px}
+.c5-mark-val{font-size:11px;font-weight:700;font-family:var(--mono);color:var(--text);white-space:nowrap}
+.c5-legend{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:8px}
+.c5-leg-item{display:flex;align-items:flex-start;gap:8px}
+.c5-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;margin-top:2px}
+.c5-dot-pess{background:#ff4d6d}.c5-dot-base{background:var(--text)}.c5-dot-otim{background:#00d97e}
+.c5-leg-name{font-size:12px;font-weight:700;color:var(--text)}
+.c5-leg-range{font-size:10px;color:var(--muted)}
+@media(max-width:600px){.c5-legend{grid-template-columns:1fr}}
+
+/* ════════ OTIMIZAÇÃO MOBILE ════════ */
+@media(max-width:768px){
+  /* topbar: logo menor, nav rola horizontalmente */
+  .tb-logo-icon{width:30px;height:30px;font-size:15px}
+  .tb-logo-name{font-size:14px}
+  .tb-logo-sub{display:none}
+  .tb-nav{gap:0;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;justify-content:flex-start;flex:1}
+  .tb-nav::-webkit-scrollbar{display:none}
+  .tb-nav-item{padding:6px 10px;font-size:8px;white-space:nowrap;flex-shrink:0}
+  .tb-nav-item .nav-icon{font-size:13px}
+  .tb-right{flex-shrink:0}
+  /* price strip: rótulos e valores menores */
+  .ps-cell{padding:8px 10px}
+  .ps-val{font-size:14px}
+  .ps-label{font-size:8px}
+  .ps-sub{font-size:8px}
+  /* indicadores: 1 coluna */
+  .exec-cards{grid-template-columns:1fr 1fr}
+  /* tabelas e cartões: respiro menor */
+  .cycle-card,.exec-panel,.proj-card,.hist-card,.compare-box,.cycle5-card,.bola-radar-section{padding:14px}
+  /* score+radar empilha */
+  .bola-score-radar{grid-template-columns:1fr}
+  /* charts não estouram a largura */
+  canvas{max-width:100%!important}
+}
+@media(max-width:480px){
+  .exec-cards{grid-template-columns:1fr}
+  .tb-update{display:none}
+  .ps-val{font-size:13px}
+}
 </style>
 </style>
 </head>
@@ -1197,14 +1255,14 @@ tr.hl td{background:rgba(247,147,26,.04)}
       </div>
       <div class="proj-body">
         <div>
-          <div class="proj-item-lbl">ATH Projetado (Ciclo 5)</div>
-          <div class="proj-item-val">US$ 195.000 – US$ 263.000</div>
-          <div class="proj-item-sub">Nov/2029 · ciclo 5</div>
-        </div>
-        <div>
-          <div class="proj-item-lbl">Fundo Projetado</div>
+          <div class="proj-item-lbl">Fundo Projetado (Ciclo 4)</div>
           <div class="proj-item-val">US$ 29.000 – US$ 69.000</div>
           <div class="proj-item-sub">Outubro/2026</div>
+        </div>
+        <div>
+          <div class="proj-item-lbl">Dias até ATH (média)</div>
+          <div class="proj-item-val">~535 dias</div>
+          <div class="proj-item-sub">do halving ao topo</div>
         </div>
       </div>
       <div class="proj-countdown">
@@ -1231,6 +1289,32 @@ tr.hl td{background:rgba(247,147,26,.04)}
         </tbody>
       </table>
     </div>
+  </div>
+
+  <!-- Projeção do Ciclo 5 (ATH projetado) com régua de cenários -->
+  <div class="cycle5-card">
+    <div class="cycle5-header">
+      <div class="cycle5-title">🔮 Projeção do Ciclo 5 — ATH</div>
+      <div class="cycle5-sub">Cenários especulativos para o topo do próximo ciclo (~2029)</div>
+    </div>
+    <div class="cycle5-ruler">
+      <div class="c5-track">
+        <div class="c5-seg c5-pess"></div>
+        <div class="c5-seg c5-base"></div>
+        <div class="c5-seg c5-otim"></div>
+      </div>
+      <div class="c5-marks">
+        <div class="c5-mark" style="left:0%"><span class="c5-mark-tick"></span><span class="c5-mark-val">US$ 100k</span></div>
+        <div class="c5-mark" style="left:53%"><span class="c5-mark-tick"></span><span class="c5-mark-val">US$ 180k</span></div>
+        <div class="c5-mark" style="left:100%"><span class="c5-mark-tick"></span><span class="c5-mark-val">US$ 250k</span></div>
+      </div>
+      <div class="c5-legend">
+        <div class="c5-leg-item"><span class="c5-dot c5-dot-pess"></span><div><div class="c5-leg-name">Pessimista</div><div class="c5-leg-range">a partir de US$ 100k</div></div></div>
+        <div class="c5-leg-item"><span class="c5-dot c5-dot-base"></span><div><div class="c5-leg-name">Base / Realista</div><div class="c5-leg-range">~US$ 180k</div></div></div>
+        <div class="c5-leg-item"><span class="c5-dot c5-dot-otim"></span><div><div class="c5-leg-name">Otimista</div><div class="c5-leg-range">US$ 180k – 250k</div></div></div>
+      </div>
+    </div>
+    <div class="proj-disclaimer" style="margin-top:14px">⚠ Cenários hipotéticos baseados em múltiplos de ciclos anteriores. Pura especulação — não são previsões.</div>
   </div>
 
   </div>
@@ -2830,11 +2914,14 @@ function zoomC4Out()   { if (c4ChartInst) c4ChartInst.zoom(0.7); }
 
 // Historical normalized data [day, ratio] (ratio = price / ATH_price)
 const BEAR_DATA = {
-  c1: [ // Nov 2013 ATH → Jan 2015 bottom (414 days)
-    [0,1.00],[7,0.82],[14,0.70],[21,0.62],[30,0.55],[45,0.48],[60,0.42],[75,0.52],
-    [90,0.44],[105,0.38],[120,0.33],[135,0.30],[150,0.27],[165,0.24],[180,0.22],
-    [200,0.20],[220,0.19],[240,0.18],[260,0.17],[280,0.16],[300,0.16],[320,0.15],
-    [340,0.14],[360,0.14],[380,0.13],[400,0.13],[414,0.12]
+  c1: [ // Nov 2013 ATH → Jan 2015 bottom (414 days) — pontos densos c/ oscilações reais
+    [0,1.00],[5,0.91],[10,0.78],[15,0.74],[20,0.66],[25,0.71],[30,0.63],[38,0.58],
+    [45,0.52],[52,0.57],[60,0.50],[68,0.46],[75,0.55],[82,0.49],[90,0.44],[98,0.47],
+    [105,0.41],[112,0.38],[120,0.35],[128,0.40],[135,0.36],[142,0.33],[150,0.31],
+    [158,0.34],[165,0.29],[172,0.27],[180,0.25],[188,0.28],[195,0.24],[205,0.22],
+    [215,0.23],[225,0.20],[235,0.21],[245,0.19],[255,0.20],[265,0.18],[275,0.17],
+    [285,0.18],[295,0.16],[305,0.17],[315,0.15],[325,0.16],[335,0.15],[345,0.14],
+    [355,0.15],[365,0.14],[375,0.13],[385,0.14],[395,0.13],[405,0.12],[414,0.12]
   ],
   c2: [ // Dec 2017 ATH → Dec 2018 bottom (363 days)
     [0,1.00],[7,0.86],[14,0.72],[21,0.60],[30,0.55],[45,0.48],[60,0.52],[75,0.46],
@@ -2884,14 +2971,15 @@ async function updateCycle4Low(force){
       if(db(ATH4_DATE, d) < 0) continue; // só após o ATH
       if(price < low){ low = price; lowTs = ts; }
     }
-    // considera também o preço ao vivo de hoje (pode ser uma nova mínima)
+    // considera também o preço ao vivo de hoje (pode ser uma nova mínima intradiária)
     if(liveData.btcUSD > 0 && liveData.btcUSD < low){ low = liveData.btcUSD; lowTs = now; }
     if(!isFinite(low)) throw new Error('mínimo inválido');
-    c4LowCache = {
-      low: Math.round(low),
-      lowDate: lowTs ? new Date(lowTs) : new Date(),
-      asOf: new Date()
-    };
+    // MONOTÔNICO: nunca sobe. Se já tínhamos um fundo menor, mantém o menor.
+    if(c4LowCache && c4LowCache.low <= Math.round(low)){
+      c4LowCache.asOf = new Date(); // só atualiza a data de verificação
+    } else {
+      c4LowCache = { low: Math.round(low), lowDate: lowTs ? new Date(lowTs) : new Date(), asOf: new Date() };
+    }
     c4LowLastFetch = now;
     renderCycle4Low(c4LowCache);
   }catch(e){
@@ -2900,6 +2988,19 @@ async function updateCycle4Low(force){
     if(liveData.btcUSD > 0){
       renderCycle4Low({ low: Math.round(liveData.btcUSD), lowDate: new Date(), asOf: new Date(), provisional:true });
     }
+  }
+}
+
+// Checa se o preço ao vivo é uma nova mínima do ciclo 4 (chamado a cada refresh)
+function checkC4LiveLow(){
+  if(!liveData.btcUSD || liveData.btcUSD<=0) return;
+  const p = Math.round(liveData.btcUSD);
+  if(!c4LowCache){ return; } // ainda não carregou o histórico; updateCycle4Low cuida disso
+  if(p < c4LowCache.low){
+    c4LowCache.low = p;
+    c4LowCache.lowDate = new Date();
+    c4LowCache.asOf = new Date();
+    renderCycle4Low(c4LowCache);
   }
 }
 
@@ -2921,6 +3022,44 @@ function renderCycle4Low(c){
   // Mobile card
   setEl('tc-bot-real', el=>{ el.textContent = lowStr; });
   setEl('tc-bot-asof', el=>{ el.textContent = 'até '+asOfStr; });
+}
+
+// Dados reais (Binance) para as baixas 2 e 3 — substituem os pontos esparsos
+// hardcoded, dando a mesma granularidade diária da baixa 4 (oscilações reais).
+// Binance só tem dados desde 2017, então a baixa 1 (2013) segue hardcoded.
+let bearRealData = { c2: null, c3: null };
+
+async function fetchBinanceBearWindow(athDate, athPrice, maxDays){
+  // busca candles diários do ATH até ATH+maxDays e normaliza (dia0=ATH, y=preço/ATH)
+  const start = athDate.getTime();
+  const end = start + (maxDays+5)*86400000;
+  const url = 'https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1d'
+    + '&startTime='+start+'&endTime='+end+'&limit=1000';
+  const res = await fetch(url, {signal: AbortSignal.timeout(15000)});
+  if(!res.ok) throw new Error('Binance '+res.status);
+  const kl = await res.json();
+  if(!Array.isArray(kl) || kl.length < 30) throw new Error('poucos candles');
+  const out = [];
+  for(const k of kl){
+    const t = new Date(k[0]);
+    const close = parseFloat(k[4]);
+    if(!isFinite(close) || close<=0) continue;
+    const dayN = Math.round((t - athDate)/86400000);
+    if(dayN < 0 || dayN > maxDays+1) continue;
+    out.push([dayN, +(close/athPrice).toFixed(4)]);
+  }
+  return out.length>=30 ? out : null;
+}
+
+async function fetchBearRealData(){
+  // Baixa 2: ATH 17/12/2017 ($19.783), ~363 dias até o fundo
+  // Baixa 3: ATH 10/11/2021 ($68.789), ~376 dias até o fundo
+  try{
+    bearRealData.c2 = await fetchBinanceBearWindow(ATH_C.c2.d, ATH_C.c2.p, 414);
+  }catch(e){ console.warn('Baixa 2 real falhou:', e.message); bearRealData.c2=null; }
+  try{
+    bearRealData.c3 = await fetchBinanceBearWindow(ATH_C.c3.d, ATH_C.c3.p, 414);
+  }catch(e){ console.warn('Baixa 3 real falhou:', e.message); bearRealData.c3=null; }
 }
 
 async function fetchBearC4Data(){
@@ -3098,6 +3237,7 @@ async function buildBearChart(){
   const status = document.getElementById('bear-status');
   if(status){ status.textContent='Carregando ciclo 4…'; status.style.color='var(--hint)'; }
   await fetchBearC4Data();
+  await fetchBearRealData();
   await fetchBearReferenceLines();
 
   const cv = document.getElementById('bearChart');
@@ -3120,8 +3260,8 @@ async function buildBearChart(){
 
   const datasets = [
     makeDs(BEAR_DATA.c1,'#7b7fff','Baixa 1 · 2013–2015',1.5),
-    makeDs(BEAR_DATA.c2,'#29d9c2','Baixa 2 · 2017–2018',1.5),
-    makeDs(BEAR_DATA.c3,'#3ddc84','Baixa 3 · 2021–2022',1.5),
+    makeDs(bearRealData.c2||BEAR_DATA.c2,'#29d9c2','Baixa 2 · 2017–2018',1.5),
+    makeDs(bearRealData.c3||BEAR_DATA.c3,'#3ddc84','Baixa 3 · 2021–2022',1.5),
     {label:'Baixa 4 · 2025–atual',
      data: bearC4Data.map(p=>({x:p[0],y:p[1]})),
      borderColor:'#f7931a',backgroundColor:'rgba(247,147,26,0.08)',
@@ -3460,7 +3600,7 @@ const NEWS_FALLBACK = [
 
 let newsCache = null;
 let newsLastFetch = 0;
-const NEWS_TTL = 30 * 60 * 1000; // 30 min
+const NEWS_TTL = 30 * 60 * 1000; // 30 min (backend cacheia 3h; cliente só revalida)
 
 function renderNewsItems(items) {
   const classified = { bull: [], bear: [], neut: [] };
@@ -3558,6 +3698,7 @@ async function fetchOneFeed(feed) {
 
 async function _baseFetchNews(force = false) {
   const now = Date.now();
+  // cache local de sessão evita rechamar o backend a cada troca de aba
   if (!force && newsCache && (now - newsLastFetch) < NEWS_TTL) return;
 
   const dot = document.getElementById('news-dot');
@@ -3566,32 +3707,35 @@ async function _baseFetchNews(force = false) {
   if(txt) txt.textContent = 'Buscando notícias…';
   if (!newsCache && typeof showNewsSkeletons==='function') showNewsSkeletons();
 
-  // Fetch all feeds in parallel, collect whatever succeeds
-  const results = await Promise.allSettled(RSS_FEEDS.map(fetchOneFeed));
-  const allItems = [];
-  let successCount = 0;
-  results.forEach(r => {
-    if (r.status === 'fulfilled' && r.value.length > 0) {
-      allItems.push(...r.value);
-      successCount++;
+  // Busca do BACKEND (/api/news): ele agrega os feeds do lado do servidor,
+  // cacheia no KV e atualiza no máx. a cada 3h. Sem CORS, sem proxy instável.
+  try{
+    const res = await fetch('/api/news' + (force?'?force=1':''), {signal: AbortSignal.timeout(12000)});
+    if(res.ok){
+      const data = await res.json();
+      if(data && Array.isArray(data.items) && data.items.length){
+        newsCache = data.items;
+        newsLastFetch = now;
+        if(typeof renderNewsItems==='function') renderNewsItems(newsCache);
+        if(dot) dot.className = 'news-status-dot';
+        if(txt){
+          const upd = data.ts ? new Date(data.ts).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}) : '';
+          const tag = data.source==='cache' ? 'cache' : data.source==='stale' ? 'cache (offline)' : 'atualizado';
+          txt.textContent = data.items.length + ' notícias · ' + tag + (upd?' · '+upd:'');
+        }
+        return;
+      }
     }
-  });
-
-  if (allItems.length > 0) {
-    newsCache = allItems;
-    newsLastFetch = now;
-    if(typeof renderNewsItems==='function') renderNewsItems(newsCache);
-    if(dot) dot.className = 'news-status-dot';
-    const ts = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-    if(txt) txt.textContent = successCount + '/' + RSS_FEEDS.length + ' feeds · ' + ts;
-  } else {
-    // All feeds failed — use fallback
+    throw new Error('backend news vazio');
+  }catch(e){
+    console.warn('news backend falhou:', e.message);
+    // fallback: usa cache local de sessão ou o NEWS_FALLBACK estático
     if (!newsCache) {
       newsCache = NEWS_FALLBACK;
       if(typeof renderNewsItems==='function') renderNewsItems(newsCache);
     }
     if(dot) dot.className = 'news-status-dot error';
-    if(txt) txt.textContent = 'Feeds indisponíveis — usando cache local';
+    if(txt) txt.textContent = 'Sem conexão com o servidor de notícias';
   }
 }
 
@@ -3622,6 +3766,7 @@ function refreshUI(){
   updateIndCards();
   updateExecPanel();
   buildRadar();
+  checkC4LiveLow();
 }
 
 // News mini rendering
