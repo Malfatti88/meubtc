@@ -52,10 +52,13 @@ export async function onRequestGet(context) {
         redirect_uri: redirectUri,
         grant_type: 'authorization_code',
       }),
+      // timeout: se o Google travar, não prende a função até o limite do Cloudflare
+      signal: AbortSignal.timeout(10000),
     });
     if (!tokenRes.ok) return redirectErr(origin, 'token_exchange_failed');
     tokenJson = await tokenRes.json();
-  } catch (_e) {
+  } catch (e) {
+    console.warn('callback token exchange falhou:', String(e).slice(0, 150));
     return redirectErr(origin, 'token_network');
   }
 
