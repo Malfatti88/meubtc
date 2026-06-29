@@ -14,7 +14,5 @@ export async function onRequestPost() {
   });
 }
 
-// também aceita GET para conveniência
-export async function onRequestGet() {
-  return onRequestPost();
-}
+// Logout aceita apenas POST (evita logout-CSRF via <img>/link GET).
+// O frontend já chama com method: 'POST'.
