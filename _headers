@@ -1,8 +1,24 @@
+# ════════════════════════════════════════════════════════════════
+# _headers — Cabeçalhos de segurança HTTP (Cloudflare Pages)
+# Coloque este arquivo na RAIZ do repositório (mesmo nível do index.html).
+# O Cloudflare Pages aplica estes headers a todas as respostas.
+# ════════════════════════════════════════════════════════════════
+
 /*
-  Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
-  X-Frame-Options: DENY
+  # Impede que o navegador "adivinhe" o tipo de conteúdo (anti MIME-sniffing)
   X-Content-Type-Options: nosniff
+  # Não vaza a URL de origem para outros sites
   Referrer-Policy: strict-origin-when-cross-origin
-  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
-  Cross-Origin-Opener-Policy: same-origin
-  Cross-Origin-Resource-Policy: same-origin
+  # Impede que o site seja embutido em iframes de terceiros (anti-clickjacking)
+  X-Frame-Options: DENY
+  # Reforça HTTPS por 1 ano (inclui subdomínios). Só ativa após o site rodar 100% em HTTPS.
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+  # Desliga APIs sensíveis do navegador que o site não usa
+  Permissions-Policy: geolocation=(), microphone=(), camera=(), payment=()
+  # Reforça o anti-clickjacking de forma moderna (complementa X-Frame-Options)
+  Content-Security-Policy: frame-ancestors 'none'
+
+# Os endpoints de API não devem ser cacheados por intermediários
+/api/*
+  Cache-Control: no-store
+  X-Content-Type-Options: nosniff
