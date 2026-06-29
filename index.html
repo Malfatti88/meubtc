@@ -476,7 +476,14 @@ tr.hl td{background:rgba(247,147,26,.04)}
 .bola-logout-link:hover{color:var(--text)}
 @media(max-width:700px){
   .bola-proj-cells{grid-template-columns:1fr}
-  .bola-hero{margin:20px auto}
+  .bola-hero{margin:8px auto;padding:20px 16px}
+  .bola-hero-icon{font-size:36px;margin-bottom:4px}
+  .bola-hero-title{font-size:22px}
+  .bola-hero-sub{font-size:12px}
+  .bola-hero-warn{font-size:11px;line-height:1.45}
+  .bola-hero-divider{margin:12px auto}
+  .bola-login-text{font-size:12px;margin-bottom:10px}
+  .bola-login-fine{font-size:9px;margin-top:10px}
 }
 .bola-score-radar{display:grid;grid-template-columns:200px 1fr;gap:20px;align-items:start}
 .bola-score-box{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r-md);padding:18px 14px}
@@ -611,10 +618,34 @@ tr.hl td{background:rgba(247,147,26,.04)}
 .ruler-hit-tip{position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r-sm);padding:6px 9px;font-size:10px;line-height:1.4;color:var(--text);white-space:nowrap;text-align:center;opacity:0;visibility:hidden;transition:opacity .15s;z-index:50;box-shadow:0 6px 20px rgba(0,0,0,.5);pointer-events:none}
 .ruler-hit:hover .ruler-hit-tip{opacity:1;visibility:visible}
 .ruler-hit:hover{z-index:60}
+
+/* ── Botão de login no topo ── */
+.tb-login{display:flex;align-items:center;gap:7px;background:var(--bg3);border:1px solid var(--border2);border-radius:18px;padding:6px 14px;font-size:12px;font-weight:600;color:var(--text);cursor:pointer;font-family:var(--mono);transition:all .15s;flex-shrink:0}
+.tb-login:hover{border-color:var(--orange-glow);background:var(--orange-dim);color:var(--orange)}
+.tb-login svg{flex-shrink:0}
+.tb-account{width:34px;height:34px;border-radius:50%;border:1px solid var(--border2);background:var(--bg3);cursor:pointer;padding:0;overflow:hidden;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:border-color .15s}
+.tb-account:hover{border-color:var(--orange-glow)}
+.tb-account img{width:100%;height:100%;object-fit:cover}
+.tb-account #tb-account-avatar{display:flex;align-items:center;justify-content:center;width:100%;height:100%;font-family:var(--mono);font-weight:700;font-size:13px;color:var(--orange);background:var(--orange-dim)}
+@media(max-width:768px){
+  .tb-login-label{display:none}
+  .tb-login{padding:7px 9px;border-radius:50%}
+}
 </style>
 </style>
 </head>
-<body>
+<body class="light-mode">
+<script>
+  // Tema: claro por padrão. Respeita a escolha salva do usuário (localStorage).
+  (function(){
+    try{
+      var saved = localStorage.getItem('meubtc-theme');
+      if(saved === 'dark'){ document.body.classList.remove('light-mode'); }
+      else if(saved === 'light'){ document.body.classList.add('light-mode'); }
+      // sem preferência salva → mantém o claro (default)
+    }catch(_e){}
+  })();
+</script>
 <div class="refresh-bar" id="refresh-bar" style="width:0%"></div>
 
 <!-- ════════ TOPBAR ════════ -->
@@ -634,8 +665,22 @@ tr.hl td{background:rgba(247,147,26,.04)}
       <span class="tb-status-time" id="tb-update-time">—</span>
       <span class="tb-status-live">Dados ao vivo</span>
     </div>
+    <!-- Botão de login no topo: mesmo fluxo da Bola de Cristal -->
+    <button class="tb-login" id="tb-login-btn" onclick="bolaStartLogin()" title="Entrar com Google">
+      <svg width="15" height="15" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path fill="#FFC107" d="M43.6 20.5h-1.9V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.5 6.5 29.5 4.5 24 4.5 13.2 4.5 4.5 13.2 4.5 24S13.2 43.5 24 43.5 43.5 34.8 43.5 24c0-1.2-.1-2.3-.4-3.5z"/>
+        <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.5 6.5 29.5 4.5 24 4.5c-7.6 0-14.2 4.3-17.7 10.2z"/>
+        <path fill="#4CAF50" d="M24 43.5c5.4 0 10.3-2.1 14-5.4l-6.5-5.5c-2 1.5-4.6 2.4-7.5 2.4-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.8 39.1 16.3 43.5 24 43.5z"/>
+        <path fill="#1976D2" d="M43.6 20.5H24v8h11.3c-.8 2.2-2.1 4.1-3.9 5.5l6.5 5.5c-.5.4 6.6-4.8 6.6-15 0-1.2-.1-2.3-.4-3.5z"/>
+      </svg>
+      <span class="tb-login-label">Entrar</span>
+    </button>
+    <!-- Quando logado: mostra avatar/inicial que leva à Bola de Cristal -->
+    <button class="tb-account" id="tb-account-btn" onclick="switchView('bolacristal')" title="Minha conta — Bola de Cristal" style="display:none">
+      <span id="tb-account-avatar"></span>
+    </button>
     <button class="theme-toggle" onclick="toggleTheme()" title="Alternar tema claro/escuro" aria-label="Alternar tema">
-      <div class="tt-knob" id="tt-knob">☾</div>
+      <div class="tt-knob" id="tt-knob">☀</div>
     </button>
     <button class="tb-help" onclick="switchView('metodologia')" title="Ajuda e Metodologia">?</button>
   </div>
@@ -1695,6 +1740,7 @@ async function bolaCheckAuth(){
       const j = await r.json();
       if(j && j.user){
         bolaUser = j.user;
+        syncTopbarAuth();
         if(j.consent && j.consent.accepted){
           // já aceitou → mostra conteúdo
           bolaConsent = j.consent;
@@ -1711,6 +1757,36 @@ async function bolaCheckAuth(){
     }
   }catch(e){ console.warn('bolaCheckAuth:', e.message); }
   // sem sessão → gate (já está visível)
+  syncTopbarAuth();
+}
+
+// Atualiza o botão de login/conta no topo conforme o estado de autenticação
+function syncTopbarAuth(){
+  const loginBtn = document.getElementById('tb-login-btn');
+  const acctBtn = document.getElementById('tb-account-btn');
+  const avatar = document.getElementById('tb-account-avatar');
+  if(bolaUser){
+    // logado → esconde "Entrar", mostra avatar (foto do Google ou inicial)
+    if(loginBtn) loginBtn.style.display = 'none';
+    if(acctBtn) acctBtn.style.display = '';
+    if(avatar){
+      const picUrl = bolaUser.picture ? safeUrl(bolaUser.picture) : '';
+      if(picUrl && /^https:\/\//i.test(picUrl)){
+        avatar.textContent = '';
+        const img = document.createElement('img');
+        img.src = picUrl; img.alt = ''; img.referrerPolicy = 'no-referrer';
+        avatar.appendChild(img);
+      } else {
+        // sem foto → inicial do nome/email
+        const initial = (bolaUser.name || bolaUser.email || '?').trim()[0] || '?';
+        avatar.textContent = initial.toUpperCase();
+      }
+    }
+  } else {
+    // deslogado → mostra "Entrar", esconde avatar
+    if(loginBtn) loginBtn.style.display = '';
+    if(acctBtn) acctBtn.style.display = 'none';
+  }
 }
 
 // Inicia o fluxo OAuth: redireciona para o endpoint do Worker
@@ -1846,6 +1922,8 @@ window.addEventListener('DOMContentLoaded', ()=>{
       if(params.get('login')) history.replaceState({}, '', window.location.pathname);
     }
   }catch(_e){}
+  // verifica o estado de login no carregamento para refletir no botão do topo
+  if(typeof bolaCheckAuth==='function') bolaCheckAuth();
 });
 
 let liveData={
@@ -1985,6 +2063,16 @@ function setEl(id,fn){const el=document.getElementById(id);if(el)fn(el);}
 // ── THEME TOGGLE ──
 function toggleTheme(){
   document.body.classList.toggle('light-mode');
+  const isLight=document.body.classList.contains('light-mode');
+  const knob=document.getElementById('tt-knob');
+  if(knob) knob.textContent=isLight?'☀':'☾';
+  try{ localStorage.setItem('meubtc-theme', isLight?'light':'dark'); }catch(_e){}
+  // o radar usa cores que dependem do tema → redesenha
+  try{ if(typeof buildRadar==='function') buildRadar(); }catch(_e){}
+}
+
+// Ajusta o ícone do toggle no carregamento conforme o tema atual
+function syncThemeKnob(){
   const knob=document.getElementById('tt-knob');
   if(knob) knob.textContent=document.body.classList.contains('light-mode')?'☀':'☾';
 }
@@ -2324,14 +2412,16 @@ function buildRadar(){
   if(dom.dir==='up')    py=cy-dist;
   if(dom.dir==='down')  py=cy+dist;
 
-  // desenha o SVG
-  const ring=(r,op)=>`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>`;
+  // desenha o SVG — cor da grade adapta ao tema (some no fundo branco se for branca)
+  const isLight = document.body.classList.contains('light-mode');
+  const gridColor = isLight ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.08)';
+  const ring=(r,op)=>`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${gridColor}" stroke-width="1"/>`;
   svg.innerHTML=`
     <!-- anéis concêntricos -->
     ${ring(R)} ${ring(R*0.66)} ${ring(R*0.33)}
     <!-- eixos -->
-    <line x1="${cx-R}" y1="${cy}" x2="${cx+R}" y2="${cy}" stroke="rgba(255,255,255,0.08)"/>
-    <line x1="${cx}" y1="${cy-R}" x2="${cx}" y2="${cy+R}" stroke="rgba(255,255,255,0.08)"/>
+    <line x1="${cx-R}" y1="${cy}" x2="${cx+R}" y2="${cy}" stroke="${gridColor}"/>
+    <line x1="${cx}" y1="${cy-R}" x2="${cx}" y2="${cy+R}" stroke="${gridColor}"/>
     <!-- rótulos das 4 direções -->
     <text x="${cx}" y="18" text-anchor="middle" fill="#ff4d6d" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700">EUFORIA</text>
     <text x="${cx}" y="296" text-anchor="middle" fill="#b388ff" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700">CAPITULAÇÃO</text>
@@ -2340,7 +2430,7 @@ function buildRadar(){
     <!-- halo + ponto -->
     <circle cx="${px}" cy="${py}" r="16" fill="${dom.cor}" opacity="0.18"/>
     <circle cx="${px}" cy="${py}" r="9" fill="${dom.cor}" opacity="0.35"/>
-    <circle cx="${px}" cy="${py}" r="5" fill="${dom.cor}" stroke="#07070c" stroke-width="1.5"/>
+    <circle cx="${px}" cy="${py}" r="5" fill="${dom.cor}" stroke="${isLight?'#fff':'#07070c'}" stroke-width="1.5"/>
   `;
 
   // legenda ao lado: fase + score + intensidades
@@ -3155,14 +3245,17 @@ function detectLevelHits(prices){
 }
 
 // Desenha os marcadores (bolinhas) nas réguas dos ciclos 4 e 5
+const HALVING_5 = new Date('2028-04-01'); // próximo halving (início do ciclo 5)
+
 function renderRulerMarkers(){
-  // Régua Ciclo 4 (fundo): 29k(0%) → 48k(48%) → 69k(100%)
-  placeMarkers('c4-marks', 29000, 69000, [29000,48000,69000]);
-  // Régua Ciclo 5 (ATH): 100k(0%) → 180k(53%) → 250k(100%)
-  placeMarkers('c5-marks-host', 100000, 250000, [100000,180000,250000]);
+  // Régua Ciclo 4 (fundo): 29k(0%) → 48k(48%) → 69k(100%) — sempre ativa (ciclo em andamento)
+  placeMarkers('c4-marks', 29000, 69000, [29000,48000,69000], null);
+  // Régua Ciclo 5 (ATH): só marca níveis ATINGIDOS APÓS o próximo halving.
+  // Antes disso o ciclo 5 nem começou, então a régua fica sem marcadores.
+  placeMarkers('c5-marks-host', 100000, 250000, [100000,180000,250000], HALVING_5);
 }
 
-function placeMarkers(hostId, minV, maxV, baseLevels){
+function placeMarkers(hostId, minV, maxV, baseLevels, minDate){
   const host = document.getElementById(hostId);
   if(!host) return;
   // remove marcadores antigos
@@ -3170,6 +3263,8 @@ function placeMarkers(hostId, minV, maxV, baseLevels){
   for(const lvStr of Object.keys(levelHits)){
     const lv = +lvStr;
     if(lv < minV || lv > maxV) continue;
+    // gate por data: só marca se o nível foi atingido DEPOIS de minDate (ex.: halving 5)
+    if(minDate && (!levelHits[lv].date || levelHits[lv].date < minDate)) continue;
     // pula níveis que coincidem exatamente com os rótulos base (pra não poluir)
     const pct = (lv - minV)/(maxV - minV)*100;
     const hit = levelHits[lv];
@@ -3999,6 +4094,7 @@ updateShareLinks();
 refreshUI();
 fetchLiveData();
 resetRefreshBar();
+syncThemeKnob();
 buildRadar();
 updateCycle4Low();
 fetchNews();
