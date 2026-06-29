@@ -6,7 +6,7 @@
 <title>meuBTC — Inteligência do Ciclo do Bitcoin</title>
 <link rel="manifest" href="data:application/json,{&quot;name&quot;:&quot;meuBTC&quot;,&quot;short_name&quot;:&quot;meuBTC&quot;,&quot;theme_color&quot;:&quot;#07070c&quot;,&quot;background_color&quot;:&quot;#07070c&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;start_url&quot;:&quot;/&quot;}">
 <meta name="theme-color" content="#07070c">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https:; connect-src 'self' https://cloudflareinsights.com https://api.coinmetrics.io https://community-api.coinmetrics.io https://api.coingecko.com https://api.alternative.me https://alternative.me https://api.binance.com https://api.allorigins.win https://corsproxy.io https://api.codetabs.com https://www.coindesk.com https://cointelegraph.com https://bitcoinmagazine.com https://decrypt.co https://rss2json.com; base-uri 'self'; form-action 'none'; manifest-src 'self' data:;">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https:; connect-src 'self' https://cloudflareinsights.com https://api.coinmetrics.io https://community-api.coinmetrics.io https://api.coingecko.com https://api.alternative.me https://alternative.me https://api.binance.com https://www.coindesk.com https://cointelegraph.com https://bitcoinmagazine.com https://decrypt.co; base-uri 'self'; form-action 'none'; manifest-src 'self' data:;">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
 <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=()">
@@ -483,6 +483,8 @@ tr.hl td{background:rgba(247,147,26,.04)}
 @media(max-width:700px){.bola-score-radar{grid-template-columns:1fr}}
 
 /* ── PROJEÇÃO CICLO 5 (régua de cenários) ── */
+.c4-ruler-box{padding:16px 14px;border-top:1px solid var(--border)}
+.c4-ruler-title{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:14px}
 .cycle5-card{background:var(--bg2);border:1px solid rgba(179,136,255,.3);border-radius:var(--r-lg);padding:20px;margin-top:20px;position:relative;overflow:hidden}
 .cycle5-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(120,80,200,.1),transparent 60%);pointer-events:none}
 .cycle5-header{margin-bottom:24px;position:relative}
@@ -536,6 +538,79 @@ tr.hl td{background:rgba(247,147,26,.04)}
   .tb-update{display:none}
   .ps-val{font-size:13px}
 }
+
+/* ════════ NOTÍCIAS (view completa) ════════ */
+#view-noticias .news-tabs{display:flex;gap:2px;background:var(--bg3);border-radius:var(--r-sm);padding:3px;width:fit-content}
+#view-noticias .news-tab{padding:7px 18px;border-radius:var(--r-sm);font-size:12px;cursor:pointer;color:var(--muted);transition:all .2s;border:none;background:transparent;font-family:var(--mono)}
+#view-noticias .news-tab.active.bull{background:var(--bg2);color:var(--green);border:1px solid rgba(0,217,126,.25)}
+#view-noticias .news-tab.active.bear{background:var(--bg2);color:var(--red);border:1px solid rgba(255,77,109,.25)}
+#view-noticias .news-tab.active.neut{background:var(--bg2);color:var(--muted);border:1px solid var(--border2)}
+.news-status{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted)}
+.news-status-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pdot 2s ease-in-out infinite;flex-shrink:0}
+.news-status-dot.loading{background:var(--orange);animation:spin .8s linear infinite}
+.news-status-dot.error{background:var(--red);animation:none}
+.news-panel{display:none;flex-direction:column;gap:10px}.news-panel.active{display:flex}
+#view-noticias .news-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-md);padding:15px 17px;display:flex;gap:14px;align-items:flex-start;transition:border-color .2s;text-decoration:none;color:inherit;overflow:visible;cursor:pointer}
+#view-noticias .news-card:hover{border-color:var(--border2)}
+#view-noticias .news-card.bull-card{border-left:2px solid rgba(0,217,126,.35)}
+#view-noticias .news-card.bear-card{border-left:2px solid rgba(255,77,109,.35)}
+.news-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.news-dot.bull{background:var(--green)}.news-dot.bear{background:var(--red)}.news-dot.neut{background:var(--yellow)}
+.news-body{flex:1;min-width:0}
+.news-headline{font-size:13px;font-weight:500;color:var(--text);margin-bottom:5px;line-height:1.4}
+.news-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.news-tag{font-size:10px;padding:2px 8px;border-radius:3px;font-weight:500}
+.tag-bull{background:var(--green-dim);color:var(--green)}.tag-bear{background:var(--red-dim);color:var(--red)}.tag-neut{background:var(--yellow-dim);color:var(--yellow)}
+.news-source{font-size:10px;color:var(--muted)}.news-date{font-size:10px;color:var(--hint)}
+.news-link{font-size:11px;color:var(--blue);text-decoration:none;margin-left:auto;white-space:nowrap}
+.news-empty{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-md);padding:28px;text-align:center;color:var(--muted);font-size:12px}
+.news-skeleton{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-md);padding:15px 17px;display:flex;gap:14px}
+.news-skel-dot{width:8px;height:8px;border-radius:50%;background:var(--hint);flex-shrink:0;margin-top:5px;animation:pulse 1.5s ease-in-out infinite}
+.news-skel-body{flex:1;display:flex;flex-direction:column;gap:8px}
+.news-skel-line{height:12px;border-radius:3px;background:var(--hint);animation:pulse 1.5s ease-in-out infinite}
+.news-sentiment-bar{display:none;align-items:center;gap:10px;margin:14px 0}
+.nsb-label{font-size:10px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.nsb-track{flex:1;display:flex;height:8px;border-radius:4px;overflow:hidden;background:var(--bg3)}
+.nsb-bull{background:var(--green);height:100%}.nsb-bear{background:var(--red);height:100%}
+.nsb-stats{font-size:11px;color:var(--muted)}
+@media(max-width:700px){#view-noticias .news-card{flex-direction:column;gap:8px}.news-dot{display:none}}
+
+/* ════════ SIDEBAR (navegação lateral) ════════ */
+.nav-hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;background:none;border:none;padding:4px;flex-shrink:0}
+.nav-hamburger span{display:block;width:22px;height:2px;background:var(--muted);border-radius:2px;transition:all .2s}
+.nav-hamburger.open span:nth-child(1){transform:translateY(7px) rotate(45deg);background:var(--orange)}
+.nav-hamburger.open span:nth-child(2){opacity:0}
+.nav-hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg);background:var(--orange)}
+.sidebar{width:210px;background:var(--bg2);border-right:1px solid var(--border);position:fixed;top:64px;left:0;bottom:0;z-index:150;display:flex;flex-direction:column;overflow-y:auto}
+.sidebar-nav{padding:18px 12px 12px;display:flex;flex-direction:column;gap:4px}
+.sidebar-item{display:flex;align-items:center;gap:11px;padding:11px 13px;border-radius:var(--r-md);cursor:pointer;color:var(--muted);font-size:12px;font-weight:500;letter-spacing:.04em;transition:all .15s;border:none;background:transparent;font-family:var(--mono);width:100%;text-align:left}
+.sidebar-item:hover{background:var(--bg3);color:var(--text)}
+.sidebar-item.active{background:var(--orange-dim);color:var(--orange);border:1px solid var(--orange-glow)}
+.sidebar-item i{font-size:16px;flex-shrink:0;font-style:normal;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;text-align:center}
+.sidebar-item .nav-svg svg{width:18px;height:18px;display:block}
+.sidebar-update{margin-top:auto;padding:16px 16px;border-top:1px solid var(--border)}
+.sidebar-section-label{font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.sidebar-ts{font-size:10px;color:var(--muted);letter-spacing:.04em;line-height:1.5}
+.sidebar-backdrop{display:none}
+/* Conteúdo deslocado à direita da sidebar (desktop) */
+.price-strip,.view{margin-left:210px}
+/* Mobile: sidebar vira gaveta */
+@media(max-width:768px){
+  .sidebar{transform:translateX(-100%);transition:transform .25s;top:56px;width:240px}
+  .sidebar.open{transform:translateX(0)}
+  .sidebar-backdrop{display:block;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:140;opacity:0;visibility:hidden;transition:opacity .25s}
+  .sidebar-backdrop.open{opacity:1;visibility:visible}
+  .price-strip,.view{margin-left:0}
+  .nav-hamburger{display:flex}
+  .tb-logo-sub{display:none}
+}
+
+/* marcadores de nível atingido nas réguas */
+.ruler-hit{position:absolute;top:18px;transform:translateX(-50%);z-index:5}
+.ruler-hit-dot{display:block;width:9px;height:9px;border-radius:50%;background:var(--blue);border:2px solid var(--bg2);box-shadow:0 0 0 1px var(--blue);cursor:help}
+.ruler-hit-tip{position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r-sm);padding:6px 9px;font-size:10px;line-height:1.4;color:var(--text);white-space:nowrap;text-align:center;opacity:0;visibility:hidden;transition:opacity .15s;z-index:50;box-shadow:0 6px 20px rgba(0,0,0,.5);pointer-events:none}
+.ruler-hit:hover .ruler-hit-tip{opacity:1;visibility:visible}
+.ruler-hit:hover{z-index:60}
 </style>
 </style>
 </head>
@@ -544,6 +619,9 @@ tr.hl td{background:rgba(247,147,26,.04)}
 
 <!-- ════════ TOPBAR ════════ -->
 <nav class="topbar">
+  <button class="nav-hamburger" id="nav-hamburger" onclick="toggleSidebar()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
   <a class="tb-logo" href="#" onclick="switchView('resumo');return false">
     <div class="tb-logo-icon">₿</div>
     <div class="tb-logo-text">
@@ -551,27 +629,6 @@ tr.hl td{background:rgba(247,147,26,.04)}
       <div class="tb-logo-sub">Inteligência do Ciclo do Bitcoin</div>
     </div>
   </a>
-  <div class="tb-nav">
-    <button class="tb-nav-item active" id="nav-resumo" onclick="switchView('resumo')">
-      <span class="nav-icon">⌂</span>Dashboard
-    </button>
-    <button class="tb-nav-item" id="nav-graficos" onclick="switchView('graficos')">
-      <span class="nav-icon">↗</span>Gráficos
-    </button>
-    <button class="tb-nav-item" id="nav-bolacristal" onclick="switchView('bolacristal')">
-      <span class="nav-icon">🔮</span>
-      Bola de Cristal
-    </button>
-    <button class="tb-nav-item" id="nav-noticias" onclick="switchView('noticias')">
-      <span class="nav-icon">☰</span>Notícias
-    </button>
-    <button class="tb-nav-item" id="nav-bitcoinologia" onclick="switchView('bitcoinologia')">
-      <span class="nav-icon">⬡</span>Bitcoinologia
-    </button>
-    <button class="tb-nav-item" id="nav-metodologia" onclick="switchView('metodologia')">
-      <span class="nav-icon">⊞</span>Metodologia
-    </button>
-  </div>
   <div class="tb-right">
     <div class="tb-status">
       <span class="tb-status-time" id="tb-update-time">—</span>
@@ -583,6 +640,23 @@ tr.hl td{background:rgba(247,147,26,.04)}
     <button class="tb-help" onclick="switchView('metodologia')" title="Ajuda e Metodologia">?</button>
   </div>
 </nav>
+
+<!-- ════════ SIDEBAR (navegação) ════════ -->
+<aside class="sidebar" id="sidebar">
+  <nav class="sidebar-nav">
+    <button class="sidebar-item active" id="nav-resumo" onclick="switchView('resumo')"><i class="nav-svg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg></i>Dashboard</button>
+    <button class="sidebar-item" id="nav-graficos" onclick="switchView('graficos')"><i class="nav-svg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l3-4 3 3 4-6"/></svg></i>Gráficos</button>
+    <button class="sidebar-item" id="nav-bolacristal" onclick="switchView('bolacristal')"><i>🔮</i>Bola de Cristal</button>
+    <button class="sidebar-item" id="nav-noticias" onclick="switchView('noticias')"><i class="nav-svg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h13a1 1 0 011 1v12a2 2 0 002 2H6a2 2 0 01-2-2V5z"/><path d="M18 8h2a1 1 0 011 1v9a2 2 0 01-2 2"/><line x1="7" y1="8" x2="14" y2="8"/><line x1="7" y1="12" x2="14" y2="12"/><line x1="7" y1="16" x2="11" y2="16"/></svg></i>Notícias</button>
+    <button class="sidebar-item" id="nav-bitcoinologia" onclick="switchView('bitcoinologia')"><i class="nav-svg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3L2 8l10 5 10-5-10-5z"/><path d="M6 10.5V16c0 1.5 2.7 3 6 3s6-1.5 6-3v-5.5"/></svg></i>Bitcoinologia</button>
+    <button class="sidebar-item" id="nav-metodologia" onclick="switchView('metodologia')"><i class="nav-svg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4h6a1 1 0 011 1v0a1 1 0 001 1h1a2 2 0 012 2v10a2 2 0 01-2 2H6a2 2 0 01-2-2V8a2 2 0 012-2h1a1 1 0 001-1v0a1 1 0 011-1z"/><path d="M9 13l2 2 4-4"/></svg></i>Metodologia</button>
+  </nav>
+  <div class="sidebar-update">
+    <div class="sidebar-section-label">Status</div>
+    <div class="sidebar-ts"><span id="sidebar-ts-time">—</span><br>Dados ao vivo</div>
+  </div>
+</aside>
+<div class="sidebar-backdrop" id="sidebar-backdrop" onclick="closeSidebar()"></div>
 
 <!-- ════════ PRICE STRIP ════════ -->
 <div class="price-strip" id="price-strip">
@@ -1265,6 +1339,26 @@ tr.hl td{background:rgba(247,147,26,.04)}
           <div class="proj-item-sub">do halving ao topo</div>
         </div>
       </div>
+      <!-- Régua de cenários do fundo (Ciclo 4) -->
+      <div class="c4-ruler-box">
+        <div class="c4-ruler-title">Cenários de fundo</div>
+        <div class="cycle5-ruler">
+          <div class="c5-track">
+            <div class="c5-seg" style="width:48%;background:linear-gradient(90deg,#ff4d6d,#ffa94d)"></div>
+            <div class="c5-seg" style="flex:1;background:linear-gradient(90deg,#ffd166,#00d97e)"></div>
+          </div>
+          <div class="c5-marks" id="c4-marks">
+            <div class="c5-mark" style="left:0%"><span class="c5-mark-tick"></span><span class="c5-mark-val">US$ 29k</span></div>
+            <div class="c5-mark" style="left:48%"><span class="c5-mark-tick"></span><span class="c5-mark-val">US$ 48k</span></div>
+            <div class="c5-mark" style="left:100%"><span class="c5-mark-tick"></span><span class="c5-mark-val">US$ 69k</span></div>
+          </div>
+          <div class="c5-legend">
+            <div class="c5-leg-item"><span class="c5-dot c5-dot-pess"></span><div><div class="c5-leg-name">Pessimista</div><div class="c5-leg-range">US$ 29k</div></div></div>
+            <div class="c5-leg-item"><span class="c5-dot c5-dot-base"></span><div><div class="c5-leg-name">Base / Realista</div><div class="c5-leg-range">US$ 48k</div></div></div>
+            <div class="c5-leg-item"><span class="c5-dot c5-dot-otim"></span><div><div class="c5-leg-name">Otimista</div><div class="c5-leg-range">US$ 69k</div></div></div>
+          </div>
+        </div>
+      </div>
       <div class="proj-countdown">
         <div class="proj-countdown-label">⏱ Contador até fundo projetado</div>
         <div>
@@ -1303,7 +1397,7 @@ tr.hl td{background:rgba(247,147,26,.04)}
         <div class="c5-seg c5-base"></div>
         <div class="c5-seg c5-otim"></div>
       </div>
-      <div class="c5-marks">
+      <div class="c5-marks" id="c5-marks-host">
         <div class="c5-mark" style="left:0%"><span class="c5-mark-tick"></span><span class="c5-mark-val">US$ 100k</span></div>
         <div class="c5-mark" style="left:53%"><span class="c5-mark-tick"></span><span class="c5-mark-val">US$ 180k</span></div>
         <div class="c5-mark" style="left:100%"><span class="c5-mark-tick"></span><span class="c5-mark-val">US$ 250k</span></div>
@@ -1328,7 +1422,7 @@ tr.hl td{background:rgba(247,147,26,.04)}
 <section id="noticias">
   <div class="sec-label">Contexto de mercado</div>
   <div class="sec-title">Notícias de Bitcoin</div>
-  <div class="sec-sub">Classificadas por sentimento · atualizadas automaticamente via CryptoPanic</div>
+  <div class="sec-sub">Classificadas por sentimento · CoinDesk, Cointelegraph, Bitcoin Magazine, Decrypt · atualiza várias vezes ao dia</div>
 
   <div id="news-sentiment-bar" class="news-sentiment-bar" style="display:none">
     <span class="nsb-label">Sentimento</span>
@@ -1632,8 +1726,20 @@ function bolaStartLogin(){
 function bolaRenderOptinUser(){
   const box = document.getElementById('bola-optin-user');
   if(box && bolaUser){
-    box.innerHTML = 'Conectado como <strong>'+(bolaUser.name||'—')+'</strong> ('+(bolaUser.email||'—')+')'
-      + (bolaUser.email_verified?' ✓':' <span style="color:var(--yellow)">e-mail não verificado</span>');
+    // monta com nós de texto (sem innerHTML) para neutralizar XSS via nome/email do Google
+    box.textContent = 'Conectado como ';
+    const strong = document.createElement('strong');
+    strong.textContent = bolaUser.name || '—';
+    box.appendChild(strong);
+    box.appendChild(document.createTextNode(' ('+(bolaUser.email||'—')+')'));
+    if(bolaUser.email_verified){
+      box.appendChild(document.createTextNode(' ✓'));
+    } else {
+      const warn = document.createElement('span');
+      warn.style.color = 'var(--yellow)';
+      warn.textContent = ' e-mail não verificado';
+      box.appendChild(warn);
+    }
   }
   const ver = document.getElementById('bola-termo-ver');
   if(ver) ver.textContent = TERMO_VERSAO;
@@ -1658,9 +1764,24 @@ function bolaBuildCharts(){
 function bolaRenderUserBadge(){
   const badge = document.getElementById('bola-user-badge');
   if(badge && bolaUser){
-    badge.innerHTML = (bolaUser.picture?'<img src="'+bolaUser.picture+'" alt="" referrerpolicy="no-referrer">':'')
-      + '<span>'+(bolaUser.name||bolaUser.email||'Usuário')+'</span>'
-      + '<span class="bola-logout-link" onclick="bolaLogout()">sair</span>';
+    badge.textContent = '';
+    // imagem do Google: só aceita https (evita javascript:/data: maliciosos)
+    const picUrl = bolaUser.picture ? safeUrl(bolaUser.picture) : '';
+    if(picUrl && picUrl !== '#' && /^https:\/\//i.test(picUrl)){
+      const img = document.createElement('img');
+      img.src = picUrl;
+      img.alt = '';
+      img.referrerPolicy = 'no-referrer';
+      badge.appendChild(img);
+    }
+    const nameSpan = document.createElement('span');
+    nameSpan.textContent = bolaUser.name || bolaUser.email || 'Usuário';
+    badge.appendChild(nameSpan);
+    const logout = document.createElement('span');
+    logout.className = 'bola-logout-link';
+    logout.textContent = 'sair';
+    logout.addEventListener('click', bolaLogout);
+    badge.appendChild(logout);
   }
 }
 
@@ -1750,27 +1871,6 @@ let newsLoaded=false;
 const VIEW_LABELS={resumo:'Veredito',graficos:'Gráficos',noticias:'Notícias',bitcoinologia:'Bitcoinologia'};
 
 
-function toggleSidebar(){
-  const sb=document.getElementById('sidebar');
-  const bd=document.getElementById('sidebar-backdrop');
-  const hb=document.getElementById('hamburger');
-  sb.classList.toggle('open');
-  bd.classList.toggle('open');
-  hb.classList.toggle('open');
-  document.body.style.overflow=sb.classList.contains('open')?'hidden':'';
-}
-
-function closeSidebar(){
-  const sb=document.getElementById('sidebar');
-  const bd=document.getElementById('sidebar-backdrop');
-  const hb=document.getElementById('hamburger');
-  sb.classList.remove('open');
-  bd.classList.remove('open');
-  hb.classList.remove('open');
-  document.body.style.overflow='';
-}
-
-function toggleMenu(){ toggleSidebar(); }
 
 // ── SHARE VEREDITO ────────────────────────────────────────────
 function shareVeredito(){
@@ -1890,13 +1990,32 @@ function toggleTheme(){
 }
 
 // ── SWITCH VIEW ──
+function toggleSidebar(){
+  const sb=document.getElementById('sidebar');
+  const bd=document.getElementById('sidebar-backdrop');
+  const hb=document.getElementById('nav-hamburger');
+  if(!sb) return;
+  const open=sb.classList.toggle('open');
+  if(bd) bd.classList.toggle('open', open);
+  if(hb) hb.classList.toggle('open', open);
+}
+function closeSidebar(){
+  const sb=document.getElementById('sidebar');
+  const bd=document.getElementById('sidebar-backdrop');
+  const hb=document.getElementById('nav-hamburger');
+  if(sb) sb.classList.remove('open');
+  if(bd) bd.classList.remove('open');
+  if(hb) hb.classList.remove('open');
+}
+
 function switchView(view){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-  document.querySelectorAll('.tb-nav-item').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.sidebar-item').forEach(b=>b.classList.remove('active'));
   const v=document.getElementById('view-'+view);
   if(v) v.classList.add('active');
   const b=document.getElementById('nav-'+view);
   if(b) b.classList.add('active');
+  closeSidebar();
   window.scrollTo(0,0);
   // Gráficos: só o "Comparando Ciclos de Baixa" fica aqui
   if(view==='graficos'&&!bearChartLoaded){
@@ -1923,7 +2042,9 @@ function updatePriceStrip(){
   setEl('ps-pbar-fill',el=>el.style.width=cycPct.toFixed(1)+'%');
   setEl('ps-bot-days',el=>el.textContent=(daysToBot>0?daysToBot:'—')+' dias');
   setEl('ps-ath-days',el=>el.textContent='~'+dToNextATH+' dias');
-  setEl('tb-update-time',el=>el.textContent='Atualização: '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}));
+  const updTime='Atualização: '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  setEl('tb-update-time',el=>el.textContent=updTime);
+  setEl('sidebar-ts-time',el=>el.textContent=updTime);
   setEl('cc-pct',el=>el.textContent=cycPct.toFixed(2)+'%');
   setEl('cc-pbar',el=>el.style.width=cycPct.toFixed(1)+'%');
   setEl('cc-days-since',el=>el.textContent=daysSinceH4);
@@ -2982,6 +3103,8 @@ async function updateCycle4Low(force){
     }
     c4LowLastFetch = now;
     renderCycle4Low(c4LowCache);
+    // detecta quando o BTC cruzou níveis redondos (para marcar nas réguas)
+    try{ detectLevelHits(data.prices); }catch(_e){}
   }catch(e){
     console.warn('updateCycle4Low falhou:', e.message);
     // fallback: usa o preço atual como referência mínima provisória
@@ -3001,6 +3124,62 @@ function checkC4LiveLow(){
     c4LowCache.lowDate = new Date();
     c4LowCache.asOf = new Date();
     renderCycle4Low(c4LowCache);
+  }
+}
+
+// Detecta o primeiro dia em que o BTC cruzou cada nível REDONDO (29k,30k,...250k)
+// e marca nas réguas (Ciclo 4 = fundo; Ciclo 5 = ATH). Hover mostra valor + data.
+let levelHits = {}; // { 29000: {date, price}, 30000: {...}, ... }
+
+function detectLevelHits(prices){
+  if(!Array.isArray(prices) || !prices.length) return;
+  // níveis redondos relevantes: de 25k a 260k, de 1k em 1k para baixos e 5k acima
+  const levels = [];
+  for(let v=25000; v<70000; v+=1000) levels.push(v);      // faixa do fundo (ciclo 4)
+  for(let v=100000; v<=260000; v+=5000) levels.push(v);   // faixa do ATH (ciclo 5)
+  // ordena cronologicamente
+  const pts = prices.slice().sort((a,b)=>a[0]-b[0]);
+  // para cada nível, acha o PRIMEIRO ponto que cruzou (tocou) aquele valor
+  for(const lv of levels){
+    if(levelHits[lv]) continue; // já registrado
+    for(let i=1;i<pts.length;i++){
+      const prev = pts[i-1][1], cur = pts[i][1];
+      // cruzou para baixo OU para cima passando pelo nível
+      if((prev>lv && cur<=lv) || (prev<lv && cur>=lv) || Math.round(cur/1000)*1000===lv){
+        levelHits[lv] = { date: new Date(pts[i][0]), price: Math.round(cur) };
+        break;
+      }
+    }
+  }
+  renderRulerMarkers();
+}
+
+// Desenha os marcadores (bolinhas) nas réguas dos ciclos 4 e 5
+function renderRulerMarkers(){
+  // Régua Ciclo 4 (fundo): 29k(0%) → 48k(48%) → 69k(100%)
+  placeMarkers('c4-marks', 29000, 69000, [29000,48000,69000]);
+  // Régua Ciclo 5 (ATH): 100k(0%) → 180k(53%) → 250k(100%)
+  placeMarkers('c5-marks-host', 100000, 250000, [100000,180000,250000]);
+}
+
+function placeMarkers(hostId, minV, maxV, baseLevels){
+  const host = document.getElementById(hostId);
+  if(!host) return;
+  // remove marcadores antigos
+  host.querySelectorAll('.ruler-hit').forEach(e=>e.remove());
+  for(const lvStr of Object.keys(levelHits)){
+    const lv = +lvStr;
+    if(lv < minV || lv > maxV) continue;
+    // pula níveis que coincidem exatamente com os rótulos base (pra não poluir)
+    const pct = (lv - minV)/(maxV - minV)*100;
+    const hit = levelHits[lv];
+    const dot = document.createElement('div');
+    dot.className = 'ruler-hit';
+    dot.style.left = pct.toFixed(1)+'%';
+    const dStr = hit.date.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'2-digit'});
+    dot.innerHTML = '<span class="ruler-hit-dot"></span>'
+      + '<span class="ruler-hit-tip">US$ '+(lv/1000)+'k atingido<br>'+dStr+'</span>';
+    host.appendChild(dot);
   }
 }
 
@@ -3030,24 +3209,43 @@ function renderCycle4Low(c){
 let bearRealData = { c2: null, c3: null };
 
 async function fetchBinanceBearWindow(athDate, athPrice, maxDays){
-  // busca candles diários do ATH até ATH+maxDays e normaliza (dia0=ATH, y=preço/ATH)
-  const start = athDate.getTime();
-  const end = start + (maxDays+5)*86400000;
-  const url = 'https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1d'
-    + '&startTime='+start+'&endTime='+end+'&limit=1000';
-  const res = await fetch(url, {signal: AbortSignal.timeout(15000)});
-  if(!res.ok) throw new Error('Binance '+res.status);
-  const kl = await res.json();
-  if(!Array.isArray(kl) || kl.length < 30) throw new Error('poucos candles');
-  const out = [];
-  for(const k of kl){
-    const t = new Date(k[0]);
-    const close = parseFloat(k[4]);
-    if(!isFinite(close) || close<=0) continue;
-    const dayN = Math.round((t - athDate)/86400000);
-    if(dayN < 0 || dayN > maxDays+1) continue;
-    out.push([dayN, +(close/athPrice).toFixed(4)]);
+  // busca preços diários do ATH até ATH+maxDays e normaliza (dia0=ATH, y=preço/ATH).
+  // Usa CoinGecko market_chart/range (mesma fonte do ciclo 4, confiável e sem
+  // bloqueio geográfico que o Binance costuma aplicar).
+  const fromSec = Math.floor(athDate.getTime()/1000);
+  const toSec = fromSec + (maxDays+5)*86400;
+  const tryFetch = async (url)=>{
+    const res = await fetch(url, {signal: AbortSignal.timeout(15000)});
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    return res.json();
+  };
+  let prices = null;
+  // 1) CoinGecko range
+  try{
+    const cg = 'https://api.coingecko.com/api/v3/coins/bitcoin/market_chart/range'
+      + '?vs_currency=usd&from='+fromSec+'&to='+toSec;
+    const j = await tryFetch(cg);
+    if(j && Array.isArray(j.prices) && j.prices.length>30) prices = j.prices;
+  }catch(e){ console.warn('CoinGecko range falhou:', e.message); }
+  // 2) Fallback: Binance klines (caso a CoinGecko limite)
+  if(!prices){
+    try{
+      const bn = 'https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1d'
+        + '&startTime='+athDate.getTime()+'&endTime='+(athDate.getTime()+(maxDays+5)*86400000)+'&limit=1000';
+      const kl = await tryFetch(bn);
+      if(Array.isArray(kl) && kl.length>30) prices = kl.map(k=>[k[0], parseFloat(k[4])]);
+    }catch(e){ console.warn('Binance fallback falhou:', e.message); }
   }
+  if(!prices) return null;
+  // normaliza para [dayN, preço/ATH], 1 ponto por dia
+  const byDay = {};
+  for(const [ts, price] of prices){
+    if(!isFinite(price) || price<=0) continue;
+    const dayN = Math.round((ts - athDate.getTime())/86400000);
+    if(dayN < 0 || dayN > maxDays+1) continue;
+    byDay[dayN] = +(price/athPrice).toFixed(4); // último do dia prevalece
+  }
+  const out = Object.keys(byDay).map(d=>[+d, byDay[d]]).sort((a,b)=>a[0]-b[0]);
   return out.length>=30 ? out : null;
 }
 
@@ -3495,7 +3693,7 @@ function _baseBuildVeredito(p,dd,cycPct,dAth4,daysToBot,mvrz){
 }
 
 // ── NEWS — RSS FEEDS ─────────────────────────────────────────
-// Multiple RSS sources via allorigins CORS proxy
+// Notícias: vêm do backend /api/news (server-side). NEWS_FALLBACK abaixo é o fallback estático.
 // Refreshes every 30 min, classifies by keyword scoring
 
 // Sanitize: strip HTML tags from external data before inserting into DOM
@@ -3520,13 +3718,6 @@ const RSS_FEEDS = [
   { url: 'https://cointelegraph.com/rss', source: 'Cointelegraph' },
   { url: 'https://bitcoinmagazine.com/.rss/full/', source: 'Bitcoin Magazine' },
   { url: 'https://decrypt.co/feed', source: 'Decrypt' },
-];
-
-// Vários proxies CORS de fallback — se um falhar/estiver fora, tenta o próximo.
-const PROXIES = [
-  { url:'https://api.allorigins.win/get?url=', extract:(r)=>r.json().then(j=>j.contents) },
-  { url:'https://corsproxy.io/?url=', extract:(r)=>r.text() },
-  { url:'https://api.codetabs.com/v1/proxy/?quest=', extract:(r)=>r.text() },
 ];
 
 // Keyword scoring — positive = bullish, negative = bearish
@@ -3646,8 +3837,11 @@ function renderNewsItems(items) {
     classified[tab].slice(0, 12).forEach(item => {
       const card = document.createElement('a');
       card.className = 'news-card ' + tab + '-card';
+      const safeHref = safeUrl(item.url);
+      card.href = safeHref;
       card.target = '_blank';
       card.rel = 'noopener noreferrer';
+      if(safeHref === '#') card.style.pointerEvents = 'none';
       card.innerHTML = `
         <div class="news-dot ${tab}"></div>
         <div class="news-body">
@@ -3677,23 +3871,6 @@ function showNewsSkeletons() {
         </div>
       </div>`).join('');
   });
-}
-
-async function fetchOneFeed(feed) {
-  let lastErr=null;
-  for(const proxy of PROXIES){
-    try{
-      const proxyUrl = proxy.url + encodeURIComponent(feed.url);
-      const res = await fetch(proxyUrl, { signal: AbortSignal.timeout(8000) });
-      if (!res.ok) { lastErr=new Error('HTTP '+res.status); continue; }
-      const xml = await proxy.extract(res);
-      if(!xml || xml.length<100){ lastErr=new Error('empty'); continue; }
-      const items = parseRSS(xml, feed.source);
-      if(items && items.length) return items;
-      lastErr=new Error('no items');
-    }catch(e){ lastErr=e; }
-  }
-  throw lastErr || new Error('all proxies failed');
 }
 
 async function _baseFetchNews(force = false) {
@@ -3780,15 +3957,20 @@ function renderNewsMini(items){
     return;
   }
   const age=(d)=>{ try{return (typeof fmtNewsDate==='function')?fmtNewsDate(d):'';}catch(_e){return '';} };
-  box.innerHTML=sorted.slice(0,4).map((n,i)=>`
-    <a class="news-item" href="${n.url||'#'}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">
-      <div class="news-source-icon" style="background:${colors[i%colors.length]}">${(n.source||'?')[0].toUpperCase()}</div>
+  box.innerHTML=sorted.slice(0,4).map((n,i)=>{
+    const href = safeUrl(n.url||'#');
+    const src = sanitize(n.source||'—');
+    const srcIcon = sanitize(((n.source||'?')[0]||'?').toUpperCase());
+    const title = sanitize(n.title||'—');
+    return `
+    <a class="news-item" href="${href}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">
+      <div class="news-source-icon" style="background:${colors[i%colors.length]}">${srcIcon}</div>
       <div class="news-body">
-        <div class="news-source-name">${n.source||'—'}</div>
-        <div class="news-title-text">${n.title||'—'}</div>
+        <div class="news-source-name">${src}</div>
+        <div class="news-title-text">${title}</div>
         <div class="news-age">${age(n.published_at)}</div>
       </div>
-    </a>`).join('');
+    </a>`;}).join('');
 }
 
 // Override fetchNews to also update mini list
@@ -3819,6 +4001,7 @@ fetchLiveData();
 resetRefreshBar();
 buildRadar();
 updateCycle4Low();
+fetchNews();
 setInterval(fetchLiveData, 5*60*1000);
 setInterval(()=>updateCycle4Low(true), 24*60*60*1000); // fundo real do ciclo 4: 1x/dia
 setInterval(fetchNews, 30*60*1000);
